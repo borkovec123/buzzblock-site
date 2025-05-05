@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UV Mosquito Lamp - Mom's Story</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; line-height: 1.6; background-color: #ffffff; }
+    header {
+      background-color: #f2f2f2;
+      padding: 10px 20px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .container { padding: 20px; max-width: 800px; margin: 0 auto; }
+    .responsive { max-width: 100%; height: auto; margin: 20px 0; }
+    .buy-box {
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin: 30px 0;
+    }
+    .buy-button { background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-top: 10px; }
+    #sticky-button {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #28a745;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: bold;
+      z-index: 999;
+    }
+    .buyer-popup {
+      position: fixed;
+      bottom: 100px;
+      left: 20px;
+      background: #fff;
+      padding: 10px 15px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      font-size: 14px;
+      display: none;
+      z-index: 1000;
+    }
+    video { margin: 20px 0; border-radius: 10px; width: 100%; display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  Currently trending in <span id="country-name">your area</span>
+</header>
+
+<div class="container">
+  <h1>The $29 Lamp That Saved Our Sleep</h1>
+  <p>We had just moved to <span id="country-name">a new place</span>, and the mosquitoes were unbearable. Every night, my baby would wake up crying from bites. I felt helpless.</p>
+
+  <img class="responsive" src="product-25.jpg" alt="Mosquito Lamp Promo">
+  <img class="responsive" src="product-19.webp" alt="Mom and Baby with Lamp">
+
+  <p>We tried sprays and coils, but they smelled awful and barely worked. Then I found this UV mosquito lamp. It changed everything.</p>
+
+  <video autoplay loop muted playsinline>
+    <source src="video-01.mp4" type="video/mp4">
+  </video>
+
+  <img class="responsive" src="product-10.webp" alt="Lamp Setup Indoors">
+  <img class="responsive" src="product-04.webp" alt="Lamp Glowing Outdoors">
+
+  <p>It’s chemical-free, quiet, and safe around children and pets. We placed one next to the crib and another in the living room. In the morning, we checked the tray... and it was full.</p>
+
+  <video autoplay loop muted playsinline>
+    <source src="video-05.mp4" type="video/mp4">
+  </video>
+
+  <div class="buy-box">
+    <h2>Recommended by Parents</h2>
+    <img class="responsive" src="product-22.jpg" alt="Trust Badge Preview">
+    <a class="buy-button" href="#">GET 50% OFF MOZZ GUARD NOW!</a>
+    <p>Rated 4.8/5 by 3,791 customers</p>
+  </div>
+</div>
+
+<div class="buyer-popup" id="buyer-popup">Fatima in Lahore just bought 2 lamps!</div>
+<div id="sticky-button"><a href="#" style="color:white; text-decoration:none;">Buy Now – $29</a></div>
+
+<script>
+  fetch("https://ipwho.is/")
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.country) {
+        document.querySelectorAll("#country-name").forEach(el => el.textContent = data.country);
+      }
+    });
+
+  window.addEventListener('scroll', function () {
+    const btn = document.getElementById("sticky-button");
+    if (window.scrollY > 400) { btn.style.display = "block"; }
+    else { btn.style.display = "none"; }
+  });
+
+  const buyers = [
+    "Fatima in Lahore just bought 2 lamps!",
+    "John in Manila ordered 3 units!",
+    "Grace in Johannesburg picked the Family Bundle!"
+  ];
+  let current = 0;
+  setInterval(() => {
+    const popup = document.getElementById("buyer-popup");
+    popup.textContent = buyers[current];
+    popup.style.display = "block";
+    setTimeout(() => { popup.style.display = "none"; }, 4000);
+    current = (current + 1) % buyers.length;
+  }, 10000);
+</script>
+
+</body>
+</html>
