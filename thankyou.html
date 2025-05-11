@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thank You – BuzzBlock</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f3ff;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background-color: #6b21a8;
+      padding: 20px;
+      color: white;
+    }
+    .container {
+      padding: 40px 20px;
+    }
+    h1 {
+      color: #4c1d95;
+    }
+    .upsell {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #ede9fe;
+      border-radius: 8px;
+    }
+    footer {
+      margin-top: 50px;
+      padding: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>BuzzBlock</h2>
+  </header>
+
+  <div class="container">
+    <h1>Thank you for your order!</h1>
+    <p>Your BuzzBlock is on its way. Please allow 4–8 business days for delivery.</p>
+    <p>We’ve sent a confirmation email with your order details.</p>
+
+    <div class="upsell">
+      <h3>Want to get even more out of BuzzBlock?</h3>
+      <p>Join our tips list or check out exclusive partner offers while you wait for your order.</p>
+      <!-- Placeholder for email opt-in or affiliate upsell -->
+      <button onclick="alert('Coming soon!')" style="padding: 10px 20px; background-color: #7c3aed; color: white; border: none; border-radius: 5px;">Get More Value</button>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 BuzzBlock. All rights reserved.
+  </footer>
+
+  <script>
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const clickId = urlParams.get('sub') || localStorage.getItem('click_id');
+
+      if (clickId) {
+        localStorage.setItem('click_id', clickId);
+
+        // Fire BeMob postback
+        const postbackUrl = 'https://9805o.bemobtrcks.com/postback?cid=' + clickId;
+        fetch(postbackUrl)
+          .then(response => console.log('Postback sent:', response.status))
+          .catch(err => console.error('Postback failed:', err));
+      }
+    })();
+  </script>
+</body>
+</html>
