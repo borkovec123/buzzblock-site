@@ -61,21 +61,21 @@
     &copy; 2025 BuzzBlock. All rights reserved.
   </footer>
 
-  <script>
-    (function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const clickId = urlParams.get('sub') || localStorage.getItem('click_id');
+  
+<script>
+  (function() {
+    const clickId = localStorage.getItem('click_id');
 
-      if (clickId) {
-        localStorage.setItem('click_id', clickId);
+    if (clickId) {
+      const postbackUrl = 'https://9805o.bemobtrcks.com/postback?cid=' + clickId;
+      fetch(postbackUrl)
+        .then(response => console.log('Postback sent:', response.status))
+        .catch(err => console.error('Postback failed:', err));
+    } else {
+      console.warn('No click_id found in localStorage. Postback not sent.');
+    }
+  })();
+</script>
 
-        // Fire BeMob postback
-        const postbackUrl = 'https://9805o.bemobtrcks.com/postback?cid=' + clickId;
-        fetch(postbackUrl)
-          .then(response => console.log('Postback sent:', response.status))
-          .catch(err => console.error('Postback failed:', err));
-      }
-    })();
-  </script>
 </body>
 </html>
