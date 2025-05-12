@@ -26,6 +26,121 @@
   }
 }
 
+
+@media (max-width: 768px) {
+  .faq-question {
+    padding: 10px 14px !important;
+    font-size: 15px !important;
+    line-height: 1.3 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .faq-answer {
+    padding: 6px 14px 10px 14px !important;
+    margin-top: -6px !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+
+  .faq-answer p {
+    margin: 8px 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .faq-item {
+    padding: 0 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .faq-question {
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+  }
+
+  .faq-answer {
+    padding: 6px 12px 8px 12px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+
+  .faq-answer p {
+    margin: 6px 0 !important;
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .faq-item {
+    padding: 0 !important;
+    margin: 6px 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+  }
+
+  .faq-question {
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+  }
+
+  .faq-answer {
+    padding: 4px 10px 6px 10px !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+  }
+
+  .faq-answer p {
+    margin: 4px 0 !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* 1. Align testimonial box with bottom of image */
+  .testimonial-box {
+    bottom: 0 !important;
+    transform: translateX(-50%) translateY(50%) !important;
+  }
+
+  /* 2. Tighten checklist spacing */
+  .highlight-box {
+    margin-bottom: 12px !important;
+  }
+
+  .checklist {
+    padding: 4px 0 !important;
+    margin: 0 !important;
+  }
+
+  .checklist li {
+    margin: 6px 0 !important;
+    padding: 0 !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+  }
+
+  /* 3. Reduce padding above "As Seen On" */
+  .as-seen-on {
+    padding-top: 12px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .highlight-box {
+    margin-top: 60px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .highlight-box {
+    margin-top: 20px !important;
+  }
+}
 </style>
 <!DOCTYPE html>
 
@@ -351,7 +466,53 @@ html {
 }
 
   </style>
-</head>
+<style>
+.testimonial-box {
+  position: absolute;
+  background: white;
+  border: 2px solid var(--primary-color);
+  border-radius: 15px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  text-align: center;
+  z-index: 5;
+}
+
+@media (max-width: 768px) {
+  .testimonial-box {
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 360px;
+    font-size: 13px;
+    padding: 6px 12px 8px 12px;
+  }
+  .testimonial-box p {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 769px) {
+  .testimonial-box {
+    bottom: 40px;
+    left: 40px;
+    right: 40px;
+    font-size: 15px;
+    padding: 12px 18px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .testimonial-box p {
+    font-size: 15px;
+  }
+}
+
+.testimonial-box h3,
+.testimonial-box p {
+  margin-top: 4px !important;
+  margin-bottom: 4px !important;
+}
+</style></head>
 <style>
   /* Make layout stacks on small screens */
   @media (min-width: 769px) {
@@ -501,7 +662,7 @@ html {
 
   .testimonial-box {
     position: absolute !important;
-    bottom: 12px !important;
+    bottom: -40px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 90% !important;
@@ -651,6 +812,12 @@ html {
 </style>
 <body>
 <div class="top-bar" id="sale-bar">Sale Ends Today</div>
+<script>
+  const saleBar = document.getElementById("sale-bar");
+  const options = { weekday: 'long', month: 'long', day: 'numeric' };
+  const today = new Date().toLocaleDateString('en-US', options);
+  saleBar.textContent = `⚡ Sale Ends: ${today}`;
+</script>
 <div class="navbar">
 <a href="#">
 <img alt="BuzzBlock Logo" class="logo" src="images/logo.png"/>
@@ -661,7 +828,7 @@ html {
 <a class="nav-link" href="#features">Features</a>
 <a class="nav-link" href="#reviews">Reviews</a>
 </nav>
-<button class="nav-button">Order Now &amp; Save 50%</button>
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144"><button class="nav-button">Order Now &amp; Save 50%</button></a>
 </div>
 <div class="scroll-wrapper">
 <!-- Mobile Layout: Headline and image first, then the entire original hero-left content -->
@@ -669,12 +836,7 @@ html {
 <div class="star-bar">⭐⭐⭐⭐⭐ Rated 4.8 by 3200+ Verified Customers</div>
 <h1 class="headline">Kill Mosquitoes From Any Environment In MINUTES</h1>
 <div class="image-wrapper">
-<img alt="BuzzBlock" class="hero-img" src="images/hero1.png"/>
-<div class="testimonial-box">
-<div class="stars">⭐⭐⭐⭐⭐ <span>50,000+ Happy Customers</span></div>
-<h3>“Only thing I’ve tried that’s worked for mosquitoes”</h3>
-<p>I’ll be honest, I was really hesitant to buy BuzzBlock. I’ve been burned before by online purchases that didn’t live up to the hype... but this changed everything!</p>
-</div>
+<img alt="BuzzBlock" class="hero-img" src="images/hero3.png"/>
 </div>
 <div class="hero-left">
 <!-- Moved headline and rating higher for mobile-first flow -->
@@ -693,39 +855,84 @@ html {
 <div class="stock-line">
 <span class="hourglass">⌛</span>
 <strong>Sale: Live For 24 Hrs.</strong> 🔥
-      <strong style="color:red;">Stock: Only 1 Unit Left!</strong>
+      <strong style="color:red;">Stock: <span class="unit-count">Only 3 Units Left</span>!</strong>
 </div>
-<button class="cta-button">Order Now &amp; Save 50%</button>
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144"><button class="cta-button">Order Now &amp; Save 50%</button></a>
 <div class="guarantee">90 Days Money Back Guarantee</div>
 </div>
 <div class="faq-section">
 <div class="faq-item">
 <button class="faq-question">Why Do You Need BuzzBlock?<span class="arrow">▶</span></button>
-<div class="faq-answer">Today, more families struggle with relentless mosquito invasions...</div>
+<div class="faq-answer">
+<p>Today, more families are struggling with <strong>relentless mosquito invasions</strong> than ever before. <strong>Warmer temperatures</strong>, <strong>standing water</strong>, and <strong>urban expansion</strong> have created the perfect breeding grounds for these pests—turning <strong>backyards, patios, and even bedrooms</strong> into mosquito hotspots.</p>
+<p><strong>Chemical repellents</strong>, <strong>toxic sprays</strong>, and <strong>bug coils</strong> have become the go-to solutions pushed by big companies that prioritize <strong>profit over real results</strong>. But these <strong>temporary fixes</strong> do little to stop the problem at its source—and worse, they fill your home with <strong>harmful chemicals</strong> that you don’t want your family breathing in.</p>
+<p><strong>BuzzBlock</strong> is a <strong>revolutionary device</strong> designed to help you <strong>take back control</strong> of your space and <strong>eliminate mosquitoes for good</strong>. Using <strong>advanced UV technology</strong> and a <strong>powerful electric grid</strong>, it <strong>lures and zaps mosquitoes instantly</strong>—without the need for <strong>toxic sprays</strong> or <strong>constant reapplication</strong>.</p>
+<p>If you’re tired of <strong>waking up to itchy welts</strong>, hearing that <strong>high-pitched buzzing</strong> in the middle of the night, or cutting <strong>family BBQs short</strong> because of relentless bites, this zapper is the answer. It works <strong>around the clock</strong> to <strong>trap and kill mosquitoes</strong>, so you can finally enjoy <strong>peaceful nights</strong> and <strong>mosquito-free days</strong>.</p>
+<p>Whether you want to <strong>relax on the patio</strong>, let your kids <strong>play outside without fear of bites</strong>, or simply <strong>sleep through the night undisturbed</strong>, BuzzBlock is the <strong>easiest and most effective way to reclaim your home</strong>. <strong>Stop swatting, spraying, and scratching</strong>—and enjoy a <strong>bite-free summer once and for all</strong>.</p>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">The Science Behind BuzzBlock<span class="arrow">▶</span></button>
-<div class="faq-answer">Mosquitoes are attracted to specific cues...</div>
+<div class="faq-answer">
+<p>Mosquitoes don’t just fly randomly—they’re drawn to <strong>specific cues</strong> in their environment, and one of the most powerful is <strong>UV light</strong>. But not just any UV light.</p>
+<p>Scientific research has shown that mosquitoes are most attracted to <strong>UV light in the 365–395 nanometer (nm) wavelength range</strong>. This frequency mimics <strong>natural light sources</strong> they rely on—like <strong>moonlight</strong> and <strong>reflections on water</strong>. Their <strong>attraction to this wavelength is deeply embedded in their biology</strong>.</p>
+<p>Many traditional bug zappers use <strong>random light sources</strong>, but <strong>BuzzBlock</strong> is engineered with a <strong>high-intensity 365 nm UV LED</strong>—the <strong>most attractive wavelength</strong> for mosquitoes. Once drawn in, they are <strong>instantly neutralized</strong> by a <strong>high-voltage electric grid</strong>.</p>
+<p>This provides a <strong>targeted, non-toxic</strong> way to eliminate mosquitoes—<strong>without sprays, lotions, or refills</strong>. Enjoy <strong>peaceful nights</strong> and <strong>mosquito-free outdoor adventures</strong> all summer long.</p>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">Eliminates a Wide Range of Pesky Insects<span class="arrow">▶</span></button>
-<div class="faq-answer">BuzzBlock targets mosquitoes, gnats, and more!</div>
+<div class="faq-answer">
+<p><strong>Mosquitoes</strong><br/>No more itchy bites! Effectively <strong>attracts and zaps disease-carrying mosquitoes</strong>.</p>
+<p><strong>Flies</strong><br/>Say goodbye to <strong>annoying houseflies, fruit flies</strong>, and <strong>gnats buzzing around</strong> your space.</p>
+<p><strong>Gnats &amp; Midges</strong><br/>Eliminates <strong>tiny flying pests</strong> that <strong>swarm in humid weather</strong>.</p>
+<p><strong>Stink Bugs</strong><br/>Reduces the number of these <strong>smelly invaders</strong> attracted to <strong>warm areas</strong>.</p>
+<p><strong>Moths</strong><br/>Stops moths from <strong>invading your home</strong> and <strong>ruining your clothes</strong>.</p>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">Where Can You Use It?<span class="arrow">▶</span></button>
-<div class="faq-answer">Perfect for bedrooms, patios, camping, and more.</div>
+<div class="faq-answer">
+<ol>
+<li><strong>Bedrooms &amp; Living Spaces</strong><br/>Sleep peacefully without the <strong>constant buzzing and biting</strong> of mosquitoes. Perfect for <strong>nightstands, nurseries, and living rooms</strong>.</li>
+<li><strong>Patios &amp; Backyards</strong><br/>Enjoy <strong>BBQs</strong>, <strong>family gatherings</strong>, and <strong>outdoor dinners</strong> without swatting pests.</li>
+<li><strong>Camping &amp; Hiking Trips</strong><br/>Compact and portable, <strong>BuzzBlock</strong> is a <strong>must-have for outdoor adventures</strong>.</li>
+<li><strong>RV &amp; Travel</strong><br/>Whether on the road or in a rental, BuzzBlock delivers <strong>reliable mosquito protection anywhere</strong>.</li>
+<li><strong>Garages &amp; Basements</strong><br/>Keep <strong>storage areas free from flying insects</strong> that sneak in.</li>
+<li><strong>Greenhouses &amp; Indoor Gardens</strong><br/>Protect <strong>plants from flying pests</strong> without chemicals.</li>
+<li><strong>Kitchen &amp; Dining Areas</strong><br/>Keep <strong>mosquitoes and flies away from food</strong> during meals.</li>
+</ol>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">Is It Hard To Set Up?<span class="arrow">▶</span></button>
-<div class="faq-answer">No tools or installation required — plug and go!</div>
+<div class="faq-answer">
+<p>There’s <strong>no need for complicated installations</strong>, <strong>refills</strong>, or <strong>constant maintenance</strong>. It’s <strong>ready to use straight out of the box</strong>—just <strong>click the button on top</strong> and it <strong>starts working immediately</strong>.</p>
+<ul>
+<li><strong>Immediate mosquito elimination</strong> – No more buzzing around your ears at night.</li>
+<li><strong>Restful sleep</strong> – Say goodbye to tossing and turning from itchy bites.</li>
+<li><strong>Happier kids</strong> – No more crying from painful, swollen bites.</li>
+<li><strong>Bite-free BBQs and patio nights</strong> – Enjoy evenings without constantly swatting.</li>
+</ul>
+<p><strong>BuzzBlock</strong> offers <strong>instant, continuous protection</strong>. Just set it up and relax—<strong>no sprays, lotions, or candles required</strong>.</p>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">Shipping Details<span class="arrow">▶</span></button>
-<div class="faq-answer">Orders ship within 1–2 business days.</div>
+<div class="faq-answer">
+<p>We know how frustrating <strong>long delivery times</strong> can be. <strong>BuzzBlock</strong> ships directly from <strong>regional fulfillment centers</strong> that serve <strong>cities, islands, and remote areas</strong>.</p>
+<p><strong>Most orders arrive within 5–12 business days</strong>. You’ll get a <strong>tracking number</strong> once your order is processed.</p>
+<p>If there’s a delay, our <strong>support team is ready to help</strong>—we're experienced in shipping to <strong>tropical and hard-to-reach regions</strong>.</p>
+<p>🛫 <strong>Bonus:</strong> We’re offering <strong>free shipping</strong> for a limited time—<strong>no surprise fees</strong> at checkout.</p>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">What If It Doesn't Work For Me?<span class="arrow">▶</span></button>
-<div class="faq-answer">You're covered by our 90-day money-back guarantee.</div>
+<div class="faq-answer">
+<p>We’re confident <strong>BuzzBlock</strong> will transform your home into a <strong>mosquito-free zone</strong>. That’s why we offer a <strong>90-day money-back guarantee</strong>.</p>
+<p>If you're not satisfied or don’t see results, just contact us within 90 days for a <strong>full refund</strong>.</p>
+<p><strong>Enjoy the summer risk-free</strong> and see the difference for yourself!</p>
+</div>
 </div>
 </div>
 </div>
@@ -748,51 +955,90 @@ html {
 <div class="stock-line">
 <span class="hourglass">⌛</span>
 <strong>Sale: Live For 24 Hrs.</strong> 🔥
-                <strong style="color:red;">Stock: Only 1 Unit Left!</strong>
+                <strong style="color:red;">Stock: <span class="unit-count">Only 3 Units Left</span>!</strong>
 </div>
-<button class="cta-button">Order Now &amp; Save 50%</button>
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144"><button class="cta-button">Order Now &amp; Save 50%</button></a>
 <div class="guarantee">90 Days Money Back Guarantee</div>
 </div>
-
 <div class="faq-section">
 <div class="faq-item">
 <button class="faq-question">Why Do You Need BuzzBlock?<span class="arrow">▶</span></button>
-<div class="faq-answer">Today, more families struggle with relentless mosquito invasions...</div>
+<div class="faq-answer">
+<p>Today, more families are struggling with <strong>relentless mosquito invasions</strong> than ever before. <strong>Warmer temperatures</strong>, <strong>standing water</strong>, and <strong>urban expansion</strong> have created the perfect breeding grounds for these pests—turning <strong>backyards, patios, and even bedrooms</strong> into mosquito hotspots.</p>
+<p><strong>Chemical repellents</strong>, <strong>toxic sprays</strong>, and <strong>bug coils</strong> have become the go-to solutions pushed by big companies that prioritize <strong>profit over real results</strong>. But these <strong>temporary fixes</strong> do little to stop the problem at its source—and worse, they fill your home with <strong>harmful chemicals</strong> that you don’t want your family breathing in.</p>
+<p><strong>BuzzBlock</strong> is a <strong>revolutionary device</strong> designed to help you <strong>take back control</strong> of your space and <strong>eliminate mosquitoes for good</strong>. Using <strong>advanced UV technology</strong> and a <strong>powerful electric grid</strong>, it <strong>lures and zaps mosquitoes instantly</strong>—without the need for <strong>toxic sprays</strong> or <strong>constant reapplication</strong>.</p>
+<p>If you’re tired of <strong>waking up to itchy welts</strong>, hearing that <strong>high-pitched buzzing</strong> in the middle of the night, or cutting <strong>family BBQs short</strong> because of relentless bites, this zapper is the answer. It works <strong>around the clock</strong> to <strong>trap and kill mosquitoes</strong>, so you can finally enjoy <strong>peaceful nights</strong> and <strong>mosquito-free days</strong>.</p>
+<p>Whether you want to <strong>relax on the patio</strong>, let your kids <strong>play outside without fear of bites</strong>, or simply <strong>sleep through the night undisturbed</strong>, BuzzBlock is the <strong>easiest and most effective way to reclaim your home</strong>. <strong>Stop swatting, spraying, and scratching</strong>—and enjoy a <strong>bite-free summer once and for all</strong>.</p>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">The Science Behind BuzzBlock<span class="arrow">▶</span></button>
-<div class="faq-answer">Mosquitoes are attracted to specific cues...</div>
+<div class="faq-answer">
+<p>Mosquitoes don’t just fly randomly—they’re drawn to <strong>specific cues</strong> in their environment, and one of the most powerful is <strong>UV light</strong>. But not just any UV light.</p>
+<p>Scientific research has shown that mosquitoes are most attracted to <strong>UV light in the 365–395 nanometer (nm) wavelength range</strong>. This frequency mimics <strong>natural light sources</strong> they rely on—like <strong>moonlight</strong> and <strong>reflections on water</strong>. Their <strong>attraction to this wavelength is deeply embedded in their biology</strong>.</p>
+<p>Many traditional bug zappers use <strong>random light sources</strong>, but <strong>BuzzBlock</strong> is engineered with a <strong>high-intensity 365 nm UV LED</strong>—the <strong>most attractive wavelength</strong> for mosquitoes. Once drawn in, they are <strong>instantly neutralized</strong> by a <strong>high-voltage electric grid</strong>.</p>
+<p>This provides a <strong>targeted, non-toxic</strong> way to eliminate mosquitoes—<strong>without sprays, lotions, or refills</strong>. Enjoy <strong>peaceful nights</strong> and <strong>mosquito-free outdoor adventures</strong> all summer long.</p>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">Eliminates a Wide Range of Pesky Insects<span class="arrow">▶</span></button>
-<div class="faq-answer">BuzzBlock targets mosquitoes, gnats, and more!</div>
+<div class="faq-answer">
+<p><strong>Mosquitoes</strong><br/>No more itchy bites! Effectively <strong>attracts and zaps disease-carrying mosquitoes</strong>.</p>
+<p><strong>Flies</strong><br/>Say goodbye to <strong>annoying houseflies, fruit flies</strong>, and <strong>gnats buzzing around</strong> your space.</p>
+<p><strong>Gnats &amp; Midges</strong><br/>Eliminates <strong>tiny flying pests</strong> that <strong>swarm in humid weather</strong>.</p>
+<p><strong>Stink Bugs</strong><br/>Reduces the number of these <strong>smelly invaders</strong> attracted to <strong>warm areas</strong>.</p>
+<p><strong>Moths</strong><br/>Stops moths from <strong>invading your home</strong> and <strong>ruining your clothes</strong>.</p>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">Where Can You Use It?<span class="arrow">▶</span></button>
-<div class="faq-answer">Perfect for bedrooms, patios, camping, and more.</div>
+<div class="faq-answer">
+<ol>
+<li><strong>Bedrooms &amp; Living Spaces</strong><br/>Sleep peacefully without the <strong>constant buzzing and biting</strong> of mosquitoes. Perfect for <strong>nightstands, nurseries, and living rooms</strong>.</li>
+<li><strong>Patios &amp; Backyards</strong><br/>Enjoy <strong>BBQs</strong>, <strong>family gatherings</strong>, and <strong>outdoor dinners</strong> without swatting pests.</li>
+<li><strong>Camping &amp; Hiking Trips</strong><br/>Compact and portable, <strong>BuzzBlock</strong> is a <strong>must-have for outdoor adventures</strong>.</li>
+<li><strong>RV &amp; Travel</strong><br/>Whether on the road or in a rental, BuzzBlock delivers <strong>reliable mosquito protection anywhere</strong>.</li>
+<li><strong>Garages &amp; Basements</strong><br/>Keep <strong>storage areas free from flying insects</strong> that sneak in.</li>
+<li><strong>Greenhouses &amp; Indoor Gardens</strong><br/>Protect <strong>plants from flying pests</strong> without chemicals.</li>
+<li><strong>Kitchen &amp; Dining Areas</strong><br/>Keep <strong>mosquitoes and flies away from food</strong> during meals.</li>
+</ol>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">Is It Hard To Set Up?<span class="arrow">▶</span></button>
-<div class="faq-answer">No tools or installation required — plug and go!</div>
+<div class="faq-answer">
+<p>There’s <strong>no need for complicated installations</strong>, <strong>refills</strong>, or <strong>constant maintenance</strong>. It’s <strong>ready to use straight out of the box</strong>—just <strong>click the button on top</strong> and it <strong>starts working immediately</strong>.</p>
+<ul>
+<li><strong>Immediate mosquito elimination</strong> – No more buzzing around your ears at night.</li>
+<li><strong>Restful sleep</strong> – Say goodbye to tossing and turning from itchy bites.</li>
+<li><strong>Happier kids</strong> – No more crying from painful, swollen bites.</li>
+<li><strong>Bite-free BBQs and patio nights</strong> – Enjoy evenings without constantly swatting.</li>
+</ul>
+<p><strong>BuzzBlock</strong> offers <strong>instant, continuous protection</strong>. Just set it up and relax—<strong>no sprays, lotions, or candles required</strong>.</p>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">Shipping Details<span class="arrow">▶</span></button>
-<div class="faq-answer">Orders ship within 1–2 business days.</div>
+<div class="faq-answer">
+<p>We know how frustrating <strong>long delivery times</strong> can be. <strong>BuzzBlock</strong> ships directly from <strong>regional fulfillment centers</strong> that serve <strong>cities, islands, and remote areas</strong>.</p>
+<p><strong>Most orders arrive within 5–12 business days</strong>. You’ll get a <strong>tracking number</strong> once your order is processed.</p>
+<p>If there’s a delay, our <strong>support team is ready to help</strong>—we're experienced in shipping to <strong>tropical and hard-to-reach regions</strong>.</p>
+<p>🛫 <strong>Bonus:</strong> We’re offering <strong>free shipping</strong> for a limited time—<strong>no surprise fees</strong> at checkout.</p>
+</div>
 </div>
 <div class="faq-item">
 <button class="faq-question">What If It Doesn't Work For Me?<span class="arrow">▶</span></button>
-<div class="faq-answer">You're covered by our 90-day money-back guarantee.</div>
+<div class="faq-answer">
+<p>We’re confident <strong>BuzzBlock</strong> will transform your home into a <strong>mosquito-free zone</strong>. That’s why we offer a <strong>90-day money-back guarantee</strong>.</p>
+<p>If you're not satisfied or don’t see results, just contact us within 90 days for a <strong>full refund</strong>.</p>
+<p><strong>Enjoy the summer risk-free</strong> and see the difference for yourself!</p>
+</div>
 </div>
 </div>
 </div>
 <div class="hero-right desktop-hero-right">
 <div class="image-wrapper">
-<img alt="BuzzBlock" class="hero-img" src="images/hero1.png"/>
-<div class="testimonial-box">
-<div class="stars">⭐⭐⭐⭐⭐ <span>50,000+ Happy Customers</span></div>
-<h3>“Only thing I’ve tried that’s worked for mosquitoes”</h3>
-<p>I’ll be honest, I was really hesitant to buy BuzzBlock. I’ve been burned before by online purchases that didn’t live up to the hype... but this changed everything!</p>
-</div>
+<img alt="BuzzBlock" class="hero-img" src="images/hero3.png"/>
 </div>
 </div>
 </div>
@@ -803,64 +1049,12 @@ html {
 <div class="reviews-section" style="background: #fff; padding: 60px 20px; text-align: center;">
 <h2 style="color: var(--primary-color); font-size: 30px; font-weight: 800; margin-bottom: 10px;">REAL REVIEWS. REAL RESULTS.</h2>
 <h3 style="color: #1a1a1a; font-size: 32px; font-weight: 800; margin-bottom: 40px;">“Best summer we’ve had in years”</h3>
-<div class="review-cards">
-<div class="review-card" style="background: #f9f9ff; border-radius: 12px; width: 250px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); overflow: hidden;">
-<img alt="Review 1" src="images/review1.png" style="width: 100%; height: 200px; object-fit: cover;"/>
-<div style="padding: 20px;">
-<div style="margin-bottom: 6px;">
-<span style="background: var(--primary-color); color: #fff; font-size: 14px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">★★★★★</span>
-</div>
-<h4 style="font-size: 18px; font-weight: 700; margin: 10px 0 6px;">Christina K.</h4>
-<p style="font-size: 14px; line-height: 1.5; color: #333;">Finally, a Mosquito-Free Summer! Every summer, my family dreaded mosquito season—late-night buzzing, itchy bites, and endless swatting. Since setting up Mozz Guard, we can actually enjoy our evenings outside without being eaten alive. It works like magic!<br/><strong>10/10 recommend!</strong></p>
-</div>
-</div>
-<div class="review-card" style="background: #f9f9ff; border-radius: 12px; width: 250px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); overflow: hidden;">
-<img alt="Review 2" src="images/review2.webp" style="width: 100%; height: 200px; object-fit: cover;"/>
-<div style="padding: 20px;">
-<div style="margin-bottom: 6px;">
-<span style="background: var(--primary-color); color: #fff; font-size: 14px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">★★★★★</span>
-</div>
-<h4 style="font-size: 18px; font-weight: 700; margin: 10px 0 6px;">Ethan P.</h4>
-<p style="font-size: 14px; line-height: 1.5; color: #333;">I buy a lot of stuff. I’m easily influenced. 😂 But zero jokes here—this is hands down one of the best purchases I’ve made. I used to wake up with new mosquito bites every morning, and my kids would toss and turn all night because of the itching. With Mozz Guard, we’ve had the most peaceful sleep ever! Even during Scotland’s peak mosquito season, when the swarms were unbearable, this kept them away.</p>
-</div>
-</div>
-<div class="review-card" style="background: #f9f9ff; border-radius: 12px; width: 250px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); overflow: hidden;">
-<img alt="Review 3" src="images/review3.png" style="width: 100%; height: 200px; object-fit: cover;"/>
-<div style="padding: 20px;">
-<div style="margin-bottom: 6px;">
-<span style="background: var(--primary-color); color: #fff; font-size: 14px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">★★★★★</span>
-</div>
-<h4 style="font-size: 18px; font-weight: 700; margin: 10px 0 6px;">Sarah B.</h4>
-<p style="font-size: 14px; line-height: 1.5; color: #333;">I was skeptical, but Mozz Guard does exactly what it says. Since we set it up, our mosquito problem is gone. We can finally have BBQs, patio dinners, and evenings on the porch without being chewed inside. Not only that, but I’ve slept better than ever—no buzzing, no waking up scratching my legs, and no restless nights. It’s incredibly quiet, easy to use, and keeps working night after night. I’m beyond pleased with this purchase!</p>
-</div>
-</div>
-<div class="review-card" style="background: #f9f9ff; border-radius: 12px; width: 250px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); overflow: hidden;">
-<img alt="Review 4" src="images/review4.webp" style="width: 100%; height: 200px; object-fit: cover;"/>
-<div style="padding: 20px;">
-<div style="margin-bottom: 6px;">
-<span style="background: var(--primary-color); color: #fff; font-size: 14px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">★★★★★</span>
-</div>
-<h4 style="font-size: 18px; font-weight: 700; margin: 10px 0 6px;">Lisa P.</h4>
-<p style="font-size: 14px; line-height: 1.5; color: #333;">At first, I wasn’t sure if Mozz Guard would really work. But after just 10 days, I can confidently say this has made a huge difference in our home. No more waking up to new bites, no more kids crying from itchy skin, and no more mosquito invasions every night. As a busy working mom of two, I need all the sleep I can get, and this device has helped me and my family sleep 100 times better. I literally tell everyone I know about it!</p>
-</div>
-</div>
-<div class="doctor-review" style="display: flex; gap: 30px; align-items: center; max-width: 1000px; margin: 60px auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); padding: 30px 40px; position: relative;">
-<img alt="Dr. Scott" src="images/scott.png" style="width: 200px; height: 200px; object-fit: cover; border-radius: 16px; flex-shrink: 0;"/>
-<div style="flex: 1;">
-<div style="font-size: 20px; color: #ffc107; margin-bottom: 6px;">★★★★★</div>
-<h3 style="color: var(--primary-color); font-size: 24px; font-weight: 800; margin: 6px 0 16px;">"The worst mosquito season in a decade?"</h3>
-<p style="font-size: 16px; color: #444; font-style: italic; line-height: 1.7;">
-            "The combination of a mild winter and a wet spring has caused a boom in the mosquito population. We're also seeing an increase in exotic mosquitoes, known to carry dangerous diseases. Using a device like MozzGuard is highly recommended."
-          </p>
-<p style="margin-top: 18px; font-weight: 600; font-size: 15px;">
-<span style="color: var(--primary-color); font-weight: 700;">Scott A. – Bath, England</span> <span style="font-weight: 400;">| Epidemiologist</span>
-</p>
-</div>
-<div style="position: absolute; top: -20px; right: -20px; background: var(--primary-color); color: white; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-          “
-        </div>
-</div>
-</div>
+<div class="review-cards"><div class="review-card" style="background: #f9f9ff; border-radius: 12px; width: 250px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); overflow: hidden;"><img alt="Review by Diego M." src="images/review1.webp" style="width: 100%; height: 200px; object-fit: cover;"/><div style="padding: 20px;"><div style="margin-bottom: 6px;"><span style="background: var(--primary-color); color: #fff; font-size: 14px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">★★★★★</span></div><h4 style="font-size: 18px; font-weight: 700; margin: 10px 0 6px;">Christina K. from England</h4><p style="font-size: 14px; line-height: 1.5; color: #333;">Finally, a Mosquito-Free Summer! Every summer, my family dreaded mosquito season—late-night buzzing, itchy bites, and endless swatting. Since setting up BuzzBlock, we can actually enjoy our evenings outside without being eaten alive. It works like magic!
+  10/10 recommend!
+The first night I set it up, I woke up without a single bite. It’s quiet, compact, and somehow really effective. I even bring it when we visit family. I wish I had bought this years ago!</p></div></div><div class="review-card" style="background: #f9f9ff; border-radius: 12px; width: 250px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); overflow: hidden;"><img alt="Review by Ethan P." src="images/review2.webp" style="width: 100%; height: 200px; object-fit: cover;"/><div style="padding: 20px;"><div style="margin-bottom: 6px;"><span style="background: var(--primary-color); color: #fff; font-size: 14px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">★★★★★</span></div><h4 style="font-size: 18px; font-weight: 700; margin: 10px 0 6px;">Ethan P. from Scotland</h4><p style="font-size: 14px; line-height: 1.5; color: #333;">I buy a lot of stuff. I’m easily influenced. 😂 But zero jokes here—this is hands down one of the best purchases I’ve made. I used to wake up with new mosquito bites every morning, and my kids would toss and turn all night because of the itching. With BuzzBlock, we’ve had the most peaceful sleep ever! Even during Scotland’s peak mosquito season, when the swarms were unbearable, this kept them away.</p></div></div><div class="review-card" style="background: #f9f9ff; border-radius: 12px; width: 250px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); overflow: hidden;"><img alt="Review by Intan S." src="images/sarah3.webp" style="width: 100%; height: 200px; object-fit: cover;"/><div style="padding: 20px;"><div style="margin-bottom: 6px;"><span style="background: var(--primary-color); color: #fff; font-size: 14px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">★★★★★</span></div><h4 style="font-size: 18px; font-weight: 700; margin: 10px 0 6px;">Anna B. from Poland</h4><p style="font-size: 14px; line-height: 1.5; color: #333;">I was skeptical, but BuzzBlock does exactly what it says. Since we set it up, our mosquito problem is gone. We can finally have BBQs, patio dinners, and evenings on the porch without being chased inside.
+Not only that, but I’ve slept better than ever—no buzzing, no waking up scratching my legs, and no restless nights. It’s incredibly quiet, easy to use, and keeps working night after night. I’m beyond pleased with this purchase!
+Since we got this little light, she sleeps through the night. I love that there’s no smell, no smoke, and no chemicals. We keep it near her crib, and I move it to the kitchen during the day. Worth every rupiah.</p></div></div><div class="review-card" style="background: #f9f9ff; border-radius: 12px; width: 250px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); overflow: hidden;"><img alt="Review by Amaka L." src="images/lisa4.webp" style="width: 100%; height: 200px; object-fit: cover;"/><div style="padding: 20px;"><div style="margin-bottom: 6px;"><span style="background: var(--primary-color); color: #fff; font-size: 14px; font-weight: 600; padding: 4px 10px; border-radius: 20px;">★★★★★</span></div><h4 style="font-size: 18px; font-weight: 700; margin: 10px 0 6px;">Elena L. from Romania</h4><p style="font-size: 14px; line-height: 1.5; color: #333;">I didn’t expect much from a device this small, but I was wrong. We live near a stagnant water canal, and mosquitoes are everywhere — day and night. BuzzBlock started working from night one.
+My baby sleeps without scratching now, and I don’t have to use oils or sprays anymore. It’s safe, quiet, and the light doesn’t disturb anyone. I’ve already told three other moms at church about it. We all love it.</p></div></div></div>
 <!-- BEGIN Next-Gen Product Section -->
 <div id="buzzblock" style="background-color: #e6f2ff; padding: 60px 20px;">
 <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: stretch; flex-wrap: wrap; gap: 40px;">
@@ -882,15 +1076,15 @@ html {
 <p style="margin-top: 18px; font-size: 16px;">
 <span class="hourglass" style="display: inline-block; animation: hourglassSpinPause 4s ease-in-out infinite; transform-origin: center;">⌛</span>
 <strong style="color: var(--primary-color);"> Sale: Live For 24 Hrs.</strong>
-<span style="margin-left: 10px; color: red;">🔥 Stock: Only 1 Units Left!</span>
+<span style="margin-left: 10px; color: red;">🔥 Stock: <span class="unit-count">Only 3 Units Left</span>!</span>
 </p>
-<button style="margin-top: 18px; background: var(--primary-color); color: white; font-size: 20px; padding: 18px 30px; font-weight: 800; border: none; border-radius: 40px; cursor: pointer; display: inline-block;">Order Now &amp; Save 50%</button>
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144"><button style="margin-top: 18px; background: var(--primary-color); color: white; font-size: 20px; padding: 18px 30px; font-weight: 800; border: none; border-radius: 40px; cursor: pointer; display: inline-block;">Order Now &amp; Save 50%</button></a>
 <div style="font-size: 14px; margin-top: 12px; font-weight: 600; color: #333; text-align: center;">90 Days Money Back Guarantee</div>
 </div>
 <!-- Image Carousel Column -->
 <div style="flex: 1 1 500px; min-width: 300px; display: flex; align-items: center; justify-content: center;">
 <div id="carousel" style="position: relative; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); width: 75%; aspect-ratio: 1 / 1.2; overflow: hidden; background: #fff;">
-<img alt="BuzzBlock Zapper" id="carousel-img" src="images/nextgen1.webp" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block;"/>
+<img alt="BuzzBlock Zapper" id="carousel-img" src="images/product-02.webp" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block;"/>
 <button onclick="prevSlide()" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); background: rgba(0,0,0,0.4); border: none; border-radius: 50%; color: white; font-size: 24px; padding: 4px 10px; cursor: pointer;">
       ❮
     </button>
@@ -902,39 +1096,6 @@ html {
 </div>
 </div>
 <!-- END Next-Gen Product Section -->
-<script>
-  const images = ["nextgen1.webp", "nextgen2.webp", "nextgen3.webp", "nextgen4.webp"];
-  let current = 0;
-
-  function showImage(index) {
-    const img = document.getElementById("carousel-img");
-    img.src = images[index];
-  }
-
-  function nextSlide() {
-    current = (current + 1) % images.length;
-    showImage(current);
-  }
-
-  function prevSlide() {
-    current = (current - 1 + images.length) % images.length;
-    showImage(current);
-  }
-</script>
-<script>
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const today = new Date();
-    document.getElementById("sale-bar").innerHTML = `Sale Ends Today — <strong>${today.toLocaleDateString("en-US", options)}</strong>`;
-
-    document.querySelectorAll('.faq-question').forEach(button => {
-      button.addEventListener('click', () => {
-        const item = button.closest('.faq-item');
-        const wasActive = item.classList.contains('active');
-        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
-        if (!wasActive) item.classList.add('active');
-      });
-    });
-  </script>
 <!-- BEGIN Features Section -->
 <div id="features" style="background-color: #f3e8ff; padding: 60px 20px;">
 <div style="max-width: 1200px; margin: 0 auto;">
@@ -1021,12 +1182,12 @@ html {
 <p style="font-size: 20px; color: red; font-weight: 600; margin-bottom: 30px;">
     Limited 50% Discount On Now
   </p>
-<button style="background: var(--primary-color); color: white; font-size: 22px; padding: 18px 50px; font-weight: 800; border: none; border-radius: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; display: inline-flex; align-items: center; gap: 16px;">
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144"><button style="background: var(--primary-color); color: white; font-size: 22px; padding: 18px 50px; font-weight: 800; border: none; border-radius: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; display: inline-flex; align-items: center; gap: 16px;">
     Order Now
     <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.2); justify-content: center; align-items: center;">
 <span style="display: inline-block; width: 0; height: 0; border-left: 8px solid white; border-top: 6px solid transparent; border-bottom: 6px solid transparent; margin-left: 2px;"></span>
 </span>
-</button>
+</button></a>
 </div>
 <!-- END CTA Section -->
 <!-- BEGIN Features Section -->
@@ -1085,12 +1246,12 @@ html {
 <div style="margin-top: 30px; text-align: center;">
 <p style="font-size: 14px; color: #333;">
 <span class="hourglass" style="display: inline-block; animation: hourglassSpinPause 4s ease-in-out infinite; transform-origin: center;">⌛</span> Sale: Live For 24 Hrs.
-        <span style="color: red;">🔥 Stock: Only 1 Units Left!</span>
+        <span style="color: red;">🔥 Stock: <span class="unit-count">Only 3 Units Left</span>!</span>
 </p>
 </div>
 <div style="text-align: center; margin-top: 16px;">
 <!-- CTA Button -->
-<a href="#order" style="display: inline-block; background: #6e32b9; color: white; font-size: 18px; padding: 16px 32px; font-weight: 800; border: none; border-radius: 40px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144" style="display: inline-block; background: #6e32b9; color: white; font-size: 18px; padding: 16px 32px; font-weight: 800; border: none; border-radius: 40px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
       Order Now &amp; Save 50%
     </a>
 <!-- Guarantee Text -->
@@ -1120,15 +1281,15 @@ html {
 <span style="color: #6e32b9; font-size: 20px; font-weight: 800;">Pay Only £39.99</span>
 </p>
 <ul style="list-style: none; padding-left: 0; margin-left: 0; font-size: 16px; color: #222;">
-<li style="margin-bottom: 6px;">✅ Fast USA-based shipping</li>
+<li style="margin-bottom: 6px;">✅ Fast shipping to <span id="userCountry">your country</span></li>
 <li style="margin-bottom: 6px;">✅ 90-Day 100% Money-Back Guarantee</li>
 <li style="margin-bottom: 6px;">✅ Amazing Customer Support</li>
 <li style="margin-bottom: 6px; font-weight: 600;">✅ Extra discount when ordering more than one</li>
 </ul>
 <p style="font-size: 14px; color: green; display: inline-block; margin-right: 10px;">🟢 Sale: Live For 24 Hrs.</p>
-<p style="font-size: 14px; color: red; display: inline-block;">🔥 Stock: Only 1 Units Left!</p>
+<p style="font-size: 14px; color: red; display: inline-block;">🔥 Stock: <span class="unit-count">Only 3 Units Left</span>!</p>
 <br/>
-<button style="margin-top: 20px; background: #6e32b9; color: white; font-size: 18px; padding: 16px 30px; font-weight: 800; border: none; border-radius: 40px; cursor: pointer; display: inline-block;">Order Now &amp; Save 50%</button>
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144"><button style="margin-top: 20px; background: #6e32b9; color: white; font-size: 18px; padding: 16px 30px; font-weight: 800; border: none; border-radius: 40px; cursor: pointer; display: inline-block;">Order Now &amp; Save 50%</button></a>
 <p style="font-size: 14px; margin-top: 10px; font-weight: 600; color: #222;">90 Days Money Back Guarantee</p>
 </div>
 </div>
@@ -1291,12 +1452,12 @@ html {
 <div style="margin-top: 30px; text-align: center;">
 <p style="font-size: 14px; color: #333;">
 <span class="hourglass" style="display: inline-block; animation: hourglassSpinPause 4s ease-in-out infinite; transform-origin: center;">⌛</span> Sale: Live For 24 Hrs.
-      <span style="color: red;">🔥 Stock: Only 1 Units Left!</span>
+      <span style="color: red;">🔥 Stock: <span class="unit-count">Only 3 Units Left</span>!</span>
 </p>
 </div>
 <div style="text-align: center; margin-top: 16px;">
 <!-- CTA Button -->
-<a href="#order" style="display: inline-block; background: #6e32b9; color: white; font-size: 18px; padding: 16px 32px; font-weight: 800; border: none; border-radius: 40px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144" style="display: inline-block; background: #6e32b9; color: white; font-size: 18px; padding: 16px 32px; font-weight: 800; border: none; border-radius: 40px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
     Order Now &amp; Save 50%
   </a>
 <!-- Guarantee Text -->
@@ -1353,7 +1514,7 @@ html {
 </div>
 <div class="faq-item">
 <button class="faq-question">How can I contact customer support if I have questions?<span class="arrow">▶</span></button>
-<div class="faq-answer">We’re here to help! Our customer support team is available via email and phone to assist with any questions, order inquiries, or troubleshooting.<br/>Email: support@ozzimozzie.co<br/>Phone: +1 844-451-5659<br/>We strive to respond to all inquiries as quickly as possible to ensure you have the best experience with BuzzBlock.</div>
+<div class="faq-answer">We’re here to help! Our customer support team is available via phone to assist with any questions, order inquiries, or troubleshooting.Phone: +44 7778460319<br/>We strive to respond to all inquiries as quickly as possible to ensure you have the best experience with BuzzBlock.</div>
 </div>
 </div>
 </div>
@@ -1372,14 +1533,14 @@ html {
 <div style="font-size: 16px; margin-bottom: 20px; color: #333;">
     🟢 Sale: <strong>Live For 24 Hrs.</strong>
       <span class="hourglass" style="display: inline-block; animation: hourglassSpinPause 4s ease-in-out infinite; transform-origin: center;">⌛</span>
-<strong style="color: red;"> Stock: Only 1 Units Left!</strong>
+<strong style="color: red;"> Stock: <span class="unit-count">Only 3 Units Left</span>!</strong>
 </div>
-<button class="pulsing-button" style="background: #6e32b9; color: white; font-size: 24px; padding: 20px 40px; font-weight: 800; border: none; border-radius: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; display: inline-flex; align-items: center; gap: 12px;">
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144"><button class="pulsing-button" style="background: #6e32b9; color: white; font-size: 24px; padding: 20px 40px; font-weight: 800; border: none; border-radius: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; display: inline-flex; align-items: center; gap: 12px;">
     Order Now &amp; Save 50%
     <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.2); justify-content: center; align-items: center;">
 <span style="display: inline-block; width: 0; height: 0; border-left: 8px solid white; border-top: 6px solid transparent; border-bottom: 6px solid transparent; margin-left: 2px;"></span>
 </span>
-</button>
+</button></a>
 <div style="font-size: 14px; margin-top: 12px; font-weight: 600; color: #333;">
     90 Days Money Back Guarantee
   </div>
@@ -1477,16 +1638,6 @@ html {
       transform: rotate(90deg);
     }
     </style>
-<script>
-    document.querySelectorAll('.faq-question').forEach(button => {
-      button.addEventListener('click', () => {
-        const item = button.closest('.faq-item');
-        const wasActive = item.classList.contains('active');
-        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
-        if (!wasActive) item.classList.add('active');
-      });
-    });
-    </script>
 <style>
   .reviews-container {
     column-count: 4;
@@ -1706,7 +1857,144 @@ html {
   }
 }
 </style>
-</div></div></div></div></body>
+</div></div></div></div>
+<!-- BEGIN Enhanced Floating Review Bubbles + Countdown -->
+<style>
+.floating-review {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  border: 2px solid #6e32b9;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  font-size: 14px;
+  z-index: 9999;
+  display: none;
+}
+#last-unit-alert {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #ffefef;
+  border-bottom: 2px solid red;
+  padding: 12px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 15px;
+  z-index: 10000;
+  display: none;
+}
+</style>
+<div class="floating-review" id="floating-review-1">Just now: Anna from <span id="bubbleCountry1">your country</span> ordered BuzzBlock 🦟</div>
+<div class="floating-review" id="floating-review-2">Just now: Emil from <span id="bubbleCountry2">your country</span> grabbed one too 🔥</div>
+<div id="last-unit-alert">⚠️ Last unit left – selling fast!</div>
+<script>
+  const countries = ["Italy", "Spain", "Germany", "Australia", "Hungary", "Greece", "Netherlands"];
+  let currentUnitCount = 3;
+
+  function updateUnitCount() {
+    const unitElements = document.querySelectorAll(".unit-count");
+    currentUnitCount = Math.max(currentUnitCount - 1, 1);
+    unitElements.forEach(el => {
+      el.textContent = `Only ${currentUnitCount} Unit${currentUnitCount > 1 ? 's' : ''} Left`;
+    });
+    if (currentUnitCount === 1) {
+      document.getElementById("last-unit-alert").style.display = "block";
+    }
+  }
+
+  fetch("https://ipapi.co/json/")
+    .then(response => response.json())
+    .then(data => {
+      const country = data.country_name || "your country";
+      const spanUser = document.getElementById("userCountry");
+      const bubble1 = document.getElementById("bubbleCountry1");
+      const bubble2 = document.getElementById("bubbleCountry2");
+
+      if (spanUser) spanUser.textContent = country;
+      if (bubble1) bubble1.textContent = country;
+      if (bubble2) bubble2.textContent = countries[Math.floor(Math.random() * countries.length)];
+    })
+    .catch(() => {
+      const spanUser = document.getElementById("userCountry");
+      const bubble1 = document.getElementById("bubbleCountry1");
+      const bubble2 = document.getElementById("bubbleCountry2");
+
+      if (spanUser) spanUser.textContent = "Eastern Europe";
+      if (bubble1) bubble1.textContent = "Eastern Europe";
+      if (bubble2) bubble2.textContent = countries[Math.floor(Math.random() * countries.length)];
+    });
+
+  setTimeout(() => {
+    const bubble1 = document.getElementById("floating-review-1");
+    bubble1.style.display = "block";
+    updateUnitCount();
+    setTimeout(() => { bubble1.style.display = "none"; }, 10000);
+  }, 5000);
+
+  setTimeout(() => {
+    const bubble2 = document.getElementById("floating-review-2");
+    bubble2.style.display = "block";
+    updateUnitCount();
+    setTimeout(() => { bubble2.style.display = "none"; }, 10000);
+  }, 50000);
+</script>
+<!-- END Enhanced Floating Review Bubbles + Countdown -->
+<script>
+document.querySelectorAll('.faq-section').forEach(section => {
+  const buttons = section.querySelectorAll('.faq-question');
+  buttons.forEach(button => {
+    button.addEventListener('click', () => {
+      const item = button.closest('.faq-item');
+      const wasActive = item.classList.contains('active');
+      section.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+      if (!wasActive) item.classList.add('active');
+    });
+  });
+});
+</script><script>
+  const images = [
+    "product-02.webp",
+    "caro3.webp",
+    "nextgen1.webp"
+  ];
+  let current = 0;
+
+  function showImage(index) {
+    const img = document.getElementById("carousel-img");
+    img.src = "images/" + images[index];
+  }
+
+  function nextSlide() {
+    current = (current + 1) % images.length;
+    showImage(current);
+  }
+
+  function prevSlide() {
+    current = (current - 1 + images.length) % images.length;
+    showImage(current);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    showImage(current);
+  });
+</script>
+<script>
+  (function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const clickId = urlParams.get('sub');
+  
+    if (clickId) {
+      localStorage.setItem('click_id', clickId);
+      console.log("Click ID saved:", clickId);
+    }
+  })();
+  </script>
+  
+</body>
 </html>
 <style>
 @media (max-width: 768px) {
