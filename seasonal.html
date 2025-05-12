@@ -1994,6 +1994,15 @@ document.querySelectorAll('.faq-section').forEach(section => {
   })();
   </script>
   
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const sub = urlParams.get('sub');
+  if (sub) {
+    localStorage.setItem('click_id', sub);
+  }
+</script>
+
 </body>
 </html>
 <style>
