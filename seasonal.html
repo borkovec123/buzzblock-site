@@ -2003,6 +2003,23 @@ document.querySelectorAll('.faq-section').forEach(section => {
   }
 </script>
 
+
+<script>
+  const sub = localStorage.getItem('click_id');
+  if (sub) {
+    const stripeLinks = document.querySelectorAll('a[href*="buy.stripe.com"]');
+    stripeLinks.forEach(link => {
+      try {
+        const url = new URL(link.href);
+        url.searchParams.set("sub", sub);
+        link.href = url.toString();
+      } catch (e) {
+        console.warn("Could not update Stripe link:", link.href);
+      }
+    });
+  }
+</script>
+
 </body>
 </html>
 <style>
