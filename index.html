@@ -822,7 +822,7 @@ html {
 <a class="nav-link" href="#features">Features</a>
 <a class="nav-link" href="#reviews">Reviews</a>
 </nav>
-<a href="https://buy.stripe.com/4gweXhf9w9zr4UgbIJ" style="text-decoration:none;" target="_blank"><button class="nav-button">Order Now &amp; Save 50%</button></a>
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144" style="text-decoration:none;" target="_blank"><button class="nav-button">Order Now &amp; Save 50%</button></a>
 </div>
 <div class="scroll-wrapper">
 <!-- Mobile Layout: Headline and image first, then the entire original hero-left content -->
@@ -1981,6 +1981,23 @@ document.querySelectorAll('.faq-section').forEach(section => {
   })();
   </script>
   
+
+<script>
+  const sub = localStorage.getItem('click_id');
+  if (sub) {
+    const stripeLinks = document.querySelectorAll('a[href*="buy.stripe.com"]');
+    stripeLinks.forEach(link => {
+      try {
+        const url = new URL(link.href);
+        url.searchParams.set("sub", sub);
+        link.href = url.toString();
+      } catch (e) {
+        console.warn("Could not update Stripe link:", link.href);
+      }
+    });
+  }
+</script>
+
 </body>
 </html>
 <style>
