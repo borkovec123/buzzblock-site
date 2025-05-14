@@ -62,23 +62,28 @@
 <script>
 (function () {
   const urlParams = new URLSearchParams(window.location.search);
-  const clickId = urlParams.get("sub") || localStorage.getItem("click_id");
-  let rawAmount = urlParams.get("amount") || localStorage.getItem("amount");
+  const keys = ["funnel", "lp", "cluster", "country", "device", "browser", "creative_id", "zone_id", "widget_id"];
 
-  // 🛡️ Sanitize the amount value
+  let clickId = urlParams.get("sub");
+  if (clickId) {
+    localStorage.setItem("click_id", clickId);
+  } else {
+    clickId = localStorage.getItem("click_id");
+  }
+
+  let rawAmount = urlParams.get("amount");
   if (rawAmount) {
-    rawAmount = rawAmount.replace(/[^\d.]/g, ""); // keep digits and dot only
+    // Clean before storing
+    rawAmount = rawAmount.replace(/[^\d.]/g, "");
+    localStorage.setItem("amount", rawAmount);
+  } else {
+    rawAmount = localStorage.getItem("amount") || "";
+    rawAmount = rawAmount.replace(/[^\d.]/g, "");
   }
 
   const amount = parseFloat(rawAmount);
 
   if (clickId) {
-    localStorage.setItem("click_id", clickId);
-    if (!isNaN(amount)) {
-      localStorage.setItem("amount", rawAmount);
-    }
-
-    const keys = ["funnel", "lp", "cluster", "country", "device", "browser", "creative_id", "zone_id", "widget_id"];
     const params = new URLSearchParams();
     params.set("cid", clickId);
 
@@ -88,12 +93,13 @@
     }
 
     keys.forEach(key => {
-      const value = localStorage.getItem(key);
-      if (value) params.set(key, value);
+      const val = localStorage.getItem(key);
+      if (val) {
+        params.set(key, val);
+      }
     });
 
     const postbackUrl = "https://9805o.bemobtrcks.com/postback?" + params.toString();
-
     fetch(postbackUrl)
       .then(response => console.log("Postback sent:", postbackUrl, response.status))
       .catch(err => console.error("Postback failed:", err));
