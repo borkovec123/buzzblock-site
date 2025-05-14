@@ -1,11 +1,12 @@
 
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Thank You – BuzzBlock</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Thank You – BuzzBlock</title>
+<style>
     body {
       font-family: Arial, sans-serif;
       background-color: #f5f3ff;
@@ -40,55 +41,44 @@
   </style>
 </head>
 <body>
-  <header>
-    <h2>BuzzBlock</h2>
-  </header>
-
-  <div class="container">
-    <h1>Thank you for your order!</h1>
-    <p>Your BuzzBlock is on its way. Please allow 4–8 business days for delivery.</p>
-    <p>We’ve sent a confirmation email with your order details.</p>
-
-    <div class="upsell">
-      <h3>Want to get even more out of BuzzBlock?</h3>
-      <p>Join our tips list or check out exclusive partner offers while you wait for your order.</p>
-      <!-- Placeholder for email opt-in or affiliate upsell -->
-      <button onclick="alert('Coming soon!')" style="padding: 10px 20px; background-color: #7c3aed; color: white; border: none; border-radius: 5px;">Get More Value</button>
-    </div>
-  </div>
-
-  <footer>
-    &copy; 2025 BuzzBlock. All rights reserved.
+<header>
+<h2>BuzzBlock</h2>
+</header>
+<div class="container">
+<h1>Thank you for your order!</h1>
+<p>Your BuzzBlock is on its way. Please allow 4–8 business days for delivery.</p>
+<p>We’ve sent a confirmation email with your order details.</p>
+<div class="upsell">
+<h3>Want to get even more out of BuzzBlock?</h3>
+<p>Join our tips list or check out exclusive partner offers while you wait for your order.</p>
+<!-- Placeholder for email opt-in or affiliate upsell -->
+<button onclick="alert('Coming soon!')" style="padding: 10px 20px; background-color: #7c3aed; color: white; border: none; border-radius: 5px;">Get More Value</button>
+</div>
+</div>
+<footer>
+    © 2025 BuzzBlock. All rights reserved.
   </footer>
 
-  <script>
-    (function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const clickId = urlParams.get('sub') || localStorage.getItem('click_id');
 
-      if (clickId) {
-        localStorage.setItem('click_id', clickId);
-
-        // Fire BeMob postback
-        const postbackUrl = 'https://9805o.bemobtrcks.com/postback?cid=' + clickId;
-        fetch(postbackUrl)
-          .then(response => console.log('Postback sent:', response.status))
-          .catch(err => console.error('Postback failed:', err));
-      }
-    })();
-  </script>
 
 <script>
 (function () {
   const urlParams = new URLSearchParams(window.location.search);
   const clickId = urlParams.get('sub') || localStorage.getItem('click_id');
+  const amount = urlParams.get('amount') || localStorage.getItem('amount');
 
   if (clickId) {
     localStorage.setItem('click_id', clickId);
+    if (amount) localStorage.setItem('amount', amount);
 
     const keys = ["funnel", "lp", "cluster", "country", "device", "browser", "creative_id", "zone_id", "widget_id"];
     const params = new URLSearchParams();
     params.set("cid", clickId);
+
+    if (amount) {
+      const sum = parseFloat(amount) / 100; // Stripe sends cents
+      params.set("sum", sum.toFixed(2));
+    }
 
     keys.forEach(key => {
       const value = localStorage.getItem(key);
@@ -97,13 +87,11 @@
 
     const postbackUrl = "https://9805o.bemobtrcks.com/postback?" + params.toString();
 
-    // Fire BeMob postback
     fetch(postbackUrl)
       .then(response => console.log("Postback sent:", response.status))
       .catch(err => console.error("Postback failed:", err));
   }
 })();
 </script>
-
 </body>
 </html>
