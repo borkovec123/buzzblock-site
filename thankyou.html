@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,6 +52,7 @@
     <div class="upsell">
       <h3>Want to get even more out of BuzzBlock?</h3>
       <p>Join our tips list or check out exclusive partner offers while you wait for your order.</p>
+      <!-- Placeholder for email opt-in or affiliate upsell -->
       <button onclick="alert('Coming soon!')" style="padding: 10px 20px; background-color: #7c3aed; color: white; border: none; border-radius: 5px;">Get More Value</button>
     </div>
   </div>
@@ -61,14 +63,47 @@
 
   <script>
     (function() {
-      const clickId = localStorage.getItem('click_id');
+      const urlParams = new URLSearchParams(window.location.search);
+      const clickId = urlParams.get('sub') || localStorage.getItem('click_id');
+
       if (clickId) {
-        const img = new Image();
-        img.src = 'https://9805o.bemobtrcks.com/postback?cid=' + clickId + '&payout=0.5';
-      } else {
-        console.warn('No click_id found in localStorage.');
+        localStorage.setItem('click_id', clickId);
+
+        // Fire BeMob postback
+        const postbackUrl = 'https://9805o.bemobtrcks.com/postback?cid=' + clickId;
+        fetch(postbackUrl)
+          .then(response => console.log('Postback sent:', response.status))
+          .catch(err => console.error('Postback failed:', err));
       }
     })();
   </script>
+
+<script>
+(function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  const clickId = urlParams.get('sub') || localStorage.getItem('click_id');
+
+  if (clickId) {
+    localStorage.setItem('click_id', clickId);
+
+    const keys = ["funnel", "lp", "cluster", "country", "device", "browser", "creative_id", "zone_id", "widget_id"];
+    const params = new URLSearchParams();
+    params.set("cid", clickId);
+
+    keys.forEach(key => {
+      const value = localStorage.getItem(key);
+      if (value) params.set(key, value);
+    });
+
+    const postbackUrl = "https://9805o.bemobtrcks.com/postback?" + params.toString();
+
+    // Fire BeMob postback
+    fetch(postbackUrl)
+      .then(response => console.log("Postback sent:", response.status))
+      .catch(err => console.error("Postback failed:", err));
+  }
+})();
+</script>
+
 </body>
 </html>
