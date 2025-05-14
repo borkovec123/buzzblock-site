@@ -1993,8 +1993,6 @@ document.querySelectorAll('.faq-section').forEach(section => {
     }
   })();
   </script>
-  
-
 <script>
   const urlParams = new URLSearchParams(window.location.search);
   const sub = urlParams.get('sub');
@@ -2002,8 +2000,6 @@ document.querySelectorAll('.faq-section').forEach(section => {
     localStorage.setItem('click_id', sub);
   }
 </script>
-
-
 <script>
   const sub = localStorage.getItem('click_id');
   if (sub) {
@@ -2019,8 +2015,6 @@ document.querySelectorAll('.faq-section').forEach(section => {
     });
   }
 </script>
-
-
 <script>
 (function () {
   const urlParams = new URLSearchParams(window.location.search);
@@ -2051,8 +2045,23 @@ document.querySelectorAll('.faq-section').forEach(section => {
   });
 })();
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const stripeButtons = document.querySelectorAll('a[href*="buy.stripe.com"]');
 
-</body>
+  stripeButtons.forEach(button => {
+    const baseUrl = button.href.split('?')[0]; // remove any old query params
+    const clickId = localStorage.getItem("click_id");
+    const amount = "2795"; // price in cents
+
+    const url = new URL(baseUrl);
+    if (clickId) url.searchParams.set("sub", clickId);
+    url.searchParams.set("amount", amount);
+
+    button.href = url.toString();
+  });
+});
+</script></body>
 </html>
 <style>
 @media (max-width: 768px) {
