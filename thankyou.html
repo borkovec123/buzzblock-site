@@ -59,24 +59,31 @@
     © 2025 BuzzBlock. All rights reserved.
   </footer>
 
-
-
 <script>
 (function () {
   const urlParams = new URLSearchParams(window.location.search);
-  const clickId = urlParams.get('sub') || localStorage.getItem('click_id');
-  const amount = urlParams.get('amount') || localStorage.getItem('amount');
+  const clickId = urlParams.get("sub") || localStorage.getItem("click_id");
+  let rawAmount = urlParams.get("amount") || localStorage.getItem("amount");
+
+  // 🛡️ Sanitize the amount value
+  if (rawAmount) {
+    rawAmount = rawAmount.replace(/[^\d.]/g, ""); // keep digits and dot only
+  }
+
+  const amount = parseFloat(rawAmount);
 
   if (clickId) {
-    localStorage.setItem('click_id', clickId);
-    if (amount) localStorage.setItem('amount', amount);
+    localStorage.setItem("click_id", clickId);
+    if (!isNaN(amount)) {
+      localStorage.setItem("amount", rawAmount);
+    }
 
     const keys = ["funnel", "lp", "cluster", "country", "device", "browser", "creative_id", "zone_id", "widget_id"];
     const params = new URLSearchParams();
     params.set("cid", clickId);
 
-    if (amount) {
-      const sum = parseFloat(amount) / 100; // Stripe sends cents
+    if (!isNaN(amount)) {
+      const sum = amount / 100;
       params.set("sum", sum.toFixed(2));
     }
 
@@ -88,10 +95,11 @@
     const postbackUrl = "https://9805o.bemobtrcks.com/postback?" + params.toString();
 
     fetch(postbackUrl)
-      .then(response => console.log("Postback sent:", response.status))
+      .then(response => console.log("Postback sent:", postbackUrl, response.status))
       .catch(err => console.error("Postback failed:", err));
   }
 })();
 </script>
+
 </body>
 </html>
