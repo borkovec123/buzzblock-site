@@ -2020,6 +2020,38 @@ document.querySelectorAll('.faq-section').forEach(section => {
   }
 </script>
 
+
+<script>
+(function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  const clickId = urlParams.get('sub');
+  if (clickId) {
+    localStorage.setItem('click_id', clickId);
+  }
+
+  const keys = ["click_id", "funnel", "cluster", "lp", "country", "device", "browser", "zone_id", "widget_id", "creative_id"];
+  const stored = {};
+  keys.forEach((key) => {
+    const val = localStorage.getItem(key);
+    if (val) stored[key] = val;
+  });
+
+  const stripeLinks = document.querySelectorAll('a[href*="buy.stripe.com"]');
+  stripeLinks.forEach(link => {
+    try {
+      const url = new URL(link.href);
+      for (const key in stored) {
+        const paramName = key === "click_id" ? "sub" : key;
+        url.searchParams.set(paramName, stored[key]);
+      }
+      link.href = url.toString();
+    } catch (e) {
+      console.warn("Could not update Stripe link:", link.href);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
 <style>
