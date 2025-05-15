@@ -506,6 +506,15 @@ html {
   margin-top: 4px !important;
   margin-bottom: 4px !important;
 }
+</style><style>
+.mobile-only {
+  display: none;
+}
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+}
 </style></head>
 <style>
   /* Make layout stacks on small screens */
@@ -826,7 +835,9 @@ html {
 </div>
 <div class="scroll-wrapper">
 <!-- Mobile Layout: Headline and image first, then the entire original hero-left content -->
-<div class="mobile-hero"><div class="star-bar">⭐⭐⭐⭐⭐ Rated 4.8 by 3200+ Verified Customers</div><h1 class="headline">Kill Mosquitoes From Any Environment In MINUTES</h1>
+<div class="mobile-hero"><div class="mobile-only"><div class="star-bar">⭐⭐⭐⭐⭐ Rated 4.8 by 3200+ Verified Customers</div><h1 class="headline">Kill Mosquitoes From Any Environment In MINUTES</h1></div>
+
+
 <div class="image-wrapper">
 <img alt="BuzzBlock" class="hero-img" src="images/hero2.webp"/>
 <div class="testimonial-box">
