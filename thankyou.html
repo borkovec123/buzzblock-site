@@ -41,7 +41,7 @@
 </head>
 <body>
 <header>
-<img src="logo.png" alt="BuzzBlock Logo" style="max-width: 300px; height: auto;" />
+<h2>BuzzBlock</h2>
 </header>
 <div class="container">
 <h1>Thank you for your order!</h1>
@@ -57,50 +57,42 @@
 <footer>
     © 2025 BuzzBlock. All rights reserved.
   </footer>
+
+
 <script>
 (function () {
   const urlParams = new URLSearchParams(window.location.search);
-  const keys = ["funnel", "lp", "cluster", "country", "device", "browser", "creative_id", "zone_id", "widget_id"];
-
-  let clickId = urlParams.get("sub");
-  if (clickId) {
-    localStorage.setItem("click_id", clickId);
-  } else {
-    clickId = localStorage.getItem("click_id");
-  }
-
-  let rawAmount = urlParams.get("amount");
-  if (rawAmount) {
-    // Clean before storing
-    rawAmount = rawAmount.replace(/[^\d.]/g, "");
-    localStorage.setItem("amount", rawAmount);
-  } else {
-    rawAmount = localStorage.getItem("amount") || "";
-    rawAmount = rawAmount.replace(/[^\d.]/g, "");
-  }
-
-  const amount = parseFloat(rawAmount);
+  const clickId = urlParams.get('sub') || localStorage.getItem('click_id');
+  const amount = urlParams.get('amount') || localStorage.getItem('amount');
 
   if (clickId) {
+    localStorage.setItem('click_id', clickId);
+    if (amount) localStorage.setItem('amount', amount);
+
+    const keys = ["funnel", "lp", "cluster", "country", "device", "browser", "creative_id", "zone_id", "widget_id"];
     const params = new URLSearchParams();
     params.set("cid", clickId);
 
-    if (!isNaN(amount)) {
-      const sum = amount / 100;
+    if (amount) {
+      const sum = parseFloat(amount) / 100;
       params.set("payout", sum.toFixed(2));
+
+      // MGID postback
+      const mgidPostback = `https://a.mgid.com/conversion?click_id=${clickId}&goal=purchase&payout=${sum.toFixed(2)}`;
+      fetch(mgidPostback)
+        .then(res => console.log("MGID Postback sent:", res.status))
+        .catch(err => console.error("MGID Postback failed:", err));
     }
 
     keys.forEach(key => {
-      const val = localStorage.getItem(key);
-      if (val) {
-        params.set(key, val);
-      }
+      const value = localStorage.getItem(key);
+      if (value) params.set(key, value);
     });
 
-    const postbackUrl = "https://9805o.bemobtrcks.com/postback?" + params.toString();
-    fetch(postbackUrl)
-      .then(response => console.log("Postback sent:", postbackUrl, response.status))
-      .catch(err => console.error("Postback failed:", err));
+    const bemobPostback = "https://9805o.bemobtrcks.com/postback?" + params.toString();
+    fetch(bemobPostback)
+      .then(response => console.log("BeMob Postback sent:", response.status))
+      .catch(err => console.error("BeMob Postback failed:", err));
   }
 })();
 </script>
