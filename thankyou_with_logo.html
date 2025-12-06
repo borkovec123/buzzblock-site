@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Thank You – BuzzBlock</title>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f3ff;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background-color: #6b21a8;
+      padding: 20px;
+      color: white;
+    }
+    .container {
+      padding: 40px 20px;
+    }
+    h1 {
+      color: #4c1d95;
+    }
+    .upsell {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #ede9fe;
+      border-radius: 8px;
+    }
+    footer {
+      margin-top: 50px;
+      padding: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+<header>
+<img src="logo.png" alt="BuzzBlock Logo" style="max-width: 300px; height: auto;" />
+</header>
+<div class="container">
+<h1>Thank you for your order!</h1>
+<p>Your BuzzBlock is on its way. Please allow 4–8 business days for delivery.</p>
+<p>We’ve sent a confirmation email with your order details.</p>
+<div class="upsell">
+<h3>Want to get even more out of BuzzBlock?</h3>
+<p>Join our tips list or check out exclusive partner offers while you wait for your order.</p>
+<!-- Placeholder for email opt-in or affiliate upsell -->
+<button onclick="alert('Coming soon!')" style="padding: 10px 20px; background-color: #7c3aed; color: white; border: none; border-radius: 5px;">Get More Value</button>
+</div>
+</div>
+<footer>
+    © 2025 BuzzBlock. All rights reserved.
+  </footer>
+<script>
+(function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  const keys = ["funnel", "lp", "cluster", "country", "device", "browser", "creative_id", "zone_id", "widget_id"];
+
+  let clickId = urlParams.get("sub");
+  if (clickId) {
+    localStorage.setItem("click_id", clickId);
+  } else {
+    clickId = localStorage.getItem("click_id");
+  }
+
+  let rawAmount = urlParams.get("amount");
+  if (rawAmount) {
+    // Clean before storing
+    rawAmount = rawAmount.replace(/[^\d.]/g, "");
+    localStorage.setItem("amount", rawAmount);
+  } else {
+    rawAmount = localStorage.getItem("amount") || "";
+    rawAmount = rawAmount.replace(/[^\d.]/g, "");
+  }
+
+  const amount = parseFloat(rawAmount);
+
+  if (clickId) {
+    const params = new URLSearchParams();
+    params.set("cid", clickId);
+
+    if (!isNaN(amount)) {
+      const sum = amount / 100;
+      params.set("payout", sum.toFixed(2));
+    }
+
+    keys.forEach(key => {
+      const val = localStorage.getItem(key);
+      if (val) {
+        params.set(key, val);
+      }
+    });
+
+    const postbackUrl = "https://9805o.bemobtrcks.com/postback?" + params.toString();
+    fetch(postbackUrl)
+      .then(response => console.log("Postback sent:", postbackUrl, response.status))
+      .catch(err => console.error("Postback failed:", err));
+  }
+})();
+</script>
+</body>
+</html>
