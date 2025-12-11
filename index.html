@@ -2269,59 +2269,20 @@
       showImage(current);
     });
   </script>
-  <script>
-    (function () {
-      const urlParams = new URLSearchParams(window.location.search);
-      const clickId = urlParams.get('sub');
-    
-      if (clickId) {
-        localStorage.setItem('click_id', clickId);
-        console.log("Click ID saved:", clickId);
-      }
-    })();
-    </script>
-    
-  
-  <script>
-    const sub = localStorage.getItem('click_id');
-    if (sub) {
-      const stripeLinks = document.querySelectorAll('a[href*="buy.stripe.com"]');
-      stripeLinks.forEach(link => {
-        try {
-          const url = new URL(link.href);
-          url.searchParams.set("sub", sub);
-          link.href = url.toString();
-        } catch (e) {
-          console.warn("Could not update Stripe link:", link.href);
-        }
-      });
-    }
-  </script>
-  
-  
-  <script>
-    (function () {
-      const keys = ["click_id", "funnel", "cluster", "lp", "country"];
-      const stored = {};
-      keys.forEach((key) => {
-        const val = localStorage.getItem(key);
-        if (val) stored[key] = val;
-      });
-  
-      const stripeLinks = document.querySelectorAll('a[href*="buy.stripe.com"]');
-      stripeLinks.forEach(link => {
-        try {
-          const url = new URL(link.href);
-          for (const key in stored) {
-            url.searchParams.set(key === "click_id" ? "sub" : key, stored[key]);
-          }
-          link.href = url.toString();
-        } catch (e) {
-          console.warn("Could not update Stripe link:", link.href);
-        }
-      });
-    })();
-  </script>
+ <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(window.location.search);
+    const sub = params.get("sub");
+
+    if (!sub) return;
+
+    document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
+        let base = link.href.split("?")[0];
+        link.href = base + "?sub=" + encodeURIComponent(sub);
+    });
+});
+</script>
+
 
   </body>
   </html>
