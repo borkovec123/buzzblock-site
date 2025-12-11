@@ -2269,7 +2269,7 @@
       showImage(current);
     });
   </script>
- <script>
+<script>
 document.addEventListener("DOMContentLoaded", function () {
     const params = new URLSearchParams(window.location.search);
     const sub = params.get("sub");
@@ -2278,10 +2278,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
         let base = link.href.split("?")[0];
-        link.href = base + "?sub=" + encodeURIComponent(sub);
+        link.href = base + "?client_reference_id=" + encodeURIComponent(sub);
     });
 });
 </script>
+
 
 
   </body>
