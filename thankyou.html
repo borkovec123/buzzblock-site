@@ -59,45 +59,43 @@
   </footer>
 <script>
 (function () {
-  // 1) Try to read click id from the URL (?sub=...)
+  // 1) Read click ID from URL (?sub=...)
   const params = new URLSearchParams(window.location.search);
   let clickId = params.get("sub");
 
-  // 2) Fallback: try localStorage if URL doesn't have it
+  // 2) Fallback: use localStorage if needed
   if (!clickId) {
     clickId = localStorage.getItem("click_id") || "";
   }
 
   if (!clickId) {
-    console.warn("No click id found (sub/localStorage). Postback not sent.");
+    console.warn("No click ID found. Postback not fired.");
     return;
   }
 
-  // 3) Your revenue per order (24 product + 2 shipping)
+  // 3) Fixed revenue per purchase (product + shipping)
   const payout = 26; // USD
 
   // 4) Build BeMob postback URL
   const postbackUrl =
     "https://9805o.bemobtrcks.com/postback" +
-    "?cid="    + encodeURIComponent(clickId) +
+    "?cid=" + encodeURIComponent(clickId) +
     "&payout=" + encodeURIComponent(payout.toFixed(2));
 
-  // 5) Fire via tracking pixel
+  // Fire via pixel
   const img = new Image();
   img.src = postbackUrl;
 
-  // Backup fire with fetch (optional)
+  // Backup fetch
   if (window.fetch) {
-    try {
-      fetch(postbackUrl, { method: "GET", mode: "no-cors", keepalive: true });
-    } catch (e) {
-      console.warn("Fetch postback failed:", e);
-    }
+    fetch(postbackUrl, { method: "GET", mode: "no-cors", keepalive: true })
+      .catch(() => {});
   }
 
-  console.log("BeMob postback fired:", postbackUrl);
+  console.log("Postback fired:", postbackUrl);
 })();
 </script>
+
 
 
 </body>
