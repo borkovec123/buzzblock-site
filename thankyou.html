@@ -59,23 +59,30 @@
   </footer>
 <script>
 (function () {
-  // Read tracking values returned from Stripe redirect URL
+  // 1) Try to read click id from the URL (?sub=...)
   const params = new URLSearchParams(window.location.search);
-  const clickId = params.get("click_id");   // we sent this inside Stripe link
-  const payout  = params.get("amount");     // price or payout you attached (e.g. 99)
+  let clickId = params.get("sub");
+
+  // 2) Fallback: try localStorage if URL doesn't have it
+  if (!clickId) {
+    clickId = localStorage.getItem("click_id") || "";
+  }
 
   if (!clickId) {
-    console.warn("No click_id found in URL, postback not sent.");
+    console.warn("No click id found (sub/localStorage). Postback not sent.");
     return;
   }
 
-  // Construct final BeMob postback URL
+  // 3) Your revenue per order (24 product + 2 shipping)
+  const payout = 26; // USD
+
+  // 4) Build BeMob postback URL
   const postbackUrl =
     "https://9805o.bemobtrcks.com/postback" +
     "?cid="    + encodeURIComponent(clickId) +
-    (payout ? "&payout=" + encodeURIComponent(payout) : "");
+    "&payout=" + encodeURIComponent(payout.toFixed(2));
 
-  // Fire postback using tracking pixel
+  // 5) Fire via tracking pixel
   const img = new Image();
   img.src = postbackUrl;
 
@@ -88,9 +95,10 @@
     }
   }
 
-  console.log("Postback fired:", postbackUrl);
+  console.log("BeMob postback fired:", postbackUrl);
 })();
 </script>
+
 
 </body>
 </html>
