@@ -864,10 +864,9 @@
   <a class="nav-link" href="#reviews">Reviews</a>
   </nav>
 <a href="https://buy.stripe.com/4gweXhf9w9zr4UgbIJ"
-   class="stripe-buy"
    style="text-decoration:none;"
    target="_blank">
-  <button class="nav-button">Order Now &amp; Save 50%</button>
+  <button class="nav-button">Order Now & Save 50%</button>
 </a>
   </div>
   <div class="scroll-wrapper">
@@ -2278,62 +2277,39 @@
   </script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const params = new URLSearchParams(window.location.search);
-    const sub = params.get("sub");
-
-    if (!sub) return;
-
-    document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
-        let base = link.href.split("?")[0];
-        link.href = base + "?client_reference_id=" + encodeURIComponent(sub);
-    });
-});
-</script>
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
 
-  // Take the last "sub" value (because BeMob/MGID can create multiple sub params)
-  const allSubs = params.getAll("sub");
-  let cid = null;
+  // 1) Extract the REAL click ID (handle duplicated sub params safely)
+  const subs = params.getAll("sub");
+  let clickId = null;
 
-  for (let i = allSubs.length - 1; i >= 0; i--) {
-    const v = allSubs[i];
-    if (v && v !== "{click_id}") { cid = v; break; }
+  for (let i = subs.length - 1; i >= 0; i--) {
+    if (subs[i] && subs[i] !== "{click_id}") {
+      clickId = subs[i];
+      break;
+    }
   }
 
-  if (!cid) return;
-
-  // Store it for thankyou.html to use
-  localStorage.setItem("click_id", cid);
-  localStorage.setItem("bb_click_id", cid);
-  localStorage.setItem("sub", cid); // in case your thankyou script reads "sub"
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-  const params = new URLSearchParams(window.location.search);
-  const clickId = params.get("sub") || localStorage.getItem("click_id");
-
   if (!clickId) {
-    console.warn("No click_id found, Stripe links not modified");
+    console.warn("PP: No click ID found");
     return;
   }
 
-  document.querySelectorAll("a.stripe-buy").forEach(link => {
+  // 2) Store click ID for thank-you page fallback
+  localStorage.setItem("click_id", clickId);
+
+  // 3) Attach click ID to ALL Stripe Payment Links
+  document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
     try {
       const url = new URL(link.href);
       url.searchParams.set("client_reference_id", clickId);
       link.href = url.toString();
     } catch (e) {
-      console.warn("Invalid Stripe URL", link.href);
+      console.warn("Invalid Stripe link:", link.href);
     }
   });
 
+  console.log("PP: click_id set to", clickId);
 });
 </script>
   </body>
