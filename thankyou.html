@@ -60,44 +60,24 @@
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
+  let clickId = params.get("sub") || localStorage.getItem("click_id");
 
-  // 1) click id from URL (?sub=...)
-  let clickId = params.get("sub");
+  console.log("Thank-you page loaded");
+  console.log("Click ID:", clickId);
 
-  // 2) fallback to localStorage
-  if (!clickId) clickId = localStorage.getItem("click_id") || "";
+  if (!clickId) return;
 
-  // Debug: show on page (so you KNOW it ran)
-  const dbg = document.createElement("div");
-  dbg.style.cssText = "margin:16px auto;max-width:720px;padding:12px;background:#fff;border:1px solid #ddd;border-radius:8px;text-align:left;font-family:monospace;font-size:13px;";
-  dbg.textContent = "Debug: clickId=" + (clickId || "(missing)");
-  document.body.prepend(dbg);
-
-  if (!clickId) {
-    console.warn("No click ID found. Postback not fired.");
-    return;
-  }
-
-  const payout = 26.00;
-
+  const payout = 26;
   const postbackUrl =
     "https://9805o.bemobtrcks.com/postback" +
     "?cid=" + encodeURIComponent(clickId) +
-    "&payout=" + encodeURIComponent(payout.toFixed(2));
+    "&payout=" + payout +
+    "&t=" + Date.now();
 
-  // 3) Best-effort sendBeacon (most reliable for tracking)
-  let beaconOk = false;
-  if (navigator.sendBeacon) {
-    try {
-      beaconOk = navigator.sendBeacon(postbackUrl);
-    } catch (e) {}
-  }
-
-  // 4) Always fire image pixel as fallback
   const img = new Image();
   img.src = postbackUrl;
 
-  console.log("Postback attempted:", postbackUrl, "sendBeacon:", beaconOk);
+  console.log("Postback image fired:", postbackUrl);
 })();
 </script>
 
