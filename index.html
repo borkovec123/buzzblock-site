@@ -2285,7 +2285,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const params = new URLSearchParams(window.location.search);
 
+  // Take the last "sub" value (because BeMob/MGID can create multiple sub params)
+  const allSubs = params.getAll("sub");
+  let cid = null;
+
+  for (let i = allSubs.length - 1; i >= 0; i--) {
+    const v = allSubs[i];
+    if (v && v !== "{click_id}") { cid = v; break; }
+  }
+
+  if (!cid) return;
+
+  // Store it for thankyou.html to use
+  localStorage.setItem("click_id", cid);
+  localStorage.setItem("bb_click_id", cid);
+  localStorage.setItem("sub", cid); // in case your thankyou script reads "sub"
+});
+</script>
   </body>
   </html>
   <style>
