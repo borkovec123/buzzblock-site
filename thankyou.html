@@ -59,40 +59,45 @@
   </footer>
 <script>
 (function () {
-  // 1) Read click ID from URL (?sub=...)
   const params = new URLSearchParams(window.location.search);
+
+  // 1) click id from URL (?sub=...)
   let clickId = params.get("sub");
 
-  // 2) Fallback: use localStorage if needed
-  if (!clickId) {
-    clickId = localStorage.getItem("click_id") || "";
-  }
+  // 2) fallback to localStorage
+  if (!clickId) clickId = localStorage.getItem("click_id") || "";
+
+  // Debug: show on page (so you KNOW it ran)
+  const dbg = document.createElement("div");
+  dbg.style.cssText = "margin:16px auto;max-width:720px;padding:12px;background:#fff;border:1px solid #ddd;border-radius:8px;text-align:left;font-family:monospace;font-size:13px;";
+  dbg.textContent = "Debug: clickId=" + (clickId || "(missing)");
+  document.body.prepend(dbg);
 
   if (!clickId) {
     console.warn("No click ID found. Postback not fired.");
     return;
   }
 
-  // 3) Fixed revenue per purchase (product + shipping)
-  const payout = 26; // USD
+  const payout = 26.00;
 
-  // 4) Build BeMob postback URL
   const postbackUrl =
     "https://9805o.bemobtrcks.com/postback" +
     "?cid=" + encodeURIComponent(clickId) +
     "&payout=" + encodeURIComponent(payout.toFixed(2));
 
-  // Fire via pixel
+  // 3) Best-effort sendBeacon (most reliable for tracking)
+  let beaconOk = false;
+  if (navigator.sendBeacon) {
+    try {
+      beaconOk = navigator.sendBeacon(postbackUrl);
+    } catch (e) {}
+  }
+
+  // 4) Always fire image pixel as fallback
   const img = new Image();
   img.src = postbackUrl;
 
-  // Backup fetch
-  if (window.fetch) {
-    fetch(postbackUrl, { method: "GET", mode: "no-cors", keepalive: true })
-      .catch(() => {});
-  }
-
-  console.log("Postback fired:", postbackUrl);
+  console.log("Postback attempted:", postbackUrl, "sendBeacon:", beaconOk);
 })();
 </script>
 
