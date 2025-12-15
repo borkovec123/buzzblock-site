@@ -59,25 +59,26 @@
   </footer>
 <script>
 (function () {
-  const params = new URLSearchParams(window.location.search);
-  let clickId = params.get("sub") || localStorage.getItem("click_id");
+  let clickId = localStorage.getItem("click_id");
 
-  console.log("Thank-you page loaded");
-  console.log("Click ID:", clickId);
+  console.log("Thank-you loaded, clickId:", clickId);
 
-  if (!clickId) return;
+  if (!clickId || clickId === "{click_id}") {
+    console.warn("Invalid click ID, postback not fired");
+    return;
+  }
 
   const payout = 26;
-  const postbackUrl =
+  const url =
     "https://9805o.bemobtrcks.com/postback" +
     "?cid=" + encodeURIComponent(clickId) +
     "&payout=" + payout +
     "&t=" + Date.now();
 
   const img = new Image();
-  img.src = postbackUrl;
+  img.src = url;
 
-  console.log("Postback image fired:", postbackUrl);
+  console.log("Postback fired:", url);
 })();
 </script>
 
