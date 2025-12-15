@@ -863,7 +863,10 @@
   <a class="nav-link" href="#features">Features</a>
   <a class="nav-link" href="#reviews">Reviews</a>
   </nav>
-<a id="stripe-buy" href="https://buy.stripe.com/4gweXhf9w9zr4UgbIJ" style="text-decoration:none;" target="_blank">
+<a href="https://buy.stripe.com/4gweXhf9w9zr4UgbIJ"
+   class="stripe-buy"
+   style="text-decoration:none;"
+   target="_blank">
   <button class="nav-button">Order Now &amp; Save 50%</button>
 </a>
   </div>
@@ -902,8 +905,12 @@
   <strong>Sale: Live For 24 Hrs.</strong> 🔥
         <strong style="color:red;">Stock: <span class="unit-count">Only 3 Units Left</span>!</strong>
   </div>
-  <a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144" style="text-decoration:none;" target="_blank"><button class="cta-button">Order Now &amp; Save 50%</button></a>
-  </div>
+<a href="https://buy.stripe.com/4gweXhf9w9zr4UgbIJ"
+   class="stripe-buy"
+   style="text-decoration:none;"
+   target="_blank">
+  <button class="cta-button">Order Now &amp; Save 50%</button>
+</a>  </div>
   <div class="faq-section">
   <div class="faq-item">
   <button class="faq-question">Why Do You Need BuzzBlock?<span class="arrow">▶</span></button>
@@ -2304,6 +2311,29 @@ document.addEventListener("DOMContentLoaded", function () {
   localStorage.setItem("click_id", cid);
   localStorage.setItem("bb_click_id", cid);
   localStorage.setItem("sub", cid); // in case your thankyou script reads "sub"
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const params = new URLSearchParams(window.location.search);
+  const clickId = params.get("sub") || localStorage.getItem("click_id");
+
+  if (!clickId) {
+    console.warn("No click_id found, Stripe links not modified");
+    return;
+  }
+
+  document.querySelectorAll("a.stripe-buy").forEach(link => {
+    try {
+      const url = new URL(link.href);
+      url.searchParams.set("client_reference_id", clickId);
+      link.href = url.toString();
+    } catch (e) {
+      console.warn("Invalid Stripe URL", link.href);
+    }
+  });
+
 });
 </script>
   </body>
