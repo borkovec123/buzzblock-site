@@ -61,29 +61,17 @@
 (function () {
   console.log("Thank-you page loaded");
 
-  let clickId = null;
+  const clickId = localStorage.getItem("click_id");
 
-  // 1️⃣ Try URL first (in case Stripe preserved params)
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("sub")) {
-    clickId = params.get("sub");
-    console.log("Click ID from URL:", clickId);
-  }
+  console.log("Click ID from localStorage:", clickId);
 
-  // 2️⃣ Fallback to localStorage
-  if (!clickId) {
-    clickId = localStorage.getItem("click_id");
-    console.log("Click ID from localStorage:", clickId);
-  }
-
-  // 3️⃣ Validate
   if (!clickId || clickId === "{click_id}") {
     console.warn("No valid click ID — postback NOT fired");
     return;
   }
 
-  // 4️⃣ Fire BeMob postback
   const payout = 26;
+
   const postbackUrl =
     "https://9805o.bemobtrcks.com/postback" +
     "?cid=" + encodeURIComponent(clickId) +
