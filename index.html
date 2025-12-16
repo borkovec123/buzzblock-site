@@ -2278,26 +2278,34 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
-  const externalId = params.get("externalId");
+  const subs = params.getAll("sub");
 
-  if (!externalId) {
-    console.warn("PP: no externalId");
+  let clickId = null;
+  for (let i = subs.length - 1; i >= 0; i--) {
+    if (subs[i] && subs[i] !== "{click_id}") {
+      clickId = subs[i];
+      break;
+    }
+  }
+
+  if (!clickId) {
+    console.warn("PP: no click_id");
     return;
   }
 
   // Store for thank-you page
-  localStorage.setItem("externalId", externalId);
+  localStorage.setItem("click_id", clickId);
 
-  // Attach to Stripe links
+  // Attach to Stripe Payment Links
   document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
     try {
       const url = new URL(link.href);
-      url.searchParams.set("client_reference_id", externalId);
+      url.searchParams.set("client_reference_id", clickId);
       link.href = url.toString();
     } catch (e) {}
   });
 
-  console.log("PP: externalId =", externalId);
+  console.log("PP: click_id =", clickId);
 });
 </script>
   </body>
