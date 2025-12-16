@@ -58,37 +58,28 @@
     © 2025 BuzzBlock. All rights reserved.
   </footer>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const params = new URLSearchParams(window.location.search);
-  const subs = params.getAll("sub");
+(function () {
+  const mgidClickId =
+    new URLSearchParams(window.location.search).get("sub") ||
+    localStorage.getItem("mgid_click_id");
 
-  let clickId = null;
-  for (let i = subs.length - 1; i >= 0; i--) {
-    if (subs[i] && subs[i] !== "{click_id}") {
-      clickId = subs[i];
-      break;
-    }
-  }
-
-  if (!clickId) {
-    console.warn("PP: no click_id");
+  if (!mgidClickId) {
+    console.warn("TY: no MGID click ID");
     return;
   }
 
-  // Store for thank-you page
-  localStorage.setItem("click_id", clickId);
+  const payout = 26;
 
-  // Attach to Stripe Payment Links
-  document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
-    try {
-      const url = new URL(link.href);
-      url.searchParams.set("client_reference_id", clickId);
-      link.href = url.toString();
-    } catch (e) {}
-  });
+  const postback =
+    "https://9805o.bemobtrcks.com/postback" +
+    "?cid=" + encodeURIComponent(mgidClickId) +
+    "&payout=" + payout +
+    "&t=" + Date.now();
 
-  console.log("PP: click_id =", clickId);
-});
+  new Image().src = postback;
+
+  console.log("TY postback fired with MGID ID:", mgidClickId);
+})();
 </script>
 
 </body>
