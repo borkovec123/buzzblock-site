@@ -2278,30 +2278,24 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
-  const subs = params.getAll("sub");
+  const externalId = params.get("externalId");
 
-  let mgidClickId = null;
-  for (let i = subs.length - 1; i >= 0; i--) {
-    if (subs[i] && subs[i] !== "{click_id}") {
-      mgidClickId = subs[i];
-      break;
-    }
-  }
-
-  if (!mgidClickId) {
-    console.warn("PP: no MGID click ID");
+  if (!externalId) {
+    console.warn("PP: no externalId");
     return;
   }
 
-  localStorage.setItem("mgid_click_id", mgidClickId);
+  localStorage.setItem("externalId", externalId);
 
   document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
-    const url = new URL(link.href);
-    url.searchParams.set("client_reference_id", mgidClickId);
-    link.href = url.toString();
+    try {
+      const url = new URL(link.href);
+      url.searchParams.set("client_reference_id", externalId);
+      link.href = url.toString();
+    } catch (e) {}
   });
 
-  console.log("PP stored MGID click ID:", mgidClickId);
+  console.log("PP externalId:", externalId);
 });
 </script>
   </body>
