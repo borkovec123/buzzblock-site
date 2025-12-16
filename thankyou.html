@@ -59,26 +59,26 @@
   </footer>
 <script>
 (function () {
-  const mgidClickId =
-    new URLSearchParams(window.location.search).get("sub") ||
-    localStorage.getItem("mgid_click_id");
+  console.log("TY loaded");
 
-  if (!mgidClickId) {
-    console.warn("TY: no MGID click ID");
+  const externalId = localStorage.getItem("externalId");
+
+  if (!externalId) {
+    console.warn("TY: no externalId");
     return;
   }
 
   const payout = 26;
 
-  const postback =
+  const url =
     "https://9805o.bemobtrcks.com/postback" +
-    "?cid=" + encodeURIComponent(mgidClickId) +
+    "?cid=" + encodeURIComponent(externalId) +
     "&payout=" + payout +
     "&t=" + Date.now();
 
-  new Image().src = postback;
+  new Image().src = url;
 
-  console.log("TY postback fired with MGID ID:", mgidClickId);
+  console.log("TY postback fired:", url);
 })();
 </script>
 
