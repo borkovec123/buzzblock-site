@@ -59,28 +59,21 @@
   </footer>
 <script>
 (function () {
-  console.log("TY page loaded");
+  const mgidClickId = localStorage.getItem("mgid_click_id");
+  console.log("TY mgid_click_id:", mgidClickId);
 
-  // Always read the SAME key we stored on PP
-  const clickId = localStorage.getItem("click_id");
-
-  console.log("TY click_id:", clickId);
-
-  if (!clickId || clickId === "{click_id}") {
-    console.warn("TY: no valid click_id — postback NOT fired");
+  if (!mgidClickId) {
+    console.warn("TY: no mgid_click_id");
     return;
   }
 
   const payout = 26;
-
   const url =
     "https://9805o.bemobtrcks.com/postback" +
-    "?cid=" + encodeURIComponent(clickId) +
-    "&payout=" + payout +
-    "&t=" + Date.now();
+    "?cid=" + encodeURIComponent(mgidClickId) +
+    "&payout=" + payout;
 
   new Image().src = url;
-
   console.log("TY postback fired:", url);
 })();
 </script>
