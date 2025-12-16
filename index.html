@@ -2278,9 +2278,11 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
-  const subs = params.getAll("sub");
 
+  // 1) Extract the REAL click ID (handle duplicated sub params safely)
+  const subs = params.getAll("sub");
   let clickId = null;
+
   for (let i = subs.length - 1; i >= 0; i--) {
     if (subs[i] && subs[i] !== "{click_id}") {
       clickId = subs[i];
@@ -2289,23 +2291,25 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   if (!clickId) {
-    console.warn("PP: no click_id");
+    console.warn("PP: No click ID found");
     return;
   }
 
-  // Store for thank-you page
+  // 2) Store click ID for thank-you page fallback
   localStorage.setItem("click_id", clickId);
 
-  // Attach to Stripe Payment Links
+  // 3) Attach click ID to ALL Stripe Payment Links
   document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
     try {
       const url = new URL(link.href);
       url.searchParams.set("client_reference_id", clickId);
       link.href = url.toString();
-    } catch (e) {}
+    } catch (e) {
+      console.warn("Invalid Stripe link:", link.href);
+    }
   });
 
-  console.log("PP: click_id =", clickId);
+  console.log("PP: click_id set to", clickId);
 });
 </script>
   </body>
