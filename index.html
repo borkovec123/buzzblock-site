@@ -2278,19 +2278,31 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
-  const clickId = params.get("sub");
+  const subs = params.getAll("sub");
 
-  if (!clickId || clickId === "{click_id}") {
-    console.warn("PP: no valid click_id");
+  let clickId = null;
+  for (let i = subs.length - 1; i >= 0; i--) {
+    if (subs[i] && subs[i] !== "{click_id}") {
+      clickId = subs[i];
+      break;
+    }
+  }
+
+  if (!clickId) {
+    console.warn("PP: no click_id");
     return;
   }
 
+  // Store for thank-you page
   localStorage.setItem("click_id", clickId);
 
+  // Attach to Stripe Payment Links
   document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
-    const url = new URL(link.href);
-    url.searchParams.set("client_reference_id", clickId);
-    link.href = url.toString();
+    try {
+      const url = new URL(link.href);
+      url.searchParams.set("client_reference_id", clickId);
+      link.href = url.toString();
+    } catch (e) {}
   });
 
   console.log("PP: click_id =", clickId);
