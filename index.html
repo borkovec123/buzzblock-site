@@ -2278,22 +2278,22 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
-  const externalId = params.get("externalId");
+  const clickId = params.get("sub");
 
-  if (!externalId) {
-    console.warn("PP: no externalId");
+  if (!clickId || clickId === "{click_id}") {
+    console.warn("PP: no valid click_id");
     return;
   }
 
-  localStorage.setItem("mgid_click_id", externalId);
+  localStorage.setItem("click_id", clickId);
 
   document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
     const url = new URL(link.href);
-    url.searchParams.set("client_reference_id", externalId);
+    url.searchParams.set("client_reference_id", clickId);
     link.href = url.toString();
   });
 
-  console.log("PP: mgid_click_id =", externalId);
+  console.log("PP: click_id =", clickId);
 });
 </script>
   </body>
