@@ -2278,23 +2278,22 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
-  const clickId = params.get("sub");
 
-  if (!clickId) return;
+  // THIS is the MGID click ID
+  const mgidClickId = params.get("external_id");
 
-  // Persist for thank-you fallback
-  localStorage.setItem("bemob_click_id", clickId);
+  if (!mgidClickId || mgidClickId.includes("{")) {
+    console.warn("PP: No MGID external_id found");
+    return;
+  }
 
-  // Attach to Stripe links
-  document.querySelectorAll('a[href*="buy.stripe.com"]').forEach(link => {
-    try {
-      const url = new URL(link.href);
-      url.searchParams.set("client_reference_id", clickId);
-      link.href = url.toString();
-    } catch {}
-  });
+  // Store ONLY this
+  localStorage.setItem("bemob_click_id", mgidClickId);
+
+  console.log("Stored MGID click ID:", mgidClickId);
 });
 </script>
+
 
   </body>
   </html>
