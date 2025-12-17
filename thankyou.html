@@ -59,9 +59,8 @@
   </footer>
 <script>
 (function () {
-  const clickId = localStorage.getItem("bemob_click_id");
+  const clickId = localStorage.getItem("click_id");
 
-  // Hard guard
   if (!clickId || clickId.includes("{")) return;
 
   const payout = 26;
@@ -74,8 +73,8 @@
 
   new Image().src = url;
 
-  // Optional: prevent double firing
-  localStorage.removeItem("bemob_click_id");
+  // Optional safety
+  localStorage.removeItem("click_id");
 })();
 </script>
 
