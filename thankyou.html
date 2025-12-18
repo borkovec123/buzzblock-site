@@ -40,6 +40,26 @@
   </style>
 </head>
 <body>
+<!-- Mgid Sensor -->
+<script type="text/javascript">
+    (function() {
+        var d = document, w = window;
+        w.MgSensorData = w.MgSensorData || [];
+        w.MgSensorData.push({
+            cid:911140,
+            project: "a.mgid.com"
+        });
+        var l = "a.mgid.com";
+        var n = d.getElementsByTagName("script")[0];
+        var s = d.createElement("script");
+        s.type = "text/javascript";
+        s.async = true;
+        var dt = !Date.now?new Date().valueOf():Date.now();
+        s.src = "https://" + l + "/mgsensor.js?d=" + dt;
+        n.parentNode.insertBefore(s, n);
+    })();
+</script>
+<!-- /Mgid Sensor -->
 <header>
 <img src="images/logo.png" alt="BuzzBlock Logo" style="max-width: 300px; height: auto;" />
 </header>
@@ -57,29 +77,5 @@
 <footer>
     © 2025 BuzzBlock. All rights reserved.
   </footer>
-<script>
-(function () {
-  const clickId = localStorage.getItem("bemob_click_id");
-
-  if (!clickId) {
-    console.warn("No click ID, postback not fired");
-    return;
-  }
-
-  const payout = 26;
-  const url =
-    "https://9805o.bemobtrcks.com/postback" +
-    "?cid=" + encodeURIComponent(clickId) +
-    "&payout=" + payout +
-    "&t=" + Date.now();
-
-  new Image().src = url;
-
-  console.log("Postback fired with MGID click ID:", clickId);
-})();
-</script>
-
-
-
 </body>
 </html>
