@@ -805,6 +805,26 @@
   
   </style>
   <body>
+    <!-- Mgid Sensor -->
+<script type="text/javascript">
+    (function() {
+        var d = document, w = window;
+        w.MgSensorData = w.MgSensorData || [];
+        w.MgSensorData.push({
+            cid:911140,
+            project: "a.mgid.com"
+        });
+        var l = "a.mgid.com";
+        var n = d.getElementsByTagName("script")[0];
+        var s = d.createElement("script");
+        s.type = "text/javascript";
+        s.async = true;
+        var dt = !Date.now?new Date().valueOf():Date.now();
+        s.src = "https://" + l + "/mgsensor.js?d=" + dt;
+        n.parentNode.insertBefore(s, n);
+    })();
+</script>
+<!-- /Mgid Sensor -->
     <div class="top-bar" id="sale-bar">Sale Ends Today</div>
 
     <script>
@@ -864,9 +884,9 @@
   <a class="nav-link" href="#reviews">Reviews</a>
   </nav>
 <a href="https://buy.stripe.com/4gweXhf9w9zr4UgbIJ"
-   style="text-decoration:none;"
-   target="_blank">
-  <button class="nav-button">Order Now & Save 50%</button>
+   class="nav-button"
+   style="text-decoration:none;">
+   Order Now &amp; Save 50%
 </a>
   </div>
   <div class="scroll-wrapper">
@@ -998,7 +1018,10 @@
   <strong>Sale: Live For 24 Hrs.</strong> 🔥
                   <strong style="color:red;">Stock: <span class="unit-count">Only 3 Units Left</span>!</strong>
   </div>
-  <a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144" style="text-decoration:none;" target="_blank"><button class="cta-button">Order Now &amp; Save 50%</button></a>
+<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144"
+   class="cta-button">
+   Order Now &amp; Save 50%
+</a>
   </div>
   <div class="faq-section">
   <div class="faq-item">
@@ -2248,51 +2271,7 @@
     });
   });
   </script>
-  <script>
-    const images = [
-      "product-02.webp",
-      "caro3.webp",
-      "nextgen1.webp"
-    ];
-    let current = 0;
-  
-    function showImage(index) {
-      const img = document.getElementById("carousel-img");
-      img.src = "images/" + images[index];
-    }
-  
-    function nextSlide() {
-      current = (current + 1) % images.length;
-      showImage(current);
-    }
-  
-    function prevSlide() {
-      current = (current - 1 + images.length) % images.length;
-      showImage(current);
-    }
-  
-    document.addEventListener("DOMContentLoaded", () => {
-      showImage(current);
-    });
-  </script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const params = new URLSearchParams(window.location.search);
 
-  // THIS is the MGID click ID
-  const mgidClickId = params.get("external_id");
-
-  if (!mgidClickId || mgidClickId.includes("{")) {
-    console.warn("PP: No MGID external_id found");
-    return;
-  }
-
-  // Store ONLY this
-  localStorage.setItem("bemob_click_id", mgidClickId);
-
-  console.log("Stored MGID click ID:", mgidClickId);
-});
-</script>
 
 
   </body>
