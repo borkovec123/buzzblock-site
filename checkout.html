@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuzzBlock Secure Checkout</title>
+  <style>
+    body { font-family: 'Inter', sans-serif; margin: 0; background: #f9f5ff; color: #333; }
+    .header { background: #ff4d4d; color: white; text-align: center; padding: 12px; font-weight: bold; }
+    .container { max-width: 1200px; margin: 20px auto; padding: 20px; display: flex; gap: 30px; flex-wrap: wrap; }
+    .main { flex: 2; min-width: 300px; }
+    .sidebar { flex: 1; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 300px; }
+    .bundle-option { margin: 20px 0; padding: 15px; border: 2px solid #e0d4ff; border-radius: 12px; cursor: pointer; }
+    .bundle-option.selected { border-color: #6e32b9; background: #f5f0ff; }
+    .button { background: #6e32b9; color: white; padding: 18px; text-align: center; border-radius: 40px; font-weight: 800; font-size: 20px; cursor: pointer; margin-top: 20px; }
+    h1, h2 { color: #4a148c; }
+  </style>
+</head>
+<body>
+
+  <div class="header">⚡ Sale Ends Soon — Only Limited Stock Left!</div>
+
+  <div class="container">
+    <div class="main">
+      <h1>Complete Your Order</h1>
+      <p>Special Launch Price: RM99 (~USD $24)</p>
+
+      <!-- Bundle Selection -->
+      <div class="bundle-option selected" data-price="99" data-quantity="1">
+        <strong>1 BuzzBlock</strong> — RM99
+      </div>
+      <div class="bundle-option" data-price="148" data-quantity="2">
+        <strong>2 BuzzBlocks</strong> — RM148 <em>(Save 50% on second)</em>
+      </div>
+      <div class="bundle-option" data-price="197" data-quantity="3">
+        <strong>3 BuzzBlocks</strong> — RM197 <em>(Best Value + Free Shipping)</em>
+      </div>
+
+      <!-- Contact & Shipping Form (later) -->
+
+      <!-- Embedded Payment Form Placeholder -->
+      <div id="checkout-form" style="margin-top: 30px;">
+        <!-- Stripe form will appear here -->
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <h2>Order Summary</h2>
+      <p>BuzzBlock x <span id="quantity">1</span>: RM <span id="total">99</span></p>
+      <div class="button" id="pay-button">Pay Securely Now</div>
+    </div>
+  </div>
+
+  <!-- Trust/FAQ later -->
+
+  <script src="https://js.stripe.com/v3/"></script>
+  <!-- Bundle JS + Checkout code later -->
+
+</body>
+</html>
