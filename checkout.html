@@ -4,57 +4,105 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BuzzBlock Secure Checkout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
-    body { font-family: 'Inter', sans-serif; margin: 0; background: #f9f5ff; color: #333; }
-    .header { background: #ff4d4d; color: white; text-align: center; padding: 12px; font-weight: bold; }
+    body { font-family: 'Inter', sans-serif; margin: 0; background: #f8f5ff; color: #333; }
+    .header { background: #ff4d4d; color: white; text-align: center; padding: 12px; font-weight: bold; font-size: 16px; }
     .container { max-width: 1200px; margin: 20px auto; padding: 20px; display: flex; gap: 30px; flex-wrap: wrap; }
-    .main { flex: 2; min-width: 300px; }
-    .sidebar { flex: 1; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 300px; }
-    .bundle-option { margin: 20px 0; padding: 15px; border: 2px solid #e0d4ff; border-radius: 12px; cursor: pointer; }
-    .bundle-option.selected { border-color: #6e32b9; background: #f5f0ff; }
-    .button { background: #6e32b9; color: white; padding: 18px; text-align: center; border-radius: 40px; font-weight: 800; font-size: 20px; cursor: pointer; margin-top: 20px; }
+    .main { flex: 2; min-width: 300px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .sidebar { flex: 1; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 300px; position: sticky; top: 20px; align-self: flex-start; }
     h1, h2 { color: #4a148c; }
+    .bundle { margin: 20px 0; padding: 20px; border: 2px solid #e0d4ff; border-radius: 12px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; }
+    .bundle input { margin-right: 15px; transform: scale(1.5); }
+    .bundle.selected { border-color: #6e32b9; background: #f5f0ff; }
+    .bundle strong { font-size: 18px; flex: 1; }
+    .bundle em { color: #6e32b9; }
+    .button { background: #6e32b9; color: white; padding: 18px; text-align: center; border-radius: 50px; font-weight: 800; font-size: 20px; cursor: pointer; margin-top: 30px; }
+    .urgency { color: #ff4d4d; font-weight: bold; }
+    #payment-element { margin-top: 30px; min-height: 400px; }
+    .shipping-line { margin-top: 10px; font-size: 14px; color: #666; }
   </style>
 </head>
 <body>
 
-  <div class="header">⚡ Sale Ends Soon — Only Limited Stock Left!</div>
+  <div class="header">⚡ Sale Ends Soon — Limited Stock Left!</div>
 
   <div class="container">
     <div class="main">
       <h1>Complete Your Order</h1>
-      <p>Special Launch Price: RM99 (~USD $24)</p>
+      <p class="urgency">Special Launch Price — Act Now!</p>
 
       <!-- Bundle Selection -->
-      <div class="bundle-option selected" data-price="99" data-quantity="1">
-        <strong>1 BuzzBlock</strong> — RM99
+      <div class="bundle selected">
+        <input type="radio" name="bundle" value="1" checked>
+        <div>
+          <strong>1 BuzzBlock</strong> — RM99<br>
+          <em>Standard choice</em>
+        </div>
       </div>
-      <div class="bundle-option" data-price="148" data-quantity="2">
-        <strong>2 BuzzBlocks</strong> — RM148 <em>(Save 50% on second)</em>
+      <div class="bundle">
+        <input type="radio" name="bundle" value="2">
+        <div>
+          <strong>2 BuzzBlocks</strong> — RM148 <em>(Save 50% on second + Free Shipping)</em>
+        </div>
       </div>
-      <div class="bundle-option" data-price="197" data-quantity="3">
-        <strong>3 BuzzBlocks</strong> — RM197 <em>(Best Value + Free Shipping)</em>
+      <div class="bundle">
+        <input type="radio" name="bundle" value="3">
+        <div>
+          <strong>3 BuzzBlocks</strong> — RM197 <em>(Best Value + Free Shipping)</em>
+        </div>
       </div>
 
-      <!-- Contact & Shipping Form (later) -->
-
-      <!-- Embedded Payment Form Placeholder -->
-      <div id="checkout-form" style="margin-top: 30px;">
-        <!-- Stripe form will appear here -->
+      <!-- Embedded Payment Form -->
+      <div id="payment-element">
+        <!-- Stripe embedded form will load here -->
       </div>
+
+      <div id="error-message" style="color: red; margin-top: 10px;"></div>
+
+      <div class="button" id="submit-button">Complete Secure Order</div>
     </div>
 
     <div class="sidebar">
       <h2>Order Summary</h2>
-      <p>BuzzBlock x <span id="quantity">1</span>: RM <span id="total">99</span></p>
-      <div class="button" id="pay-button">Pay Securely Now</div>
+      <p>BuzzBlock x <span id="quantity">1</span></p>
+      <p>Total Product: RM <span id="product-total">99</span></p>
+      <p class="shipping-line">Shipping: <span id="shipping">RM10</span></p>
+      <p class="urgency"><strong>Order Total: RM <span id="grand-total">109</span></strong></p>
+      <p style="font-size: 14px; color: #666;">(~USD $<span id="usd-total">26</span>)</p>
     </div>
   </div>
 
-  <!-- Trust/FAQ later -->
+  <script>
+    // Bundle prices
+    const bundles = {
+      1: { quantity: 1, productPrice: 99, shipping: 10 },
+      2: { quantity: 2, productPrice: 148, shipping: 0 },
+      3: { quantity: 3, productPrice: 197, shipping: 0 }
+    };
 
-  <script src="https://js.stripe.com/v3/"></script>
-  <!-- Bundle JS + Checkout code later -->
+    // Update summary when bundle changes
+    document.querySelectorAll('input[name="bundle"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const value = radio.value;
+        const bundle = bundles[value];
+
+        // Update selection style
+        document.querySelectorAll('.bundle').forEach(b => b.classList.remove('selected'));
+        radio.closest('.bundle').classList.add('selected');
+
+        // Update sidebar
+        document.getElementById('quantity').textContent = bundle.quantity;
+        document.getElementById('product-total').textContent = bundle.productPrice;
+        document.getElementById('shipping').textContent = bundle.shipping === 0 ? 'Free' : `RM${bundle.shipping}`;
+        document.getElementById('grand-total').textContent = bundle.productPrice + bundle.shipping;
+        document.getElementById('usd-total').textContent = Math.round((bundle.productPrice + bundle.shipping) / 4.2); // approx USD
+      });
+    });
+
+    // Embedded Checkout will go here in next part
+  </script>
 
 </body>
 </html>
