@@ -5,17 +5,45 @@
   <title>BuzzBlock Checkout</title>
 </head>
 <body>
-  <h1>Checkout</h1>
+  <h1>BuzzBlock Checkout (Test Mode)</h1>
 
-  <!-- Debug only: show IDs so we can see they arrived -->
   <p>MGID click ID: <span id="debug-mgid"></span></p>
   <p>BeMob click ID: <span id="debug-bemob"></span></p>
 
-  <!-- Hidden fields we’ll use later when calling /create-session -->
+  <h2>Select your bundle</h2>
+  <label>
+    <input type="radio" name="bundle" value="1" checked>
+    1× BuzzBlock – RM99
+  </label><br>
+  <label>
+    <input type="radio" name="bundle" value="2">
+    2× BuzzBlock – RM148
+  </label><br>
+  <label>
+    <input type="radio" name="bundle" value="3">
+    3× BuzzBlock – RM197
+  </label>
+
+  <h2>Your details (test; nothing real yet)</h2>
+  <p>
+    <label>Name:
+      <input type="text" id="customer-name" placeholder="John Doe">
+    </label>
+  </p>
+  <p>
+    <label>Email:
+      <input type="email" id="customer-email" placeholder="you@example.com">
+    </label>
+  </p>
+
+  <button id="pay-button">Test send to server</button>
+
+  <!-- Hidden fields for tracking -->
   <input type="hidden" id="mgid_clickid" name="mgid_clickid">
   <input type="hidden" id="bemob_clickid" name="bemob_clickid">
 
   <script>
+  // 1) Read IDs from URL and store them
   (function() {
     var params = new URLSearchParams(window.location.search);
     var mgidClickId = params.get('mgid_clickid') || '';
@@ -24,16 +52,51 @@
     document.getElementById('mgid_clickid').value = mgidClickId;
     document.getElementById('bemob_clickid').value = bemobClickId;
 
-    // Debug display
     document.getElementById('debug-mgid').textContent = mgidClickId || '(none)';
     document.getElementById('debug-bemob').textContent = bemobClickId || '(none)';
 
-    // Expose globally for later JS (create-session)
     window.BUZZBLOCK_TRACKING = {
       mgid_clickid: mgidClickId,
       bemob_clickid: bemobClickId
     };
   })();
+
+  // 2) On button click, send data to our Node server
+  document.getElementById('pay-button').addEventListener('click', async function() {
+    var bundleInput = document.querySelector('input[name="bundle"]:checked');
+    if (!bundleInput) {
+      alert('Select a bundle first.');
+      return;
+    }
+    var bundle = bundleInput.value;
+
+    var tracking = window.BUZZBLOCK_TRACKING || {};
+    var customer = {
+      name: document.getElementById('customer-name').value || '',
+      email: document.getElementById('customer-email').value || ''
+    };
+
+    try {
+      const response = await fetch('http://localhost:3000/create-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          bundle,
+          tracking,
+          customer
+        })
+      });
+
+      const data = await response.json();
+      console.log('Server response:', data);
+      alert('Server responded: ' + JSON.stringify(data, null, 2));
+    } catch (err) {
+      console.error('Error calling /create-session:', err);
+      alert('Error calling server. Check console.');
+    }
+  });
   </script>
 </body>
 </html>
