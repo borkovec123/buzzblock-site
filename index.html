@@ -927,10 +927,8 @@
   <strong>50% off Sale: Live For 24 Hrs.</strong> 🔥
         <strong style="color:red;">Stock: <span class="unit-count">Only 3 Units Left</span>!</strong>
   </div>
-<a href="https://buy.stripe.com/5kAdTd4uS5jbdqM144"
-   class="cta-button"
-   onclick="_mgq.push(['MgSensorInvoke','order_click'])">
-Order Now for $24 (~RM98)
+<a href="/cehckout.html" class="cta-button js-to-checkout">
+  Order Now for RM99
 </a>
   </div>
   <div class="faq-section">
@@ -2373,7 +2371,26 @@ Order Now for $24 (~RM98)</a>
     });
   });
   </script>
+<script>
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var mgidClickId = params.get('mgid_clickid');
+  var bemobClickId = params.get('bemob_clickid');
 
+  if (!mgidClickId && !bemobClickId) return;
+
+  function addIdsToUrl(url) {
+    var u = new URL(url, window.location.origin);
+    if (mgidClickId) u.searchParams.set('mgid_clickid', mgidClickId);
+    if (bemobClickId) u.searchParams.set('bemob_clickid', bemobClickId);
+    return u.toString();
+  }
+
+  document.querySelectorAll('a.js-to-checkout').forEach(function(a) {
+    a.href = addIdsToUrl(a.href);
+  });
+})();
+</script>
 
 
   </body>
