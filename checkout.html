@@ -35,15 +35,18 @@
       <input type="email" id="customer-email" placeholder="you@example.com">
     </label>
   </p>
+  <h2>Payment</h2>
+<div id="checkout-container">
+  <!-- Stripe Embedded Checkout will appear here -->
+</div>
 
-  <button id="pay-button">Test send to server</button>
-
+<button id="pay-button">Proceed to payment</button>
   <!-- Hidden fields for tracking -->
   <input type="hidden" id="mgid_clickid" name="mgid_clickid">
   <input type="hidden" id="bemob_clickid" name="bemob_clickid">
 
-  <script>
-  // 1) Read IDs from URL and store them
+ <script>
+  // 1) Read IDs from URL and store them (unchanged)
   (function() {
     var params = new URLSearchParams(window.location.search);
     var mgidClickId = params.get('mgid_clickid') || '';
@@ -61,22 +64,35 @@
     };
   })();
 
-  // 2) On button click, send data to our Node server
-  document.getElementById('pay-button').addEventListener('click', async function() {
-    var bundleInput = document.querySelector('input[name="bundle"]:checked');
-    if (!bundleInput) {
-      alert('Select a bundle first.');
-      return;
-    }
-    var bundle = bundleInput.value;
+  // 2) Stripe publishable key (TEST)
+  const stripe = Stripe('pk_test_51RNA2WFPa06eKXlybOaIwB2wXQEt5nBUNDKR3rtEW0XXARlP7Q71nzQLAUAvfHQYoqgN3EQPctPOQpp860HONPXS00n1dHxhfB');
 
-    var tracking = window.BUZZBLOCK_TRACKING || {};
-    var customer = {
-      name: document.getElementById('customer-name').value || '',
-      email: document.getElementById('customer-email').value || ''
-    };
+  let embeddedCheckout = null; // to prevent double-mounts
+
+  document.getElementById('pay-button').addEventListener('click', async function() {
+    // Prevent multiple clicks while loading
+    const btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Loading payment...';
 
     try {
+      // Bundle selection
+      const bundleInput = document.querySelector('input[name="bundle"]:checked');
+      if (!bundleInput) {
+        alert('Select a bundle first.');
+        btn.disabled = false;
+        btn.textContent = 'Proceed to payment';
+        return;
+      }
+      const bundle = bundleInput.value;
+
+      const tracking = window.BUZZBLOCK_TRACKING || {};
+      const customer = {
+        name: document.getElementById('customer-name').value || '',
+        email: document.getElementById('customer-email').value || ''
+      };
+
+      // Call your backend to create a Checkout Session
       const response = await fetch('http://localhost:3000/create-session', {
         method: 'POST',
         headers: {
@@ -90,13 +106,45 @@
       });
 
       const data = await response.json();
-      console.log('Server response:', data);
-      alert('Server responded: ' + JSON.stringify(data, null, 2));
+
+      if (!response.ok) {
+        console.error('Server error:', data);
+        alert('Server error: ' + (data.message || data.error || 'Unknown'));
+        btn.disabled = false;
+        btn.textContent = 'Proceed to payment';
+        return;
+      }
+
+      const clientSecret = data.clientSecret;
+      if (!clientSecret) {
+        alert('No clientSecret returned from server.');
+        btn.disabled = false;
+        btn.textContent = 'Proceed to payment';
+        return;
+      }
+
+      console.log('Received clientSecret:', clientSecret);
+
+      // Initialize embedded checkout only once
+      if (!embeddedCheckout) {
+        embeddedCheckout = await stripe.initEmbeddedCheckout({
+          clientSecret
+        });
+        embeddedCheckout.mount('#checkout-container');
+      } else {
+        // If already mounted, you could optionally redirect to return_url or ignore
+        console.log('Embedded checkout already mounted');
+      }
+
+      btn.textContent = 'Payment form below';
     } catch (err) {
-      console.error('Error calling /create-session:', err);
-      alert('Error calling server. Check console.');
+      console.error('Error calling /create-session or initializing Stripe:', err);
+      alert('Error initializing payment. Check console.');
+      btn.disabled = false;
+      btn.textContent = 'Proceed to payment';
     }
   });
-  </script>
+</script>
+  <script src="https://js.stripe.com/v3/"></script>
 </body>
 </html>
