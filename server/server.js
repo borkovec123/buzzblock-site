@@ -6,15 +6,85 @@ const cors = require('cors');
 const Stripe = require('stripe');
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
-console.log('Loaded STRIPE_SECRET_KEY', !!stripeSecretKey);
-console.log('Loaded STRIPE_WEBHOOK_SECRET', !!webhookSecret);
+const gaMeasurementId = process.env.GA4_MEASUREMENT_ID || '';
+const gaApiSecret = process.env.GA4_API_SECRET || '';
+
+if (!stripeSecretKey) {
+  console.error('FATAL: STRIPE_SECRET_KEY env var is missing');
+  process.exit(1);
+}
+
+console.log('Loaded STRIPE_SECRET_KEY:', true);
+console.log('Loaded STRIPE_WEBHOOK_SECRET:', !!webhookSecret);
+console.log('Loaded GA4_MEASUREMENT_ID:', !!gaMeasurementId);
+console.log('Loaded GA4_API_SECRET:', !!gaApiSecret);
 
 const stripe = Stripe(stripeSecretKey);
 const app = express();
 
-// 1) Webhook endpoint – must use raw body
+/**
+ * Helper: send purchase event to GA4 via Measurement Protocol.
+ * This is OPTIONAL – if GA envs are not set, it just logs and skips.
+ */
+async function sendGa4Purchase({
+  mgidClickId,
+  bundle,
+  payout,
+  currency
+}) {
+  if (!gaMeasurementId || !gaApiSecret) {
+    console.log('GA4 env not configured, skipping GA4 MP event');
+    return;
+  }
+
+  const url =
+    `https://www.google-analytics.com/mp/collect` +
+    `?measurement_id=${encodeURIComponent(gaMeasurementId)}` +
+    `&api_secret=${encodeURIComponent(gaApiSecret)}`;
+
+  const clientId = mgidClickId || `srv-${Date.now()}`;
+
+  const body = {
+    client_id: clientId,
+    user_id: mgidClickId || undefined,
+    events: [
+      {
+        name: 'purchase',
+        params: {
+          value: payout,
+          currency,
+          items: [
+            {
+              item_name: 'BuzzBlock',
+              quantity: Number(bundle) || 1
+            }
+          ],
+          // You can add more params if you want:
+          // coupon, shipping, tax, transaction_id, etc.
+        }
+      }
+    ]
+  };
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const text = await resp.text();
+    console.log('GA4 MP status:', resp.status, 'body:', text);
+  } catch (err) {
+    console.error('GA4 MP error:', err.message);
+  }
+}
+
+// ──────────────────────────────────────────────
+// 1) Webhook endpoint – raw body for Stripe
+// ──────────────────────────────────────────────
 app.post(
   '/webhook',
   express.raw({ type: 'application/json' }),
@@ -23,31 +93,35 @@ app.post(
 
     let event;
     try {
+      if (!webhookSecret) {
+        console.warn(
+          '⚠️ STRIPE_WEBHOOK_SECRET is not set – rejecting webhook.'
+        );
+        return res.status(400).send('Webhook secret not configured');
+      }
+
       event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
     } catch (err) {
       console.error('❌ Webhook signature verification failed:', err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // We only care about completed checkouts
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
 
       const mgidClickId = session.metadata?.mgid_clickid || '';
-      const bemobClickId = session.metadata?.bemob_clickid || '';
       const bundle = session.metadata?.bundle || '';
-      const amountTotal = session.amount_total || 0; // in smallest currency unit (sen)
-      const currency = session.currency; // e.g. "myr"
+      const amountTotal = session.amount_total || 0; // in sen
+      const currency = session.currency; // "myr"
 
       const payout = amountTotal / 100; // e.g. 148.00
 
       console.log('✅ checkout.session.completed');
       console.log('  mgidClickId:', mgidClickId);
-      console.log('  bemobClickId:', bemobClickId);
       console.log('  bundle:', bundle);
       console.log('  payout:', payout, currency);
 
-      const postbacks = [];
+      const tasks = [];
 
       // MGID S2S
       if (mgidClickId) {
@@ -59,7 +133,7 @@ app.post(
 
         console.log('→ MGID postback:', mgidUrl);
 
-        postbacks.push(
+        tasks.push(
           fetch(mgidUrl)
             .then((r) => r.text())
             .then((body) => {
@@ -71,28 +145,17 @@ app.post(
         );
       }
 
-      // BeMob S2S
-      if (bemobClickId) {
-        const bemobUrl =
-          'https://9805o.bemobtrcks.com/postback' +
-          `?cid=${encodeURIComponent(bemobClickId)}` +
-          `&payout=${encodeURIComponent(payout)}`;
+      // GA4 server-side purchase event
+      tasks.push(
+        sendGa4Purchase({
+          mgidClickId,
+          bundle,
+          payout,
+          currency
+        })
+      );
 
-        console.log('→ BeMob postback:', bemobUrl);
-
-        postbacks.push(
-          fetch(bemobUrl)
-            .then((r) => r.text())
-            .then((body) => {
-              console.log('BeMob response:', body);
-            })
-            .catch((err) => {
-              console.error('BeMob postback error:', err.message);
-            })
-        );
-      }
-
-      await Promise.all(postbacks);
+      await Promise.all(tasks);
     } else {
       console.log('Ignored event type:', event.type);
     }
@@ -101,23 +164,37 @@ app.post(
   }
 );
 
-// 2) After webhook: normal middleware
+// ──────────────────────────────────────────────
+// 2) Normal middleware
+// ──────────────────────────────────────────────
 app.use(express.json());
 app.use(cors());
 
 // Health-check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', time: new Date().toISOString() });
+  const now = new Date().toISOString();
+  console.log('➡️  /health hit', now);
+  res.json({ status: 'ok', time: now });
 });
 
-// Map bundles → Stripe price IDs
+// Stripe Prices
 const PRICE_MAP = {
   '1': process.env.STRIPE_PRICE_1,
   '2': process.env.STRIPE_PRICE_2,
-  '3': process.env.STRIPE_PRICE_3
+  '3': process.env.STRIPE_PRICE_3,
+  '4': process.env.STRIPE_PRICE_4,
+  '5': process.env.STRIPE_PRICE_5
 };
 
-// Create Stripe Checkout Session (embedded)
+console.log('PRICE_MAP presence:', {
+  '1': !!PRICE_MAP['1'],
+  '2': !!PRICE_MAP['2'],
+  '3': !!PRICE_MAP['3'],
+  '4': !!PRICE_MAP['4'],
+  '5': !!PRICE_MAP['5']
+});
+
+// Create session for embedded checkout
 app.post('/create-session', async (req, res) => {
   console.log('--- /create-session called ---');
   console.log('Body:', req.body);
@@ -136,7 +213,6 @@ app.post('/create-session', async (req, res) => {
   }
 
   const mgidClickId = tracking?.mgid_clickid || '';
-  const bemobClickId = tracking?.bemob_clickid || '';
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -153,7 +229,6 @@ app.post('/create-session', async (req, res) => {
         'https://buzzblock.shop/thankyou.html?session_id={CHECKOUT_SESSION_ID}',
       metadata: {
         mgid_clickid: mgidClickId,
-        bemob_clickid: bemobClickId,
         bundle,
         customer_name: customer?.name || ''
       }
@@ -174,7 +249,7 @@ app.post('/create-session', async (req, res) => {
   }
 });
 
-// 404 fallback
+// 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
