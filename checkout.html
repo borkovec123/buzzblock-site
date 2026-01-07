@@ -1,162 +1,111 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-KSLHD2QD');</script>
-<!-- End Google Tag Manager -->
-  <meta charset="UTF-8">
-  <title>BuzzBlock Checkout</title>
+<script>
+  // --- 1) Pull tracking info from URL (MGID etc.) ---
+  (function () {
+    const params = new URLSearchParams(window.location.search);
 
-  <!-- Load Stripe.js FIRST so Stripe(...) exists when our script runs -->
-  <script src="https://js.stripe.com/v3/"></script>
-</head>
-<body>
-  <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KSLHD2QD"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-  <h1>BuzzBlock Checkout (Test Mode)</h1>
+    window.BUZZBLOCK_TRACKING = {
+      mgid_clickid: params.get('mgid_clickid') || '',
+      // add more if you ever need them
+      // source_id: params.get('source_id') || '',
+      // teaser_id: params.get('teaser_id') || '',
+    };
+  })();
 
-  <p>MGID click ID: <span id="debug-mgid"></span></p>
-  <p>BeMob click ID: <span id="debug-bemob"></span></p>
 
-  <h2>Select your bundle</h2>
-  <label>
-    <input type="radio" name="bundle" value="1" checked>
-    1× BuzzBlock – RM99
-  </label><br>
-  <label>
-    <input type="radio" name="bundle" value="2">
-    2× BuzzBlock – RM148
-  </label><br>
-  <label>
-    <input type="radio" name="bundle" value="3">
-    3× BuzzBlock – RM197
-  </label>
+  // --- 2) Stripe + backend setup ---
+  const stripe = Stripe('pk_test_51RNA2WFPa06eKXlybOaIwB2wXQEt5nBUNDKR3rtEW0XXARlP7Q71nzQLAUAvfHQYoqgN3EQPctPOQpp860HONPXS00n1dHxhfB');
 
-  <h2>Your details (test; nothing real yet)</h2>
-  <p>
-    <label>Name:
-      <input type="text" id="customer-name" placeholder="John Doe">
-    </label>
-  </p>
-  <p>
-    <label>Email:
-      <input type="email" id="customer-email" placeholder="you@example.com">
-    </label>
-  </p>
+  // TODO: change this to your Render backend URL
+  const BACKEND_URL = 'https://buzzblock-backend.onrender.com'; // example
 
-  <h2>Payment</h2>
-  <div id="checkout-container">
-    <!-- Stripe Embedded Checkout will appear here -->
-  </div>
+  let embeddedCheckout = null;
+  let currentBundle = null;
+  let isInitializing = false;
 
-  <button id="pay-button">Proceed to payment</button>
 
-  <!-- Hidden fields for tracking -->
-  <input type="hidden" id="mgid_clickid" name="mgid_clickid">
-  <input type="hidden" id="bemob_clickid" name="bemob_clickid">
+  // --- 3) Create + mount embedded checkout for a given bundle ---
+  async function initCheckoutForBundle(bundle) {
+    if (!bundle) return;
 
-  <script>
-    // 1) Read IDs from URL and store them
-    (function() {
-      var params = new URLSearchParams(window.location.search);
-      var mgidClickId = params.get('mgid_clickid') || '';
-      var bemobClickId = params.get('bemob_clickid') || '';
+    // Avoid pointless duplicate calls
+    if (isInitializing && bundle === currentBundle) return;
+    isInitializing = true;
+    currentBundle = bundle;
 
-      document.getElementById('mgid_clickid').value = mgidClickId;
-      document.getElementById('bemob_clickid').value = bemobClickId;
+    const container = document.getElementById('stripe-checkout');
+    if (!container) {
+      console.error('No #stripe-checkout element on page');
+      isInitializing = false;
+      return;
+    }
 
-      document.getElementById('debug-mgid').textContent = mgidClickId || '(none)';
-      document.getElementById('debug-bemob').textContent = bemobClickId || '(none)';
+    // Very simple loading state
+    container.innerHTML = '<p>Loading secure payment form…</p>';
 
-      window.BUZZBLOCK_TRACKING = {
-        mgid_clickid: mgidClickId,
-        bemob_clickid: bemobClickId
-      };
-    })();
-
-    // 2) Stripe publishable key (TEST)
-    const stripe = Stripe('pk_test_51RNA2WFPa06eKXlybOaIwB2wXQEt5nBUNDKR3rtEW0XXARlP7Q71nzQLAUAvfHQYoqgN3EQPctPOQpp860HONPXS00n1dHxhfB');
-
-    let embeddedCheckout = null; // to prevent double-mounts
-
-    document.getElementById('pay-button').addEventListener('click', async function() {
-      // Prevent multiple clicks while loading
-      const btn = this;
-      btn.disabled = true;
-      btn.textContent = 'Loading payment...';
-
+    // Tear down any previous session
+    if (embeddedCheckout) {
       try {
-        // Bundle selection
-        const bundleInput = document.querySelector('input[name="bundle"]:checked');
-        if (!bundleInput) {
-          alert('Select a bundle first.');
-          btn.disabled = false;
-          btn.textContent = 'Proceed to payment';
-          return;
-        }
-        const bundle = bundleInput.value;
-
-        const tracking = window.BUZZBLOCK_TRACKING || {};
-        const customer = {
-          name: document.getElementById('customer-name').value || '',
-          email: document.getElementById('customer-email').value || ''
-        };
-
-        // Call your backend to create a Checkout Session
-        const response = await fetch('https://buzzblock-backend.onrender.com/create-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-          bundle,
-          tracking,
-          customer
-        })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          console.error('Server error:', data);
-          alert('Server error: ' + (data.message || data.error || 'Unknown'));
-          btn.disabled = false;
-          btn.textContent = 'Proceed to payment';
-          return;
-        }
-
-        const clientSecret = data.clientSecret;
-        if (!clientSecret) {
-          alert('No clientSecret returned from server.');
-          btn.disabled = false;
-          btn.textContent = 'Proceed to payment';
-          return;
-        }
-
-        console.log('Received clientSecret:', clientSecret);
-
-        // Initialize embedded checkout only once
-        if (!embeddedCheckout) {
-          embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret });
-          embeddedCheckout.mount('#checkout-container');
-        } else {
-          console.log('Embedded checkout already mounted');
-        }
-
-        btn.textContent = 'Payment form below';
-      } catch (err) {
-        console.error('Error calling /create-session or initializing Stripe:', err);
-        alert('Error initializing payment. Check console.');
-        btn.disabled = false;
-        btn.textContent = 'Proceed to payment';
+        await embeddedCheckout.unmount();
+      } catch (e) {
+        console.warn('Error unmounting previous checkout', e);
       }
+      embeddedCheckout = null;
+    }
+
+    const tracking = window.BUZZBLOCK_TRACKING || {};
+
+    try {
+      const res = await fetch(BACKEND_URL + '/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bundle,          // "1" | "2" | "3" | "4" | "5"
+          tracking         // { mgid_clickid: '...' }
+          // If your backend wants customer info, you can add it here later
+          // customer: { name: ..., email: ... }
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.clientSecret) {
+        console.error('Backend error when creating session:', data);
+        container.innerHTML = '<p style="color:#c00;">Payment temporarily unavailable. Please try again.</p>';
+        isInitializing = false;
+        return;
+      }
+
+      embeddedCheckout = await stripe.initEmbeddedCheckout({
+        clientSecret: data.clientSecret
+      });
+
+      await embeddedCheckout.mount('#stripe-checkout');
+    } catch (err) {
+      console.error('Error initializing embedded checkout:', err);
+      container.innerHTML = '<p style="color:#c00;">Error connecting to payment server. Please refresh the page.</p>';
+    } finally {
+      isInitializing = false;
+    }
+  }
+
+
+  // --- 4) Wire bundle radios → new sessions ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const bundleInputs = document.querySelectorAll('input[name="bundle"]');
+
+    // Initial bundle (default checked, e.g. 3-pack)
+    const defaultBundleInput = document.querySelector('input[name="bundle"]:checked');
+    if (defaultBundleInput) {
+      initCheckoutForBundle(defaultBundleInput.value);
+    }
+
+    // When user changes bundle, re-create a session with the new amount
+    bundleInputs.forEach(input => {
+      input.addEventListener('change', () => {
+        if (input.checked) {
+          initCheckoutForBundle(input.value);
+        }
+      });
     });
-  </script>
-</body>
-</html>
+  });
+</script>
