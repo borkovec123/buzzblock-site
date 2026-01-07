@@ -1,111 +1,1011 @@
-<script>
-  // --- 1) Pull tracking info from URL (MGID etc.) ---
-  (function () {
-    const params = new URLSearchParams(window.location.search);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BuzzBlock – Secure Checkout</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    window.BUZZBLOCK_TRACKING = {
-      mgid_clickid: params.get('mgid_clickid') || '',
-      // add more if you ever need them
-      // source_id: params.get('source_id') || '',
-      // teaser_id: params.get('teaser_id') || '',
-    };
-  })();
+  <!-- (Optional) GTM / GA4 goes here -->
 
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
 
-  // --- 2) Stripe + backend setup ---
-  const stripe = Stripe('pk_test_51RNA2WFPa06eKXlybOaIwB2wXQEt5nBUNDKR3rtEW0XXARlP7Q71nzQLAUAvfHQYoqgN3EQPctPOQpp860HONPXS00n1dHxhfB');
-
-  // TODO: change this to your Render backend URL
-  const BACKEND_URL = 'https://buzzblock-backend.onrender.com'; // example
-
-  let embeddedCheckout = null;
-  let currentBundle = null;
-  let isInitializing = false;
-
-
-  // --- 3) Create + mount embedded checkout for a given bundle ---
-  async function initCheckoutForBundle(bundle) {
-    if (!bundle) return;
-
-    // Avoid pointless duplicate calls
-    if (isInitializing && bundle === currentBundle) return;
-    isInitializing = true;
-    currentBundle = bundle;
-
-    const container = document.getElementById('stripe-checkout');
-    if (!container) {
-      console.error('No #stripe-checkout element on page');
-      isInitializing = false;
-      return;
+  <style>
+    :root {
+      --bb-purple: #6e32b9;
+      --bb-purple-dark: #4f2290;
+      --bb-bg: #f7f3ff;
+      --bb-border: #e3d6ff;
+      --bb-yellow: #fff86b;
+      --bb-green: #13a76b;
+      --bb-red: #e53935;
+      --bb-text: #1f2933;
     }
 
-    // Very simple loading state
-    container.innerHTML = '<p>Loading secure payment form…</p>';
+    * {
+      box-sizing: border-box;
+    }
 
-    // Tear down any previous session
-    if (embeddedCheckout) {
-      try {
-        await embeddedCheckout.unmount();
-      } catch (e) {
-        console.warn('Error unmounting previous checkout', e);
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bb-bg);
+      color: var(--bb-text);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Top sale bar */
+    .top-bar {
+      background: var(--bb-purple);
+      color: #fff;
+      font-size: 14px;
+      padding: 8px 16px;
+      text-align: center;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: #ffffff;
+      border-bottom: 1px solid #ede7ff;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      height: 40px;
+    }
+
+    .navbar-title {
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .navbar-right {
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .navbar-lock {
+      font-size: 16px;
+    }
+
+    /* Layout */
+    .checkout-shell {
+      max-width: 1100px;
+      margin: 24px auto 40px;
+      padding: 0 16px;
+    }
+
+    .checkout-header {
+      margin-bottom: 12px;
+    }
+
+    .checkout-header-main {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .checkout-header-sub {
+      font-size: 14px;
+      color: #5a6472;
+    }
+
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    /* Left column */
+    .card {
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid var(--bb-border);
+      box-shadow: 0 10px 25px rgba(64, 46, 140, 0.06);
+      padding: 18px 18px 16px;
+    }
+
+    .card + .card {
+      margin-top: 14px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: #6c7280;
+      margin-bottom: 14px;
+    }
+
+    /* Bundle list */
+    .bundle-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .bundle-row {
+      display: flex;
+      align-items: stretch;
+      border-radius: 16px;
+      border: 2px solid transparent;
+      background: #faf7ff;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+
+    .bundle-row--recommended {
+      background: var(--bb-yellow);
+    }
+
+    .bundle-row--selected {
+      border-color: var(--bb-purple);
+      box-shadow: 0 0 0 1px rgba(110, 50, 185, 0.1);
+    }
+
+    .bundle-radio {
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .bundle-radio input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--bb-purple);
+      cursor: pointer;
+    }
+
+    .bundle-main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .bundle-image {
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      background: #ede7ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #4a4f5c;
+      text-align: center;
+      padding: 4px;
+    }
+
+    .bundle-text {
+      min-width: 0;
+    }
+
+    .bundle-name-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+
+    .bundle-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .bundle-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
+
+    .bundle-tag--recommended {
+      background: #ffecb3;
+      color: var(--bb-red);
+    }
+
+    .bundle-tag--popular {
+      background: #e0f8ef;
+      color: var(--bb-green);
+    }
+
+    .bundle-note {
+      font-size: 12px;
+      color: #5a6472;
+    }
+
+    .bundle-price {
+      text-align: right;
+      min-width: 112px;
+    }
+
+    .bundle-old {
+      font-size: 12px;
+      color: #a0a3b0;
+      text-decoration: line-through;
+    }
+
+    .bundle-now {
+      font-weight: 700;
+      font-size: 16px;
+      margin-top: 2px;
+    }
+
+    .bundle-per {
+      font-size: 12px;
+      color: var(--bb-green);
+      margin-top: 2px;
+    }
+
+    .bundle-off {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--bb-green);
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    .bundle-shipping-label {
+      font-size: 11px;
+      color: #5a6472;
+      margin-top: 2px;
+    }
+
+    .bundle-shipping-label--free {
+      color: var(--bb-green);
+      font-weight: 600;
+    }
+
+    /* Shipping bar */
+    .shipping-progress {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #4a4f5c;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .shipping-progress-bar {
+      flex: 1;
+      background: #ebe7ff;
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .shipping-progress-bar-inner {
+      height: 100%;
+      background: var(--bb-purple);
+      width: 0;
+      transition: width 0.18s ease;
+    }
+
+    .shipping-progress-text {
+      white-space: nowrap;
+    }
+
+    /* Add-ons placeholder */
+    .addon-row {
+      font-size: 13px;
+      color: #5a6472;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px dashed #ddd2ff;
+      margin-top: 4px;
+    }
+
+    .addon-row span {
+      font-size: 12px;
+    }
+
+    /* Right column – summary */
+    .summary-card {
+      position: sticky;
+      top: 18px;
+    }
+
+    .summary-heading {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .summary-product {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .summary-thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: #ede7ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #4a4f5c;
+      text-align: center;
+      padding: 4px;
+    }
+
+    .summary-product-text {
+      flex: 1;
+    }
+
+    .summary-product-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .summary-product-detail {
+      font-size: 12px;
+      color: #5a6472;
+    }
+
+    .summary-line {
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .summary-line.summary-total {
+      margin-top: 8px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .summary-line-label {
+      color: #4a4f5c;
+    }
+
+    .summary-line-value {
+      text-align: right;
+    }
+
+    .summary-line-value--green {
+      color: var(--bb-green);
+    }
+
+    .summary-badge-row {
+      font-size: 12px;
+      color: #5a6472;
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .summary-badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #f3ecff;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .cta-btn {
+      margin-top: 14px;
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 14px;
+      background: var(--bb-purple);
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 8px 18px rgba(110, 50, 185, 0.35);
+      transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.12s ease;
+    }
+
+    .cta-btn:hover {
+      background: var(--bb-purple-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(110, 50, 185, 0.4);
+    }
+
+    .cta-subtext {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #6c7280;
+      text-align: center;
+    }
+
+    .payment-icons {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #4a4f5c;
+    }
+
+    .payment-pill {
+      border-radius: 999px;
+      border: 1px solid #ddd2ff;
+      padding: 2px 8px;
+      background: #faf7ff;
+    }
+
+    .summary-urgency {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #b3531a;
+      background: #fff5e5;
+      border-radius: 10px;
+      padding: 6px 8px;
+    }
+
+    .summary-bottom-note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #6c7280;
+      line-height: 1.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .checkout-grid {
+        grid-template-columns: 1fr;
       }
-      embeddedCheckout = null;
+
+      .summary-card {
+        position: static;
+        order: -1;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    ⚡ Sale Ends Today — 50% OFF + FREE Shipping on 2+ BuzzBlock Lamps
+  </div>
+
+  <header class="navbar">
+    <div class="navbar-left">
+      <img src="images/logo.png" alt="BuzzBlock Logo" class="logo" />
+      <div class="navbar-title">BuzzBlock</div>
+    </div>
+    <div class="navbar-right">
+      <span class="navbar-lock">🔒</span>
+      <span>Secure 256-bit SSL Checkout</span>
+    </div>
+  </header>
+
+  <main class="checkout-shell">
+    <section class="checkout-header">
+      <div class="checkout-header-main">Complete your order</div>
+      <div class="checkout-header-sub">
+        ⭐ Rated 4.8/5 by 3,700+ Malaysian customers · 3–7 day delivery from our MY warehouse
+      </div>
+    </section>
+
+    <section class="checkout-grid">
+      <!-- LEFT: bundles + extras -->
+      <div>
+        <!-- Bundle selector -->
+        <div class="card">
+          <div class="card-title">Choose your BuzzBlock bundle</div>
+          <div class="card-subtitle">
+            Save more when you protect multiple rooms. 2+ units unlock <strong>FREE shipping</strong>.
+          </div>
+
+          <ul class="bundle-list" id="bundleList">
+            <!-- Bundles are rendered by JS -->
+          </ul>
+
+          <div class="shipping-progress">
+            <div class="shipping-progress-bar">
+              <div class="shipping-progress-bar-inner" id="shippingProgressInner"></div>
+            </div>
+            <div class="shipping-progress-text" id="shippingProgressText">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- (Future) Add-ons block -->
+        <div class="card">
+          <div class="card-title">Optional add-ons (coming soon)</div>
+          <div class="card-subtitle">
+            Later you can offer simple add-ons here (extra cables, hooks, extended warranty, etc.).
+          </div>
+          <div class="addon-row">
+            <div>
+              <strong>Extra accessories</strong>
+              <br />
+              <span>Placeholder section – safe to ignore for now.</span>
+            </div>
+            <span>RM&nbsp;—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: summary + CTA -->
+      <aside class="summary-card">
+        <div class="card">
+          <div class="summary-heading">Order summary</div>
+
+          <div class="summary-product">
+            <div class="summary-thumb">
+              BuzzBlock<br />UV Lamp
+            </div>
+            <div class="summary-product-text">
+              <div class="summary-product-name" id="summaryBundleName">
+                3× BuzzBlock (Recommended)
+              </div>
+              <div class="summary-product-detail" id="summaryBundleDetail">
+                Best for bedroom + living room
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-line">
+            <span class="summary-line-label">Subtotal</span>
+            <span class="summary-line-value" id="summarySubtotal">RM —</span>
+          </div>
+          <div class="summary-line">
+            <span class="summary-line-label">Shipping</span>
+            <span class="summary-line-value" id="summaryShipping">RM —</span>
+          </div>
+          <div class="summary-line summary-total">
+            <span class="summary-line-label">Total today</span>
+            <span class="summary-line-value summary-line-value--green" id="summaryTotal">
+              RM —
+            </span>
+          </div>
+
+          <div class="summary-badge-row">
+            <div class="summary-badge">🔐 Secure Stripe payment</div>
+            <div class="summary-badge">🚚 3–7 day delivery</div>
+            <div class="summary-badge">✅ 14-day return policy</div>
+          </div>
+
+          <form id="checkoutForm" action="/create-session" method="POST">
+            <input type="hidden" name="bundle" id="bundleInput" value="" />
+
+            <button type="submit" class="cta-btn" id="checkoutButton">
+              <span>Complete secure checkout</span>
+              <span>→</span>
+            </button>
+          </form>
+
+          <div class="cta-subtext">
+            You will be redirected to our secure payment page to complete your purchase.
+          </div>
+
+          <div class="payment-icons">
+            <span class="payment-pill">VISA</span>
+            <span class="payment-pill">MasterCard</span>
+            <span class="payment-pill">FPX / Online Banking</span>
+          </div>
+
+          <div class="summary-urgency">
+            ⚡ High demand during rainy season. We’re currently shipping from the latest batch –
+            once it sells out, delivery may be delayed.
+          </div>
+
+          <div class="summary-bottom-note">
+            All prices in RM. If BuzzBlock doesn’t help reduce mosquitoes in your home, contact us
+            within 14 days and our team will assist with a return.
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    // ===== CONFIG =====
+    // Adjust prices / copy here only.
+    const FREE_SHIPPING_THRESHOLD_UNITS = 2;
+    const SHIPPING_COST_SINGLE = 15; // RM for 1 unit; 0 for 2+ units by default
+
+    const bundles = [
+      {
+        id: 3,
+        units: 3,
+        name: "Buy 3 BuzzBlock",
+        note: "Best for bedroom + living room",
+        oldPrice: 191.99,  // RM, placeholder
+        newPrice: 86.97,   // total RM for 3 units
+        discountLabel: "60% OFF",
+        perUnit: 28.99,
+        freeShipping: true,
+        recommended: true,
+        popular: true
+      },
+      {
+        id: 1,
+        units: 1,
+        name: "Buy 1 BuzzBlock",
+        note: "Great to test BuzzBlock in one room",
+        oldPrice: 63.99,
+        newPrice: 31.99,
+        discountLabel: "50% OFF",
+        perUnit: 31.99,
+        freeShipping: false,
+        recommended: false,
+        popular: false
+      },
+      {
+        id: 2,
+        units: 2,
+        name: "Buy 2 BuzzBlock",
+        note: "Protect two key rooms",
+        oldPrice: 127.99,
+        newPrice: 59.98,
+        discountLabel: "55% OFF",
+        perUnit: 29.99,
+        freeShipping: false, // you can flip to true if you want FS from 2+
+        recommended: false,
+        popular: false
+      },
+      {
+        id: 4,
+        units: 4,
+        name: "Buy 4 BuzzBlock",
+        note: "Perfect for families & larger homes",
+        oldPrice: 254.99,
+        newPrice: 111.96,
+        discountLabel: "65% OFF",
+        perUnit: 27.99,
+        freeShipping: true,
+        recommended: false,
+        popular: false
+      },
+      {
+        id: 5,
+        units: 5,
+        name: "Buy 5 BuzzBlock",
+        note: "Stock up or share with family",
+        oldPrice: 318.99,
+        newPrice: 129.95,
+        discountLabel: "70% OFF",
+        perUnit: 25.99,
+        freeShipping: true,
+        recommended: false,
+        popular: false
+      }
+    ];
+
+    // Default selected bundle = first (3-pack)
+    let selectedBundleId = bundles[0].id;
+
+    // ===== RENDER BUNDLE LIST =====
+    function renderBundles() {
+      const listEl = document.getElementById("bundleList");
+      listEl.innerHTML = "";
+
+      bundles.forEach((bundle) => {
+        const li = document.createElement("li");
+
+        const row = document.createElement("div");
+        row.className = "bundle-row";
+        if (bundle.recommended) row.classList.add("bundle-row--recommended");
+        if (bundle.id === selectedBundleId) row.classList.add("bundle-row--selected");
+
+        // Radio
+        const radioWrap = document.createElement("div");
+        radioWrap.className = "bundle-radio";
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "bundleRadio";
+        radio.value = bundle.id;
+        radio.checked = bundle.id === selectedBundleId;
+        radioWrap.appendChild(radio);
+
+        // Main content grid
+        const main = document.createElement("div");
+        main.className = "bundle-main";
+
+        const img = document.createElement("div");
+        img.className = "bundle-image";
+        img.textContent = bundle.units + "× Lamp";
+
+        const text = document.createElement("div");
+        text.className = "bundle-text";
+
+        const nameLine = document.createElement("div");
+        nameLine.className = "bundle-name-line";
+
+        const name = document.createElement("div");
+        name.className = "bundle-name";
+        name.textContent = bundle.name;
+        nameLine.appendChild(name);
+
+        if (bundle.recommended) {
+          const tag = document.createElement("div");
+          tag.className = "bundle-tag bundle-tag--recommended";
+          tag.textContent = "Recommended Deal";
+          nameLine.appendChild(tag);
+        }
+
+        if (bundle.popular && !bundle.recommended) {
+          const tag = document.createElement("div");
+          tag.className = "bundle-tag bundle-tag--popular";
+          tag.textContent = "Most Popular";
+          nameLine.appendChild(tag);
+        }
+
+        text.appendChild(nameLine);
+
+        const note = document.createElement("div");
+        note.className = "bundle-note";
+        note.textContent = bundle.note;
+        text.appendChild(note);
+
+        const price = document.createElement("div");
+        price.className = "bundle-price";
+
+        const old = document.createElement("div");
+        old.className = "bundle-old";
+        old.textContent = "RM " + bundle.oldPrice.toFixed(2);
+        price.appendChild(old);
+
+        const now = document.createElement("div");
+        now.className = "bundle-now";
+        now.textContent = "RM " + bundle.newPrice.toFixed(2);
+        price.appendChild(now);
+
+        const per = document.createElement("div");
+        per.className = "bundle-per";
+        per.textContent = "RM " + bundle.perUnit.toFixed(2) + " / unit";
+        price.appendChild(per);
+
+        const off = document.createElement("div");
+        off.className = "bundle-off";
+        off.textContent = bundle.discountLabel;
+        price.appendChild(off);
+
+        const shipLabel = document.createElement("div");
+        shipLabel.className =
+          "bundle-shipping-label " +
+          (bundle.freeShipping ? "bundle-shipping-label--free" : "");
+        shipLabel.textContent = bundle.freeShipping ? "+ FREE SHIPPING" : "+ Shipping applies";
+        price.appendChild(shipLabel);
+
+        main.appendChild(img);
+        main.appendChild(text);
+        main.appendChild(price);
+
+        row.appendChild(radioWrap);
+        row.appendChild(main);
+
+        // Click handler for whole row
+        row.addEventListener("click", () => {
+          selectedBundleId = bundle.id;
+          updateSummary();
+          renderBundles();
+        });
+
+        li.appendChild(row);
+        listEl.appendChild(li);
+      });
     }
 
-    const tracking = window.BUZZBLOCK_TRACKING || {};
+    // ===== SUMMARY / SHIPPING BAR =====
+    function updateSummary() {
+      const bundle = bundles.find((b) => b.id === selectedBundleId);
+      if (!bundle) return;
 
-    try {
-      const res = await fetch(BACKEND_URL + '/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bundle,          // "1" | "2" | "3" | "4" | "5"
-          tracking         // { mgid_clickid: '...' }
-          // If your backend wants customer info, you can add it here later
-          // customer: { name: ..., email: ... }
-        })
-      });
+      // Summary text
+      document.getElementById("summaryBundleName").textContent =
+        bundle.units + "× BuzzBlock";
+      document.getElementById("summaryBundleDetail").textContent = bundle.note;
 
-      const data = await res.json();
+      const shippingCost =
+        bundle.units >= FREE_SHIPPING_THRESHOLD_UNITS && bundle.freeShipping
+          ? 0
+          : SHIPPING_COST_SINGLE;
 
-      if (!res.ok || !data.clientSecret) {
-        console.error('Backend error when creating session:', data);
-        container.innerHTML = '<p style="color:#c00;">Payment temporarily unavailable. Please try again.</p>';
+      const subtotalRM = bundle.newPrice;
+      const totalRM = subtotalRM + shippingCost;
+
+      document.getElementById("summarySubtotal").textContent =
+        "RM " + subtotalRM.toFixed(2);
+      document.getElementById("summaryShipping").textContent =
+        shippingCost === 0 ? "FREE" : "RM " + shippingCost.toFixed(2);
+      document.getElementById("summaryTotal").textContent =
+        "RM " + totalRM.toFixed(2);
+
+      // Hidden input for backend
+      document.getElementById("bundleInput").value = bundle.id;
+
+      // Shipping progress bar
+      const progressInner = document.getElementById("shippingProgressInner");
+      const progressText = document.getElementById("shippingProgressText");
+
+      if (bundle.units >= FREE_SHIPPING_THRESHOLD_UNITS && bundle.freeShipping) {
+        progressInner.style.width = "100%";
+        progressText.textContent = "✅ You unlocked FREE shipping";
+      } else {
+        const unitsNeeded = FREE_SHIPPING_THRESHOLD_UNITS - bundle.units;
+        const ratio = Math.min(bundle.units / FREE_SHIPPING_THRESHOLD_UNITS, 1);
+        progressInner.style.width = ratio * 100 + "%";
+        progressText.textContent =
+          "Spend a bit more (" + unitsNeeded + " more unit" + (unitsNeeded > 1 ? "s" : "") +
+          ") to unlock FREE shipping";
+      }
+    }
+
+    // ===== INIT =====
+    renderBundles();
+    updateSummary();
+
+    // ===== MGID Sensor hook on submit =====
+    const checkoutForm = document.getElementById("checkoutForm");
+    checkoutForm.addEventListener("submit", function () {
+      // Basic debounce / double-submit guard
+      const btn = document.getElementById("checkoutButton");
+      btn.disabled = true;
+      btn.textContent = "Processing...";
+
+      // Fire MGID conversion event if available
+      try {
+        if (window._mgq && typeof window._mgq.push === "function") {
+          _mgq.push(["MgSensorInvoke", "order_click"]);
+        }
+      } catch (e) {
+        // silent
+      }
+    });
+  </script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    // --- 1) Pull tracking info from URL (MGID etc.) ---
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+  
+      window.BUZZBLOCK_TRACKING = {
+        mgid_clickid: params.get('mgid_clickid') || '',
+        // add more if you ever need them
+        // source_id: params.get('source_id') || '',
+        // teaser_id: params.get('teaser_id') || '',
+      };
+    })();
+  
+  
+    // --- 2) Stripe + backend setup ---
+    const stripe = Stripe('pk_test_51RNA2WFPa06eKXlybOaIwB2wXQEt5nBUNDKR3rtEW0XXARlP7Q71nzQLAUAvfHQYoqgN3EQPctPOQpp860HONPXS00n1dHxhfB');
+  
+    // TODO: change this to your Render backend URL
+    const BACKEND_URL = 'https://buzzblock-backend.onrender.com'; // example
+  
+    let embeddedCheckout = null;
+    let currentBundle = null;
+    let isInitializing = false;
+  
+  
+    // --- 3) Create + mount embedded checkout for a given bundle ---
+    async function initCheckoutForBundle(bundle) {
+      if (!bundle) return;
+  
+      // Avoid pointless duplicate calls
+      if (isInitializing && bundle === currentBundle) return;
+      isInitializing = true;
+      currentBundle = bundle;
+  
+      const container = document.getElementById('stripe-checkout');
+      if (!container) {
+        console.error('No #stripe-checkout element on page');
         isInitializing = false;
         return;
       }
-
-      embeddedCheckout = await stripe.initEmbeddedCheckout({
-        clientSecret: data.clientSecret
-      });
-
-      await embeddedCheckout.mount('#stripe-checkout');
-    } catch (err) {
-      console.error('Error initializing embedded checkout:', err);
-      container.innerHTML = '<p style="color:#c00;">Error connecting to payment server. Please refresh the page.</p>';
-    } finally {
-      isInitializing = false;
-    }
-  }
-
-
-  // --- 4) Wire bundle radios → new sessions ---
-  document.addEventListener('DOMContentLoaded', () => {
-    const bundleInputs = document.querySelectorAll('input[name="bundle"]');
-
-    // Initial bundle (default checked, e.g. 3-pack)
-    const defaultBundleInput = document.querySelector('input[name="bundle"]:checked');
-    if (defaultBundleInput) {
-      initCheckoutForBundle(defaultBundleInput.value);
-    }
-
-    // When user changes bundle, re-create a session with the new amount
-    bundleInputs.forEach(input => {
-      input.addEventListener('change', () => {
-        if (input.checked) {
-          initCheckoutForBundle(input.value);
+  
+      // Very simple loading state
+      container.innerHTML = '<p>Loading secure payment form…</p>';
+  
+      // Tear down any previous session
+      if (embeddedCheckout) {
+        try {
+          await embeddedCheckout.unmount();
+        } catch (e) {
+          console.warn('Error unmounting previous checkout', e);
         }
+        embeddedCheckout = null;
+      }
+  
+      const tracking = window.BUZZBLOCK_TRACKING || {};
+  
+      try {
+        const res = await fetch(BACKEND_URL + '/create-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bundle,          // "1" | "2" | "3" | "4" | "5"
+            tracking         // { mgid_clickid: '...' }
+            // If your backend wants customer info, you can add it here later
+            // customer: { name: ..., email: ... }
+          })
+        });
+  
+        const data = await res.json();
+  
+        if (!res.ok || !data.clientSecret) {
+          console.error('Backend error when creating session:', data);
+          container.innerHTML = '<p style="color:#c00;">Payment temporarily unavailable. Please try again.</p>';
+          isInitializing = false;
+          return;
+        }
+  
+        embeddedCheckout = await stripe.initEmbeddedCheckout({
+          clientSecret: data.clientSecret
+        });
+  
+        await embeddedCheckout.mount('#stripe-checkout');
+      } catch (err) {
+        console.error('Error initializing embedded checkout:', err);
+        container.innerHTML = '<p style="color:#c00;">Error connecting to payment server. Please refresh the page.</p>';
+      } finally {
+        isInitializing = false;
+      }
+    }
+  
+  
+    // --- 4) Wire bundle radios → new sessions ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const bundleInputs = document.querySelectorAll('input[name="bundle"]');
+  
+      // Initial bundle (default checked, e.g. 3-pack)
+      const defaultBundleInput = document.querySelector('input[name="bundle"]:checked');
+      if (defaultBundleInput) {
+        initCheckoutForBundle(defaultBundleInput.value);
+      }
+  
+      // When user changes bundle, re-create a session with the new amount
+      bundleInputs.forEach(input => {
+        input.addEventListener('change', () => {
+          if (input.checked) {
+            initCheckoutForBundle(input.value);
+          }
+        });
       });
     });
-  });
-</script>
+  </script>
+</body>
+</html>
