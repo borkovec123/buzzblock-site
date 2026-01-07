@@ -178,12 +178,13 @@ app.get('/health', (req, res) => {
 });
 
 // Stripe Prices
+// Map bundles → Stripe price IDs
 const PRICE_MAP = {
   '1': process.env.STRIPE_PRICE_1,
   '2': process.env.STRIPE_PRICE_2,
   '3': process.env.STRIPE_PRICE_3,
   '4': process.env.STRIPE_PRICE_4,
-  '5': process.env.STRIPE_PRICE_5
+  '5': process.env.STRIPE_PRICE_5,
 };
 
 console.log('PRICE_MAP presence:', {
@@ -191,15 +192,14 @@ console.log('PRICE_MAP presence:', {
   '2': !!PRICE_MAP['2'],
   '3': !!PRICE_MAP['3'],
   '4': !!PRICE_MAP['4'],
-  '5': !!PRICE_MAP['5']
+  '5': !!PRICE_MAP['5'],
 });
 
-// Create session for embedded checkout
 app.post('/create-session', async (req, res) => {
   console.log('--- /create-session called ---');
   console.log('Body:', req.body);
 
-  const { bundle, tracking, customer } = req.body || {};
+  const { bundle, tracking = {}, customer = {} } = req.body || {};
 
   if (!bundle) {
     return res.status(400).json({ error: 'Missing bundle selection' });
@@ -212,39 +212,73 @@ app.post('/create-session', async (req, res) => {
       .json({ error: 'Invalid bundle or missing STRIPE_PRICE env' });
   }
 
-  const mgidClickId = tracking?.mgid_clickid || '';
+  const mgidClickId = tracking.mgid_clickid || '';
 
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       ui_mode: 'embedded',
+
+      // What the customer is buying
       line_items: [
         {
           price: priceId,
-          quantity: 1
-        }
+          quantity: 1,
+        },
       ],
-      customer_email: customer?.email || undefined,
+
+      // 👇 1) Collect full SHIPPING ADDRESS
+      shipping_address_collection: {
+        // change / add countries if you expand later
+        allowed_countries: ['MY'],
+      },
+
+      // 👇 2) Show a “3–7 day delivery” shipping method (FREE)
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 0, currency: 'myr' },
+            display_name: '3–7 day delivery',
+            delivery_estimate: {
+              minimum: { unit: 'business_day', value: 3 },
+              maximum: { unit: 'business_day', value: 7 },
+            },
+          },
+        },
+      ],
+
+      // 👇 3) Ask for phone number in Checkout
+      phone_number_collection: {
+        enabled: true,
+      },
+
+      // Use email from your page if present (optional)
+      customer_email: customer.email || undefined,
+
+      // Where Stripe sends them back after payment
       return_url:
         'https://buzzblock.shop/thankyou.html?session_id={CHECKOUT_SESSION_ID}',
+
+      // Tracking & extra info you want to see in webhook
       metadata: {
         mgid_clickid: mgidClickId,
         bundle,
-        customer_name: customer?.name || ''
-      }
+        customer_name: customer.name || '',
+      },
     });
 
     console.log('✅ Created Session:', session.id);
 
     res.json({
       clientSecret: session.client_secret,
-      sessionId: session.id
+      sessionId: session.id,
     });
   } catch (err) {
-    console.error('❌ Stripe error:', err);
+    console.error('❌ Stripe error in /create-session:', err);
     res.status(500).json({
       error: 'Stripe error',
-      message: 'Payment configuration error (test env)'
+      message: 'Payment configuration error',
     });
   }
 });
