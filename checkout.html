@@ -609,10 +609,11 @@
           <form id="checkoutForm" action="/create-session" method="POST">
             <input type="hidden" name="bundle" id="bundleInput" value="" />
 
-            <button type="submit" class="cta-btn" id="checkoutButton">
-              <span>Complete secure checkout</span>
-              <span>→</span>
-            </button>
+<button id="pay-button" type="button">
+  Complete secure checkout →
+</button>
+
+<div id="checkout-container"></div>
           </form>
 
           <div class="cta-subtext">
@@ -895,5 +896,85 @@
       }
     });
   </script>
+  <script src="https://js.stripe.com/v3/"></script>
+<script>
+  // 1) Stripe client
+  const stripe = Stripe('pk_test_51RNA2WFPa06eKXlybOaIwB2wXQEt5nBUNDKR3rtEW0XXARlP7Q71nzQLAUAvfHQYoqgN3EQPctPOQpp860HONPXS00n1dHxhfB');
+
+  // 2) Backend base URL – note: this is the RENDER backend, not buzzblock.shop
+  const BACKEND_BASE = 'https://buzzblock-backend.onrender.com';
+
+  let embeddedCheckout = null;
+
+  // Read mgid_clickid from URL
+  (function () {
+    const params = new URLSearchParams(location.search);
+    const mgidClickId = params.get('mgid_clickid') || '';
+    window.BUZZBLOCK_TRACKING = { mgid_clickid: mgidClickId };
+  })();
+
+  document.getElementById('pay-button').addEventListener('click', async function () {
+    const btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Processing…';
+
+    try {
+      // Selected bundle
+      const bundleInput = document.querySelector('input[name="bundle"]:checked');
+      if (!bundleInput) {
+        alert('Please choose a bundle first.');
+        btn.disabled = false;
+        btn.textContent = 'Complete secure checkout →';
+        return;
+      }
+      const bundle = bundleInput.value;
+
+      // Customer fields (optional for now)
+      const customer = {
+        name:  document.getElementById('customer-name')?.value || '',
+        email: document.getElementById('customer-email')?.value || ''
+      };
+
+      const tracking = window.BUZZBLOCK_TRACKING || {};
+
+      // *** This MUST be a POST to the backend URL ***
+      const res = await fetch(`${BACKEND_BASE}/create-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bundle, tracking, customer })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        console.error('Server error:', data);
+        alert('Server error: ' + (data.message || data.error || 'Unknown'));
+        btn.disabled = false;
+        btn.textContent = 'Complete secure checkout →';
+        return;
+      }
+
+      const clientSecret = data.clientSecret;
+      if (!clientSecret) {
+        alert('No clientSecret returned from server.');
+        btn.disabled = false;
+        btn.textContent = 'Complete secure checkout →';
+        return;
+      }
+
+      // Initialise / mount embedded checkout once
+      if (!embeddedCheckout) {
+        embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret });
+        embeddedCheckout.mount('#checkout-container');
+      }
+
+      btn.textContent = 'Secure payment form below';
+    } catch (err) {
+      console.error('Error calling /create-session:', err);
+      alert('Error initialising payment. Check console.');
+      btn.disabled = false;
+      btn.textContent = 'Complete secure checkout →';
+    }
+  });
+</script>
 </body>
 </html>
