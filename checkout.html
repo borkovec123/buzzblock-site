@@ -606,15 +606,15 @@
             <div class="summary-badge">✅ 14-day return policy</div>
           </div>
 
-          <form id="checkoutForm" action="/create-session" method="POST">
-            <input type="hidden" name="bundle" id="bundleInput" value="" />
+<div id="checkoutBox">
+  <input type="hidden" id="bundleInput" value="" />
 
-<button id="pay-button" type="button">
-  Complete secure checkout →
-</button>
+  <button id="pay-button" type="button">
+    Complete secure checkout →
+  </button>
 
-<div id="checkout-container"></div>
-          </form>
+  <div id="checkout-container"></div>
+</div>
 
           <div class="cta-subtext">
             You will be redirected to our secure payment page to complete your purchase.
@@ -878,14 +878,6 @@
     renderBundles();
     updateSummary();
 
-    // ===== MGID Sensor hook on submit =====
-    const checkoutForm = document.getElementById("checkoutForm");
-    checkoutForm.addEventListener("submit", function () {
-      // Basic debounce / double-submit guard
-      const btn = document.getElementById("checkoutButton");
-      btn.disabled = true;
-      btn.textContent = "Processing...";
-
       // Fire MGID conversion event if available
       try {
         if (window._mgq && typeof window._mgq.push === "function") {
@@ -919,15 +911,8 @@
     btn.textContent = 'Processing…';
 
     try {
-      // Selected bundle
-      const bundleInput = document.querySelector('input[name="bundle"]:checked');
-      if (!bundleInput) {
-        alert('Please choose a bundle first.');
-        btn.disabled = false;
-        btn.textContent = 'Complete secure checkout →';
-        return;
-      }
-      const bundle = bundleInput.value;
+// Selected bundle (from JS state)
+const bundle = String(selectedBundleId);
 
       // Customer fields (optional for now)
       const customer = {
