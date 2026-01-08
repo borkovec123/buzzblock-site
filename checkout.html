@@ -744,7 +744,188 @@
       font-size: 0.78rem;
       color: #6b7280;
     }
+    /* === BuzzBlock checkout gallery === */
+
+/* HERO WRAPPER */
+.bb-hero {
+  padding: 16px 16px 24px;
+}
+
+.bb-hero-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* Desktop / tablet: 2 columns like MozzGuard */
+@media (min-width: 900px) {
+  .bb-hero-inner {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 32px;
+  }
+}
+
+/* LEFT: GALLERY */
+.bb-hero-gallery {
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 18px 40px rgba(15, 0, 60, 0.16);
+  padding: 18px 18px 14px;
+}
+
+.bb-hero-main {
+  position: relative;
+  width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  background: radial-gradient(circle at top, #fdf7ff 0, #f2ebff 40%, #f7f7ff 100%);
+  /* Roughly same aspect ratio as MozzGuard */
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bb-hero-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ARROWS */
+.bb-hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(0, 0, 0, 0.10);
+  color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+}
+
+.bb-hero-arrow--left {
+  left: 10px;
+}
+
+.bb-hero-arrow--right {
+  right: 10px;
+}
+
+.bb-hero-arrow:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+/* THUMB STRIP */
+.bb-hero-thumbs {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+  overflow-x: auto;
+  padding: 0 4px 6px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bb-hero-thumb {
+  border: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 64px;
+  height: 64px;
+  cursor: pointer;
+  opacity: 0.6;
+  border: 2px solid transparent;
+}
+
+.bb-hero-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bb-hero-thumb.is-active {
+  opacity: 1;
+  border-color: #7c3aed; /* purple */
+}
+
+/* RIGHT: TEXT */
+.bb-hero-copy {
+  padding: 4px 4px 4px 4px;
+}
+
+.bb-hero-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.bb-hero-stars {
+  color: #10b981; /* green */
+  font-size: 16px;
+}
+
+.bb-hero-headline {
+  font-size: 22px;
+  line-height: 1.25;
+  margin: 4px 0 16px;
+  font-weight: 800;
+}
+
+@media (min-width: 900px) {
+  .bb-hero-headline {
+    font-size: 26px;
+  }
+}
+
+.bb-hero-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.bb-hero-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.bb-hero-bullet-icon {
+  color: #7c3aed;
+  margin-top: 4px;
+}
+
+/* Slight tightening on small mobile */
+@media (max-width: 480px) {
+  .bb-hero-gallery {
+    border-radius: 20px;
+    padding: 14px 14px 10px;
+  }
+  .bb-hero-main {
+    border-radius: 18px;
+  }
+}
   </style>
+  
 </head>
 
 <body>
@@ -773,11 +954,94 @@
           <div class="timer-dot"></div>
           <span>Sale Ends Today — 50% OFF</span>
         </div>
+        
       </div>
     </header>
-
+     <!-- BuzzBlock Product Gallery / Slideshow -->
+<section class="bb-hero">
+    <div class="bb-hero-inner">
+      <!-- LEFT: GALLERY -->
+      <div class="bb-hero-gallery">
+        <div class="bb-hero-main">
+          <button class="bb-hero-arrow bb-hero-arrow--left" type="button" aria-label="Previous image">
+            ‹
+          </button>
+  
+          <img
+            id="bb-hero-main-image"
+            src="images/slidec1.png"
+            alt="BuzzBlock product image"
+          />
+  
+          <button class="bb-hero-arrow bb-hero-arrow--right" type="button" aria-label="Next image">
+            ›
+          </button>
+        </div>
+  
+        <div class="bb-hero-thumbs" id="bb-hero-thumbs">
+          <button class="bb-hero-thumb is-active" data-index="0" type="button">
+            <img src="images/slidec1.png" alt="BuzzBlock lamp and box" />
+          </button>
+          <button class="bb-hero-thumb" data-index="1" type="button">
+            <img src="images/slidec2.png" alt="BuzzBlock close-up UV light" />
+          </button>
+          <button class="bb-hero-thumb" data-index="2" type="button">
+            <img src="images/slidec3.png" alt="Family using BuzzBlock at home" />
+          </button>
+          <button class="bb-hero-thumb" data-index="3" type="button">
+            <img src="images/slidec4.png" alt="BuzzBlock outdoor scene" />
+          </button>
+  
+          <!-- ADD 2 more thumbs (replace filenames with your real images) -->
+          <button class="bb-hero-thumb" data-index="4" type="button">
+            <img src="images/slidec5.png" alt="BuzzBlock lifestyle image" />
+          </button>
+          <button class="bb-hero-thumb" data-index="5" type="button">
+            <img src="images/slidec6.png" alt="BuzzBlock details image" />
+          </button>
+        </div>
+      </div>
+  
+      <!-- RIGHT: TEXT -->
+      <div class="bb-hero-copy">
+        <div class="bb-hero-rating-row">
+          <div class="bb-hero-stars">★★★★★</div>
+          <div class="bb-hero-rating-text">
+            <strong>4.8/5</strong> · 3,700+ Malaysian customers
+          </div>
+        </div>
+  
+        <h1 class="bb-hero-headline">
+          Anyone Can Sleep Mosquito-Free<br />Even During Rainy Season…
+        </h1>
+  
+        <ul class="bb-hero-bullets">
+          <li>
+            <span class="bb-hero-bullet-icon">➤</span>
+            <div>
+              <strong>Chemical-free & safe:</strong> No sprays or coils – safe for kids, pets & bedrooms.
+            </div>
+          </li>
+          <li>
+            <span class="bb-hero-bullet-icon">➤</span>
+            <div>
+              <strong>Scientifically tuned UV-light:</strong> Attracts and traps mosquitoes based on their
+              natural behaviour.
+            </div>
+          </li>
+          <li>
+            <span class="bb-hero-bullet-icon">➤</span>
+            <div>
+              <strong>Portable & weather-ready:</strong> Use it in bedrooms, living rooms, balconies & on trips.
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
     <main class="layout">
       <!-- LEFT COLUMN -->
+       
       <section class="card left-card">
         <div class="section-title">Complete your order</div>
         <div class="section-subtitle">
@@ -1176,13 +1440,13 @@
     // Bundle <-> price mapping just for UI text.
     const BUNDLE_CONFIG = {
       "1": {
-        subtotal: "RM 31.99",
-        total: "RM 31.99",
+        subtotal: "RM 99.99",
+        total: "RM 99.99",
         shipping: "RM 9.99",
         qtyLabel: "1× BuzzBlock",
       },
       "2": {
-        subtotal: "RM 59.98",
+        subtotal: "RM 179",
         total: "RM 59.98",
         shipping: "FREE",
         qtyLabel: "2× BuzzBlock",
@@ -1335,6 +1599,55 @@
         btn.textContent = "Complete secure checkout";
       }
     });
+  </script>
+<script>
+    (function () {
+      const mainImg = document.getElementById("bb-hero-main-image");
+      const thumbButtons = Array.from(document.querySelectorAll(".bb-hero-thumb"));
+      const leftBtn = document.querySelector(".bb-hero-arrow--left");
+      const rightBtn = document.querySelector(".bb-hero-arrow--right");
+  
+      if (!mainImg || thumbButtons.length === 0 || !leftBtn || !rightBtn) return;
+  
+      // Build slides array from the thumb <img src="...">
+      const bbSlides = thumbButtons
+        .map((btn) => btn.querySelector("img")?.getAttribute("src"))
+        .filter(Boolean);
+  
+      let bbCurrentIndex = 0;
+  
+      function setActiveThumb(index) {
+        thumbButtons.forEach((btn, i) => btn.classList.toggle("is-active", i === index));
+        // optional: keep active thumb visible on mobile
+        thumbButtons[index]?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+      }
+  
+      function renderSlide(index) {
+        const len = bbSlides.length;
+        bbCurrentIndex = ((index % len) + len) % len;
+  
+        mainImg.src = bbSlides[bbCurrentIndex];
+  
+        // Update alt from thumb image alt (nice touch)
+        const alt = thumbButtons[bbCurrentIndex]?.querySelector("img")?.alt;
+        if (alt) mainImg.alt = alt;
+  
+        setActiveThumb(bbCurrentIndex);
+      }
+  
+      leftBtn.addEventListener("click", () => renderSlide(bbCurrentIndex - 1));
+      rightBtn.addEventListener("click", () => renderSlide(bbCurrentIndex + 1));
+  
+      thumbButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.dataset.index);
+          renderSlide(Number.isFinite(idx) ? idx : 0);
+        });
+      });
+  
+      // Initial render (sync main image + active thumb)
+      renderSlide(0);
+    })();
   </script>
 </body>
 </html>
