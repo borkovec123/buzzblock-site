@@ -171,10 +171,8 @@ app.use(express.json());
 app.use(cors());
 
 // Health-check
-app.get('/health', (req, res) => {
-  const now = new Date().toISOString();
-  console.log('➡️  /health hit', now);
-  res.json({ status: 'ok', time: now });
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
 });
 
 // Stripe Prices
