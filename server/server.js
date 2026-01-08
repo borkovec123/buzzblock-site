@@ -232,12 +232,28 @@ app.post('/create-session', async (req, res) => {
       },
 
       // 👇 2) Show a “3–7 day delivery” shipping method (FREE)
-      shipping_options: [
+// 👇 2) Shipping logic: RM 9.99 for 1-pack, FREE for others
+shipping_options:
+  String(bundle) === '1'
+    ? [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 999, currency: 'myr' }, // RM 9.99
+            display_name: 'Standard shipping',
+            delivery_estimate: {
+              minimum: { unit: 'business_day', value: 3 },
+              maximum: { unit: 'business_day', value: 7 },
+            },
+          },
+        },
+      ]
+    : [
         {
           shipping_rate_data: {
             type: 'fixed_amount',
             fixed_amount: { amount: 0, currency: 'myr' },
-            display_name: '3–7 day delivery',
+            display_name: 'Free shipping',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 3 },
               maximum: { unit: 'business_day', value: 7 },
