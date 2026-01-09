@@ -103,7 +103,7 @@
   @media (max-width: 768px) {
     /* 1. Align testimonial box with bottom of image */
     .testimonial-box {
-      bottom: 0 !important;
+      bottom: 0px !important;
       transform: translateX(-50%) translateY(50%) !important;
     }
   
@@ -808,6 +808,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       flex-direction: column !important;
     }
   }
+  /* FINAL OVERRIDE — keep this as the last style block in the file */
+@media (max-width: 768px) {
+  .image-wrapper { 
+    padding-bottom: 70px !important; /* creates space for the box below */
+  }
+
+  .testimonial-box {
+    left: 50% !important;
+    right: auto !important;
+    bottom: -52px !important;         /* push lower (tweak -40 to -70) */
+    transform: translateX(-50%) !important; /* no Y shift */
+    width: 90% !important;
+    max-width: 360px !important;
+    z-index: 50 !important;
+  }
+}
   
   
   
@@ -897,7 +913,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       <div class="stars">⭐⭐⭐⭐⭐ <span>20,000+ Malaysian Users</span></div>
       <h3 style="text-align: center; font-size: 15px;">“Finally, something that actually reduces mosquitoes.”</h3>
       <p style="margin: 0 !important; line-height: 1.5 !important;">
-        I didn’t expect much, but BuzzBlock made our nights noticeably calmer from day one. Honestly, the best $24 we’ve spent in a while.
+        I didn’t expect much, but BuzzBlock made our nights noticeably calmer from day one. Honestly, the best RM99 we’ve spent in a while.
       </p>
     </div>
   </div>
@@ -921,7 +937,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <strong style="color:red;">Stock: <span class="unit-count">Only 3 Units Left</span>!</strong>
   </div>
 <a href="/checkout.html" class="cta-button js-to-checkout">
-  Order Now for RM99
+  Order Now & Save 50%
 </a>
   </div>
   <div class="faq-section">
@@ -1013,7 +1029,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                   <strong style="color:red;">Stock: <span class="unit-count">Only 3 Units Left</span>!</strong>
   </div>
 <a href="/checkout.html" class="cta-button js-to-checkout">
-  Order Now for RM99
+  Order Now & Save 50%
 </a>
   </div>
   <div class="faq-section">
@@ -1088,7 +1104,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <div class="testimonial-box">
   <div class="stars">⭐⭐⭐⭐⭐ <span>20,000+ Malaysian Users</span></div>
   <h3 style="text-align: center; font-size: 15px;">“Only thing that’s worked for mosquitoes”</h3>
-  <p style="margin: 0 !important; line-height: 1.5 !important;">I didn’t expect BuzzBlock to work. I’ve wasted money on mosquito gadgets before, so I was ready for this to be another disappointment. But the first night I used it, the difference was obvious — no constant buzzing around my legs, and sitting outside wasn’t a fight anymore. Honestly, it’s the best $24 I’ve spent in a long time.</p>
+  <p style="margin: 0 !important; line-height: 1.5 !important;">I didn’t expect BuzzBlock to work. I’ve wasted money on mosquito gadgets before, so I was ready for this to be another disappointment. But the first night I used it, the difference was obvious — no constant buzzing around my legs, and sitting outside wasn’t a fight anymore. Honestly, it’s the best RM99 I’ve spent in a long time.</p>
   </div>
   </div>
   </div>
@@ -1261,7 +1277,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
    "
    onclick="_mgq.push(['MgSensorInvoke','order_click'])"
   class="cta-button js-to-checkout">
-Order Now for $24 (~RM98)</a>
+Order Now & Save 50%</a>
     </div>
   <!-- Image Carousel Column -->
   <div style="flex: 1 1 500px; min-width: 300px; display: flex; align-items: center; justify-content: center;">
@@ -1513,30 +1529,40 @@ Order Now for $24 (~RM98)</a>
   <!-- LEFT COLUMN -->
   <div style="flex: 1 1 500px; min-width: 300px;">
   <div style="padding-left: 10px; max-width: 500px; margin: 0 auto;">
-  <h2 style="font-size: 36px; font-weight: 800; color: #1a1a1a; margin-bottom: 10px;">Special Offer On Now</h2>
-  <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
-  <strong>50% discount</strong> on BuzzBlock for first-time buyers
-          </p>
-  <p style="font-size: 16px; color: red; font-weight: 700; margin-bottom: 5px;">
-  <span class="hourglass" style="display: inline-block; animation: hourglassSpinPause 4s ease-in-out infinite; transform-origin: center;">⌛</span>
-            Limited Time Offer!
-          </p>
-  <div id="countdown" style="font-size: 24px; font-weight: bold; color: #1a1a1a; margin: 10px 0;"></div>
-  <p style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">
-            Special LIMITED TIME Offer:<br/>
-  <span style="color: #6e32b9; font-size: 20px; font-weight: 800;">Pay Only $24 (~RM98)</span>
-  </p>
-  <ul style="list-style: none; padding-left: 0; margin-left: 0; font-size: 16px; color: #222;">
-    <li style="margin-bottom: 6px;">✅ Fast shipping across Malaysia</li>
-    <li style="margin-bottom: 6px;">✅ Easy returns if it doesn’t work for your home</li>
-    <li style="margin-bottom: 6px;">✅ Friendly customer support</li>
-    <li style="margin-bottom: 6px; font-weight: 600;">✅ Limited-time introductory price</li>
-    </ul>
-        <p style="font-size: 13px; color: #555; margin-top: 4px;">
-      Charged in USD at today’s exchange rate. No extra steps needed.
+    <h2 style="font-size: 36px; font-weight: 800; color: #1a1a1a; margin-bottom: 10px;">Special Offer On Now</h2>
+
+    <p style="font-size: 16px; color: #333; margin-bottom: 10px;">
+      <strong>Up to 50% off</strong> BuzzBlock — introductory pricing for first-time buyers
     </p>
-  <p style="font-size: 14px; color: green; display: inline-block; margin-right: 10px;">🟢 Today’s online price ends at midnight.</p>
-  <p style="font-size: 14px; color: red; display: inline-block;">🔥 Stock: <span class="unit-count">Only 3 Units Left</span>!</p>
+    
+    <p style="font-size: 16px; color: red; font-weight: 700; margin-bottom: 5px;">
+      <span class="hourglass" style="display: inline-block; animation: hourglassSpinPause 4s ease-in-out infinite; transform-origin: center;">⌛</span>
+      Limited Time Offer!
+    </p>
+    
+    <div id="countdown" style="font-size: 24px; font-weight: bold; color: #1a1a1a; margin: 10px 0;"></div>
+    
+    <p style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">
+      Special LIMITED TIME Offer:<br/>
+      <span style="color: #6e32b9; font-size: 20px; font-weight: 800;">
+        Order Now &amp; Pay as little as RM59 per unit
+      </span>
+    </p>
+    
+    <ul style="list-style: none; padding-left: 0; margin-left: 0; font-size: 16px; color: #222;">
+      <li style="margin-bottom: 6px;">✅ Lower price per unit on multi-lamp bundles</li>
+      <li style="margin-bottom: 6px;">✅ Free shipping on 2+ units across Malaysia</li>
+      <li style="margin-bottom: 6px;">✅ Easy returns if it doesn’t work for your home</li>
+      <li style="margin-bottom: 6px; font-weight: 600;">✅ Limited-time introductory pricing</li>
+    </ul>
+    
+    <p style="font-size: 14px; color: green; display: inline-block; margin-right: 10px;">
+      🟢 Today’s bundle pricing ends at midnight.
+    </p>
+    
+    <p style="font-size: 14px; color: red; display: inline-block;">
+      🔥 Stock: <span class="unit-count">Only 3 Units Left</span>!
+    </p>
   <br/>
 <a href="/checkout.html"
    style="
@@ -1769,65 +1795,125 @@ Order Now for $24 (~RM98)</a>
   Order Now &amp; Save 50%
 </a>
     
-  <section style="background-color: #ffffff; padding: 60px 20px;">
-  <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-  <h2 style="font-size: 36px; font-weight: 800; color: #1a1a1a; margin-bottom: 30px;">Below is a list of frequently asked questions about BuzzBlock</h2>
-  <div class="faq-section">
-  <div class="faq-item">
-  <button class="faq-question">How does BuzzBlock work?<span class="arrow">▶</span></button>
-  <div class="faq-answer">BuzzBlock uses a high-intensity 365 nm UV LED to attract mosquitoes, luring them in with the precise light frequency they’re naturally drawn to. Once they get close, the built-in electric grid instantly zaps them, eliminating mosquitoes without the need for sprays, chemicals, or constant reapplication.</div>
-  </div>
-  <div class="faq-item">
-  <button class="faq-question">Is BuzzBlock safe to use around children and pets?<span class="arrow">▶</span></button>
-  <div class="faq-answer">Yes! BuzzBlock is 100% chemical-free and doesn’t release any toxic fumes or harmful substances. The protective outer grid ensures that small fingers and paws can’t touch the zapper’s electrified surface, making it safe to use indoors and outdoors around your family.</div>
-  </div>
-  <div class="faq-item">
-  <button class="faq-question">Does BuzzBlock work indoors and outdoors?<span class="arrow">▶</span></button>
-  <div class="faq-answer">Absolutely! BuzzBlock is designed to work in both indoor and outdoor settings. Use it in your bedroom, living room, patio, backyard, or even while camping. For best results, place it in areas where mosquitoes are most active.</div>
-  </div>
-  <div class="faq-item">
-  <button class="faq-question">How do I set up BuzzBlock?<span class="arrow">▶</span></button>
-  <div class="faq-answer">BuzzBlock is ready to use right out of the box! Simply press the power button and it is on. If it runs out of battery yu simply plug it in. No complicated setup, no refills, and no maintenance required.</div>
-  </div>
-  <div class="faq-item">
-  <button class="faq-question">How large of an area does BuzzBlock cover?<span class="arrow">▶</span></button>
-  <div class="faq-answer">BuzzBlock is effective in areas up to 37 square meters, making it perfect for bedrooms, patios, and outdoor seating areas. For larger spaces, multiple units can be used for even greater coverage.</div>
-  </div>
-  <div class="faq-item">
-  <button class="faq-question">Does BuzzBlock make any noise?<span class="arrow">▶</span></button>
-  <div class="faq-answer">BuzzBlock operates silently, except for a faint zap when mosquitoes are eliminated. There’s no loud buzzing, fans, or disruptive noises—just quiet, effective protection.</div>
-  </div>
-  <div class="faq-item">
-  <button class="faq-question">How do I clean BuzzBlock?<span class="arrow">▶</span></button>
-  <div class="faq-answer">BuzzBlock is low-maintenance! Simply unplug the device and use the included brush (or a dry cloth) to remove any mosquito remains from the electric grid.</div>
-  </div>
-  <div class="faq-item">
-  <button class="faq-question">Does BuzzBlock require any replacement parts?<span class="arrow">▶</span></button>
-  <div class="faq-answer">Nope! Unlike mosquito traps that require expensive refills or sticky pads, BuzzBlock works continuously without the need for replacements. Just plug it in, and you’re good to go.</div>
-  </div>
-  <div class="faq-item">
-  <button class="faq-question">Can BuzzBlock replace mosquito sprays and repellents?<span class="arrow">▶</span></button>
-  <div class="faq-answer">Yes! BuzzBlock provides chemical-free mosquito control, eliminating the need for sprays, lotions, coils, and candles that require constant reapplication. It’s a safer, hassle-free alternative to traditional repellents.</div>
-  </div>
-  <div class="faq-item">
-    <button class="faq-question">What if I’m not satisfied with my purchase?<span class="arrow">▶</span></button>
-    <div class="faq-answer">
-      <p>Every home is different, and no mosquito device works perfectly for everyone.</p>
-      <p>If BuzzBlock doesn’t help in your space, just reach out to our support team — we’ll guide you with setup tips or help arrange a return based on our standard store policy.</p>
-      <p>You won’t be stuck with a product that doesn’t work for you.</p>
+ <!-- FAQ (desktop: fills empty left space; mobile: appears after reviews) -->
+<section class="card bb-faq-card" id="bb-faq" aria-label="Frequently asked questions">
+  <div class="bb-faq-wrap">
+    <h2 class="bb-faq-title">Frequently Asked Questions</h2>
+
+    <div class="faq-section" id="faq-section">
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          How does BuzzBlock work? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          BuzzBlock uses a high-intensity 365 nm UV LED to attract mosquitoes, luring them in with the precise light frequency they’re naturally drawn to. Once they get close, the built-in electric grid instantly zaps them, eliminating mosquitoes without the need for sprays, chemicals, or constant reapplication.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          Is BuzzBlock safe to use around children and pets? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          Yes! BuzzBlock is 100% chemical-free and doesn’t release any toxic fumes or harmful substances. The protective outer grid ensures that small fingers and paws can’t touch the zapper’s electrified surface, making it safe to use indoors and outdoors around your family.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          Does BuzzBlock work indoors and outdoors? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          Absolutely! BuzzBlock is designed to work in both indoor and outdoor settings. Use it in your bedroom, living room, patio, backyard, or even while camping. For best results, place it in areas where mosquitoes are most active.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          How do I set up BuzzBlock? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          BuzzBlock is ready to use right out of the box! Simply press the power button and it is on. If it runs out of battery you simply plug it in. No complicated setup, no refills, and no maintenance required.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          How large of an area does BuzzBlock cover? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          BuzzBlock is effective in areas up to 37 square meters, making it perfect for bedrooms, patios, and outdoor seating areas. For larger spaces, multiple units can be used for even greater coverage.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          Does BuzzBlock make any noise? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          BuzzBlock operates silently, except for a faint zap when mosquitoes are eliminated. There’s no loud buzzing, fans, or disruptive noises—just quiet, effective protection.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          How do I clean BuzzBlock? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          BuzzBlock is low-maintenance! Simply unplug the device and use the included brush (or a dry cloth) to remove any mosquito remains from the electric grid.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          Does BuzzBlock require any replacement parts? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          Nope! Unlike mosquito traps that require expensive refills or sticky pads, BuzzBlock works continuously without the need for replacements. Just plug it in, and you’re good to go.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          Can BuzzBlock replace mosquito sprays and repellents? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          Yes! BuzzBlock provides chemical-free mosquito control, eliminating the need for sprays, lotions, coils, and candles that require constant reapplication. It’s a safer, hassle-free alternative to traditional repellents.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          What if I’m not satisfied with my purchase? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          <p>Every home is different, and no mosquito device works perfectly for everyone.</p>
+          <p>If BuzzBlock doesn’t help in your space, just reach out to our support team — we’ll guide you with setup tips or help arrange a return based on our standard store policy.</p>
+          <p>You won’t be stuck with a product that doesn’t work for you.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          Where does BuzzBlock ship from? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          BuzzBlock ships directly from our warehouses in Malaysia to ensure fast and reliable delivery. Orders are processed and shipped quickly, and you’ll receive tracking as soon as your order is on its way.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" type="button">
+          How can I contact customer support if I have questions? <span class="arrow" aria-hidden="true">▶</span>
+        </button>
+        <div class="faq-answer">
+          We’re here to help. Email: <strong>info@buzzblock.shop</strong><br />
+          We strive to respond as quickly as possible.
+        </div>
+      </div>
     </div>
-  <div class="faq-item">
-  <button class="faq-question">Where does BuzzBlock ship from?<span class="arrow">▶</span></button>
-  <div class="faq-answer">BuzzBlock ships directly from our warehouses in Malaysia to ensure fast and reliable delivery. We offer worldwide shipping, and orders are processed and shipped within 24 hours. You’ll receive a tracking number as soon as your order is on its way!</div>
   </div>
-  <div class="faq-item">
-  <button class="faq-question">How can I contact customer support if I have questions?<span class="arrow">▶</span></button>
-  <div class="faq-answer">We’re here to help! Our customer support team is available via email to assist with any questions, order inquiries, or troubleshooting. Email: info@buzzblock.shop
-    <br/>We strive to respond to all inquiries as quickly as possible to ensure you have the best experience with BuzzBlock.</div>
-  </div>
-  </div>
-  </div>
-  </section>
+</section>
   <!-- BEGIN Urgency CTA Section -->
   <section style="background-color: #f3e8ff; padding: 60px 20px; text-align: center;">
   <h2 style="font-size: 38px; font-weight: 800; color: #e53935; margin-bottom: 16px;">
@@ -2283,57 +2369,109 @@ Order Now for $24 (~RM98)</a>
   </style>
   <div class="floating-review" id="floating-review-1">Just now: Anna from <span id="bubbleCountry1">your country</span> ordered BuzzBlock 🦟</div>
   <div class="floating-review" id="floating-review-2">Just now: Emil from <span id="bubbleCountry2">your country</span> grabbed one too 🔥</div>
-  <div id="last-unit-alert">⚠️ Last unit left – selling fast!</div>
+  <div id="last-unit-alert" style="display:none;">⚠️ Only 5 units left — selling fast!</div>
+
   <script>
     const countries = ["Italy", "Spain", "Germany", "Australia", "Hungary", "Greece", "Netherlands"];
-    let currentUnitCount = 3;
   
-    function updateUnitCount() {
+    // ✅ Persist units across refresh
+    const UNIT_STORAGE_KEY = "bb_currentUnitCount_v1";
+    const UNIT_FLOOR = 5;   // stop at 5
+    const UNIT_START = 7;   // start at 7
+  
+    function getStoredUnitCount() {
+      const raw = localStorage.getItem(UNIT_STORAGE_KEY);
+      const n = raw ? parseInt(raw, 10) : NaN;
+      return Number.isFinite(n) ? n : UNIT_START;
+    }
+  
+    function setStoredUnitCount(n) {
+      localStorage.setItem(UNIT_STORAGE_KEY, String(n));
+    }
+  
+    let currentUnitCount = getStoredUnitCount();
+  
+    function renderUnitCount() {
       const unitElements = document.querySelectorAll(".unit-count");
-      currentUnitCount = Math.max(currentUnitCount - 1, 1);
       unitElements.forEach(el => {
-        el.textContent = `Only ${currentUnitCount} Unit${currentUnitCount > 1 ? 's' : ''} Left`;
+        el.textContent = `Only ${currentUnitCount} Unit${currentUnitCount > 1 ? "s" : ""} Left`;
       });
-      if (currentUnitCount === 1) {
-        document.getElementById("last-unit-alert").style.display = "block";
+  
+      const alertEl = document.getElementById("last-unit-alert");
+      if (alertEl) {
+        if (currentUnitCount <= UNIT_FLOOR) {
+          alertEl.textContent = `⚠️ Only ${currentUnitCount} units left — selling fast!`;
+          alertEl.style.display = "block";
+        } else {
+          alertEl.style.display = "none";
+        }
       }
     }
   
-    fetch("https://ipapi.co/json/")
-      .then(response => response.json())
-      .then(data => {
-        const country = data.country_name || "your country";
-        const spanUser = document.getElementById("userCountry");
-        const bubble1 = document.getElementById("bubbleCountry1");
-        const bubble2 = document.getElementById("bubbleCountry2");
+    function updateUnitCount() {
+      // ✅ Decrease but never below 5 (your target)
+      currentUnitCount = Math.max(currentUnitCount - 1, UNIT_FLOOR);
+      setStoredUnitCount(currentUnitCount);
+      renderUnitCount();
+    }
   
-        if (spanUser) spanUser.textContent = country;
-        if (bubble1) bubble1.textContent = country;
-        if (bubble2) bubble2.textContent = countries[Math.floor(Math.random() * countries.length)];
-      })
-      .catch(() => {
-        const spanUser = document.getElementById("userCountry");
-        const bubble1 = document.getElementById("bubbleCountry1");
-        const bubble2 = document.getElementById("bubbleCountry2");
+    // Render immediately on page load (uses stored value, so no refresh reset)
+    renderUnitCount();
   
-        if (spanUser) spanUser.textContent = "Eastern Europe";
-        if (bubble1) bubble1.textContent = "Eastern Europe";
-        if (bubble2) bubble2.textContent = countries[Math.floor(Math.random() * countries.length)];
-      });
-  
-    setTimeout(() => {
-      const bubble1 = document.getElementById("floating-review-1");
-      bubble1.style.display = "block";
-      updateUnitCount();
-      setTimeout(() => { bubble1.style.display = "none"; }, 10000);
-    }, 60000);
-  
-    setTimeout(() => {
-      const bubble2 = document.getElementById("floating-review-2");
-      bubble2.style.display = "block";
-      updateUnitCount();
-      setTimeout(() => { bubble2.style.display = "none"; }, 10000);
-    }, 180000);
+   // --- GEO (try ipapi, then ipwho.is, else fallback to Malaysia) ---
+async function getCountryName() {
+  try {
+    const r1 = await fetch("https://ipapi.co/json/", { cache: "no-store" });
+    if (r1.ok) {
+      const d1 = await r1.json();
+      if (d1?.country_name) return d1.country_name;
+    }
+  } catch (_) {}
+
+  try {
+    const r2 = await fetch("https://ipwho.is/", { cache: "no-store" });
+    if (r2.ok) {
+      const d2 = await r2.json();
+      if (d2?.success !== false && d2?.country) return d2.country;
+    }
+  } catch (_) {}
+
+  // Better than "your country" for a MY funnel
+  return "Malaysia";
+}
+
+(async () => {
+  const country = await getCountryName();
+
+  const spanUser = document.getElementById("userCountry");
+  const bubble1 = document.getElementById("bubbleCountry1");
+  const bubble2 = document.getElementById("bubbleCountry2");
+
+  if (spanUser) spanUser.textContent = country;
+  if (bubble1) bubble1.textContent = country;
+
+  // Keep bubble2 as random "social proof" OR set to real geo.
+  // Option A (keep random):
+  if (bubble2) bubble2.textContent = countries[Math.floor(Math.random() * countries.length)];
+
+  // Option B (real geo):
+  // if (bubble2) bubble2.textContent = country;
+})();
+
+// --- Two events: 7 → 6 → 5, then alert shows ---
+setTimeout(() => {
+  const bubble1 = document.getElementById("floating-review-1");
+  if (bubble1) bubble1.style.display = "block";
+  updateUnitCount();
+  setTimeout(() => { if (bubble1) bubble1.style.display = "none"; }, 10000);
+}, 60000);
+
+setTimeout(() => {
+  const bubble2 = document.getElementById("floating-review-2");
+  if (bubble2) bubble2.style.display = "block";
+  updateUnitCount();
+  setTimeout(() => { if (bubble2) bubble2.style.display = "none"; }, 10000);
+}, 180000);
   </script>
   <!-- END Enhanced Floating Review Bubbles + Countdown -->
   <script>
