@@ -8,8 +8,12 @@ const Stripe = require('stripe');
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
+// Optional: GA4 MP
 const gaMeasurementId = process.env.GA4_MEASUREMENT_ID || '';
 const gaApiSecret = process.env.GA4_API_SECRET || '';
+
+// MGID postback base (you hardcoded 911140 before; keep in env if you prefer)
+const mgidPostbackId = process.env.MGID_POSTBACK_ID || '911140';
 
 if (!stripeSecretKey) {
   console.error('FATAL: STRIPE_SECRET_KEY env var is missing');
@@ -20,20 +24,15 @@ console.log('Loaded STRIPE_SECRET_KEY:', true);
 console.log('Loaded STRIPE_WEBHOOK_SECRET:', !!webhookSecret);
 console.log('Loaded GA4_MEASUREMENT_ID:', !!gaMeasurementId);
 console.log('Loaded GA4_API_SECRET:', !!gaApiSecret);
+console.log('Loaded MGID_POSTBACK_ID:', mgidPostbackId);
 
 const stripe = Stripe(stripeSecretKey);
 const app = express();
 
 /**
- * Helper: send purchase event to GA4 via Measurement Protocol.
- * This is OPTIONAL – if GA envs are not set, it just logs and skips.
+ * OPTIONAL helper: send purchase event to GA4 via Measurement Protocol.
  */
-async function sendGa4Purchase({
-  mgidClickId,
-  bundle,
-  payout,
-  currency
-}) {
+async function sendGa4Purchase({ mgidClickId, bundle, payout, currency }) {
   if (!gaMeasurementId || !gaApiSecret) {
     console.log('GA4 env not configured, skipping GA4 MP event');
     return;
@@ -58,23 +57,20 @@ async function sendGa4Purchase({
           items: [
             {
               item_name: 'BuzzBlock',
-              quantity: Number(bundle) || 1
-            }
+              quantity: Number(bundle) || 1,
+            },
           ],
-          // You can add more params if you want:
-          // coupon, shipping, tax, transaction_id, etc.
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 
   try {
     const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
-
     const text = await resp.text();
     console.log('GA4 MP status:', resp.status, 'body:', text);
   } catch (err) {
@@ -82,101 +78,150 @@ async function sendGa4Purchase({
   }
 }
 
-// ──────────────────────────────────────────────
-// 1) Webhook endpoint – raw body for Stripe
-// ──────────────────────────────────────────────
-app.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }),
-  async (req, res) => {
-    const sig = req.headers['stripe-signature'];
+/**
+ * Send MGID S2S postback
+ */
+async function sendMgidPostback({ mgidClickId, payout }) {
+  if (!mgidClickId) {
+    console.log('MGID: no click id, skipping postback');
+    return;
+  }
 
-    let event;
-    try {
-      if (!webhookSecret) {
-        console.warn(
-          '⚠️ STRIPE_WEBHOOK_SECRET is not set – rejecting webhook.'
-        );
-        return res.status(400).send('Webhook secret not configured');
-      }
+  // Your prior format:
+  // https://a.mgid.com/postback/911140?c=CLICKID&e=purchase&r=VALUE
+  const mgidUrl =
+    `https://a.mgid.com/postback/${encodeURIComponent(mgidPostbackId)}` +
+    `?c=${encodeURIComponent(mgidClickId)}` +
+    `&e=purchase` +
+    `&r=${encodeURIComponent(payout)}`;
 
-      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-    } catch (err) {
-      console.error('❌ Webhook signature verification failed:', err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+  console.log('→ MGID postback:', mgidUrl);
+
+  try {
+    const r = await fetch(mgidUrl);
+    const body = await r.text();
+    console.log('MGID response status:', r.status);
+    console.log('MGID response body:', body);
+  } catch (err) {
+    console.error('MGID postback error:', err.message);
+  }
+}
+
+// ──────────────────────────────────────────────
+// 1) Webhook endpoint – MUST be raw body for Stripe signature verification
+// ──────────────────────────────────────────────
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+
+  let event;
+  try {
+    if (!webhookSecret) {
+      console.warn('⚠️ STRIPE_WEBHOOK_SECRET is not set – rejecting webhook.');
+      return res.status(400).send('Webhook secret not configured');
     }
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+  } catch (err) {
+    console.error('❌ Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
 
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
+  try {
+    // We only want “paid only” → payment_intent.succeeded is the cleanest trigger.
+    if (event.type === 'payment_intent.succeeded') {
+      const pi = event.data.object;
 
-      const mgidClickId = session.metadata?.mgid_clickid || '';
-      const bundle = session.metadata?.bundle || '';
-      const amountTotal = session.amount_total || 0; // in sen
-      const currency = session.currency; // "myr"
+      const mgidClickId = pi.metadata?.mgid_clickid || '';
+      const bundle = pi.metadata?.bundle || '';
+      const currency = (pi.currency || 'myr').toLowerCase();
 
-      const payout = amountTotal / 100; // e.g. 148.00
+      // amount_received is the “actually received” value; fall back to amount
+      const amount = typeof pi.amount_received === 'number' ? pi.amount_received : pi.amount;
+      const payout = (amount || 0) / 100;
 
-      console.log('✅ checkout.session.completed');
+      const alreadySent = pi.metadata?.mgid_postback_sent === '1';
+
+      console.log('✅ payment_intent.succeeded');
+      console.log('  pi:', pi.id);
       console.log('  mgidClickId:', mgidClickId);
       console.log('  bundle:', bundle);
       console.log('  payout:', payout, currency);
+      console.log('  mgid_postback_sent:', alreadySent);
 
-      const tasks = [];
+      if (!alreadySent) {
+        // Fire MGID + GA4
+        await Promise.all([
+          sendMgidPostback({ mgidClickId, payout }),
+          sendGa4Purchase({ mgidClickId, bundle, payout, currency }),
+        ]);
 
-      // MGID S2S
-      if (mgidClickId) {
-        const mgidUrl =
-          'https://a.mgid.com/postback/911140' +
-          `?c=${encodeURIComponent(mgidClickId)}` +
-          `&e=purchase` +
-          `&r=${encodeURIComponent(payout)}`;
-
-        console.log('→ MGID postback:', mgidUrl);
-
-        tasks.push(
-          fetch(mgidUrl)
-            .then((r) => r.text())
-            .then((body) => {
-              console.log('MGID response:', body);
-            })
-            .catch((err) => {
-              console.error('MGID postback error:', err.message);
-            })
-        );
+        // Persist “sent” flag in Stripe so it survives server restarts and prevents duplicates.
+        try {
+          await stripe.paymentIntents.update(pi.id, {
+            metadata: {
+              ...pi.metadata,
+              mgid_postback_sent: '1',
+            },
+          });
+          console.log('✅ Marked PI metadata mgid_postback_sent=1');
+        } catch (e) {
+          console.error('⚠️ Could not update PI metadata (still OK):', e.message);
+        }
+      } else {
+        console.log('↩️ Skipping MGID/GA4: already sent for this PaymentIntent');
       }
-
-      // GA4 server-side purchase event
-      tasks.push(
-        sendGa4Purchase({
-          mgidClickId,
-          bundle,
-          payout,
-          currency
-        })
-      );
-
-      await Promise.all(tasks);
+    } else if (event.type === 'checkout.session.completed') {
+      // Keep this for logging/debug only. Do NOT send MGID from here.
+      const session = event.data.object;
+      console.log('ℹ️ checkout.session.completed', {
+        id: session.id,
+        payment_status: session.payment_status,
+        status: session.status,
+        payment_intent: session.payment_intent,
+      });
+    } else if (event.type === 'checkout.session.async_payment_succeeded') {
+      // Optional logging. PaymentIntent.succeeded will still be your “paid” trigger.
+      const session = event.data.object;
+      console.log('ℹ️ checkout.session.async_payment_succeeded', {
+        id: session.id,
+        payment_intent: session.payment_intent,
+      });
+    } else if (event.type === 'checkout.session.async_payment_failed') {
+      const session = event.data.object;
+      console.log('ℹ️ checkout.session.async_payment_failed', {
+        id: session.id,
+        payment_intent: session.payment_intent,
+      });
     } else {
       console.log('Ignored event type:', event.type);
     }
 
-    res.json({ received: true });
+    return res.json({ received: true });
+  } catch (err) {
+    console.error('❌ Webhook handler error:', err);
+    return res.status(500).send('Webhook handler error');
   }
-);
+});
 
 // ──────────────────────────────────────────────
-// 2) Normal middleware
+// 2) Normal middleware (AFTER webhook)
 // ──────────────────────────────────────────────
 app.use(express.json());
-app.use(cors());
+
+// Keep CORS simple for now. Tighten later if needed.
+app.use(
+  cors({
+    origin: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type'],
+  })
+);
 
 // Health-check
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// Stripe Prices
-// Map bundles → Stripe price IDs
+// Stripe Prices: Map bundles → Stripe price IDs
 const PRICE_MAP = {
   '1': process.env.STRIPE_PRICE_1,
   '2': process.env.STRIPE_PRICE_2,
@@ -217,7 +262,6 @@ app.post('/create-session', async (req, res) => {
       mode: 'payment',
       ui_mode: 'embedded',
 
-      // What the customer is buying
       line_items: [
         {
           price: priceId,
@@ -225,35 +269,18 @@ app.post('/create-session', async (req, res) => {
         },
       ],
 
-      // 👇 1) Collect full SHIPPING ADDRESS
+      // Shipping address collection (Malaysia)
       shipping_address_collection: {
-        // change / add countries if you expand later
         allowed_countries: ['MY'],
       },
 
-      // 👇 2) Show a “3–7 day delivery” shipping method (FREE)
-// 👇 2) Shipping logic: RM 9.99 for 1-pack, FREE for others
-shipping_options:
-  String(bundle) === '1'
-    ? [
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 999, currency: 'myr' }, // RM 9.99
-            display_name: 'Standard shipping',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 3 },
-              maximum: { unit: 'business_day', value: 7 },
-            },
-          },
-        },
-      ]
-    : [
+      // Free shipping option shown in checkout
+      shipping_options: [
         {
           shipping_rate_data: {
             type: 'fixed_amount',
             fixed_amount: { amount: 0, currency: 'myr' },
-            display_name: 'Free shipping',
+            display_name: '3–7 day delivery',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 3 },
               maximum: { unit: 'business_day', value: 7 },
@@ -262,24 +289,31 @@ shipping_options:
         },
       ],
 
-      // 👇 3) Ask for phone number in Checkout
-      phone_number_collection: {
-        enabled: true,
-      },
+      // Phone number in checkout
+      phone_number_collection: { enabled: true },
 
-      // Use email from your page if present (optional)
+      // Optional: prefills email
       customer_email: customer.email || undefined,
 
-      // Where Stripe sends them back after payment
-      return_url:
-        'https://buzzblock.shop/thankyou.html?session_id={CHECKOUT_SESSION_ID}',
-
-      // Tracking & extra info you want to see in webhook
+      // IMPORTANT: put tracking into BOTH session.metadata and payment_intent_data.metadata
       metadata: {
         mgid_clickid: mgidClickId,
         bundle,
         customer_name: customer.name || '',
       },
+
+      // THIS is what makes payment_intent.succeeded carry your MGID click id.
+      payment_intent_data: {
+        metadata: {
+          mgid_clickid: mgidClickId,
+          bundle,
+          customer_name: customer.name || '',
+          mgid_postback_sent: '0',
+        },
+      },
+
+      return_url:
+        'https://buzzblock.shop/thankyou.html?session_id={CHECKOUT_SESSION_ID}',
     });
 
     console.log('✅ Created Session:', session.id);
@@ -292,13 +326,13 @@ shipping_options:
     console.error('❌ Stripe error in /create-session:', err);
     res.status(500).json({
       error: 'Stripe error',
-      message: 'Payment configuration error',
+      message: err && err.message ? err.message : 'Payment configuration error',
     });
   }
 });
 
 // 404
-app.use((req, res) => {
+app.use((_req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
