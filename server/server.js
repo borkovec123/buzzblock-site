@@ -257,37 +257,54 @@ app.post('/create-session', async (req, res) => {
 
   const mgidClickId = tracking.mgid_clickid || '';
 
-  try {
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      ui_mode: 'embedded',
-
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-
-      // Shipping address collection (Malaysia)
-      shipping_address_collection: {
-        allowed_countries: ['MY'],
-      },
-
-      // Free shipping option shown in checkout
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 0, currency: 'myr' },
-            display_name: '3–7 day delivery',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 3 },
-              maximum: { unit: 'business_day', value: 7 },
+try {
+  const shippingOptions =
+    bundle === '1'
+      ? [
+          {
+            shipping_rate_data: {
+              type: 'fixed_amount',
+              fixed_amount: { amount: 999, currency: 'myr' }, // RM 9.99
+              display_name: 'Shipping (3–7 day delivery)',
+              delivery_estimate: {
+                minimum: { unit: 'business_day', value: 3 },
+                maximum: { unit: 'business_day', value: 7 },
+              },
             },
           },
-        },
-      ],
+        ]
+      : [
+          {
+            shipping_rate_data: {
+              type: 'fixed_amount',
+              fixed_amount: { amount: 0, currency: 'myr' },
+              display_name: 'FREE Shipping (3–7 day delivery)',
+              delivery_estimate: {
+                minimum: { unit: 'business_day', value: 3 },
+                maximum: { unit: 'business_day', value: 7 },
+              },
+            },
+          },
+        ];
+
+  const session = await stripe.checkout.sessions.create({
+    mode: 'payment',
+    ui_mode: 'embedded',
+
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+
+    // Shipping address collection (Malaysia)
+    shipping_address_collection: {
+      allowed_countries: ['MY'],
+    },
+
+    // Shipping option (conditional)
+    shipping_options: shippingOptions,
 
       // Phone number in checkout
       phone_number_collection: { enabled: true },
