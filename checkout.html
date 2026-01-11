@@ -2085,189 +2085,250 @@ Delivery was fast and setup was very easy.
     </main>
   </div>
 
-  <script>
-    // 1) Stripe client (publishable key)
-    const stripe = Stripe(
-      "pk_live_51RNA2NFMVKWDjAuUtpWoPZAb0k0E5pB0guvzthkifKYe5ZALiffc2JGuITQYcyDXllzx5lcAuGJdhQL42SyQQn1E00fcrq3Fzh"
-    );
+<script>
+  // 1) Stripe client (publishable key)
+  const stripe = Stripe(
+    "pk_live_51RNA2NFMVKWDjAuUtpWoPZAb0k0E5pB0guvzthkifKYe5ZALiffc2JGuITQYcyDXllzx5lcAuGJdhQL42SyQQn1E00fcrq3Fzh"
+  );
 
-    // Your Render backend base URL
-    const BACKEND_BASE = "https://buzzblock-backend.onrender.com";
+  // Your Render backend base URL
+  const BACKEND_BASE = "https://buzzblock-backend.onrender.com";
 
-    // Track MGID click id from URL, so we can send it to the backend
-    (function storeTrackingFromUrl() {
-      const params = new URLSearchParams(window.location.search);
-      const mgidClickId =
-        params.get("mgid_clickid") || params.get("c") || "";
+  // Track MGID click id from URL, so we can send it to the backend
+  (function storeTrackingFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const mgidClickId = params.get("mgid_clickid") || params.get("c") || "";
 
-      window.BUZZBLOCK_TRACKING = {
-        mgid_clickid: mgidClickId,
-      };
-    })();
-
-    // Bundle <-> price mapping just for UI text.
-    const BUNDLE_CONFIG = {
-      "1": {
-        subtotal: "RM 99.99",
-        total: "RM 109.98",
-        shipping: "RM 9.99",
-        qtyLabel: "1× BuzzBlock",
-      },
-      "2": {
-        subtotal: "RM 179",
-        total: "RM 179.99",
-        shipping: "FREE",
-        qtyLabel: "2× BuzzBlock",
-      },
-      "3": {
-        subtotal: "RM 239.99",
-        total: "RM 239.99",
-        shipping: "FREE",
-        qtyLabel: "3× BuzzBlock",
-      },
-      "4": {
-        subtotal: "RM 279.99",
-        total: "RM 279.99",
-        shipping: "FREE",
-        qtyLabel: "4× BuzzBlock",
-      },
-      "5": {
-        subtotal: "RM 299.99",
-        total: "RM 299.99",
-        shipping: "FREE",
-        qtyLabel: "5× BuzzBlock",
-      },
+    window.BUZZBLOCK_TRACKING = {
+      mgid_clickid: mgidClickId,
     };
+  })();
 
-    const bundleListEl = document.getElementById("bundle-list");
-    const summaryQtyEl = document.getElementById("summary-qty");
-    const summarySubtotalEl = document.getElementById("summary-subtotal");
-    const summaryShippingEl = document.getElementById("summary-shipping");
-    const summaryTotalEl = document.getElementById("summary-total");
+  // Bundle <-> price mapping just for UI text.
+  const BUNDLE_CONFIG = {
+    "1": {
+      subtotal: "RM 99.99",
+      total: "RM 109.98",
+      shipping: "RM 9.99",
+      qtyLabel: "1× BuzzBlock",
+    },
+    "2": {
+      subtotal: "RM 179",
+      total: "RM 179.99",
+      shipping: "FREE",
+      qtyLabel: "2× BuzzBlock",
+    },
+    "3": {
+      subtotal: "RM 239.99",
+      total: "RM 239.99",
+      shipping: "FREE",
+      qtyLabel: "3× BuzzBlock",
+    },
+    "4": {
+      subtotal: "RM 279.99",
+      total: "RM 279.99",
+      shipping: "FREE",
+      qtyLabel: "4× BuzzBlock",
+    },
+    "5": {
+      subtotal: "RM 299.99",
+      total: "RM 299.99",
+      shipping: "FREE",
+      qtyLabel: "5× BuzzBlock",
+    },
+  };
 
-    function updateSummaryForBundle(bundleKey) {
-      const cfg = BUNDLE_CONFIG[bundleKey];
-      if (!cfg) return;
-      summaryQtyEl.textContent = cfg.qtyLabel;
-      summarySubtotalEl.textContent = cfg.subtotal;
-      summaryShippingEl.textContent = cfg.shipping;
-      summaryTotalEl.textContent = cfg.total;
+  const bundleListEl = document.getElementById("bundle-list");
+  const summaryQtyEl = document.getElementById("summary-qty");
+  const summarySubtotalEl = document.getElementById("summary-subtotal");
+  const summaryShippingEl = document.getElementById("summary-shipping");
+  const summaryTotalEl = document.getElementById("summary-total");
+
+  function updateSummaryForBundle(bundleKey) {
+    const cfg = BUNDLE_CONFIG[bundleKey];
+    if (!cfg) return;
+    if (summaryQtyEl) summaryQtyEl.textContent = cfg.qtyLabel;
+    if (summarySubtotalEl) summarySubtotalEl.textContent = cfg.subtotal;
+    if (summaryShippingEl) summaryShippingEl.textContent = cfg.shipping;
+    if (summaryTotalEl) summaryTotalEl.textContent = cfg.total;
+  }
+
+  function getSelectedBundle() {
+    const selectedInput = document.querySelector('input[name="bundle"]:checked');
+    return selectedInput ? selectedInput.value : null;
+  }
+
+  function getCustomer() {
+    return {
+      name: document.getElementById("customer-name")?.value || "",
+      email: document.getElementById("customer-email")?.value || "",
+    };
+  }
+
+  function showPaymentError(message) {
+    const errBox = document.getElementById("payment-error");
+    const errText = document.getElementById("payment-error-text");
+    if (errBox && errText) {
+      errText.textContent = message || "Unknown error. Please try again.";
+      errBox.style.display = "block";
+    } else {
+      alert(message || "Error initialising payment. Please refresh and try again.");
+    }
+  }
+
+  function clearPaymentError() {
+    const errBox = document.getElementById("payment-error");
+    const errText = document.getElementById("payment-error-text");
+    if (errBox) errBox.style.display = "none";
+    if (errText) errText.textContent = "";
+  }
+
+  let embeddedCheckout = null;
+  let loadSeq = 0; // ignore stale async responses
+  let isLoadingCheckout = false;
+
+  async function loadEmbeddedCheckoutForBundle(bundleKey) {
+    if (!bundleKey) return;
+
+    // Prevent spam if user clicks very fast (still safe even without this)
+    if (isLoadingCheckout) {
+      // Let the latest request win
+      loadSeq++;
+    }
+    const mySeq = ++loadSeq;
+
+    clearPaymentError();
+
+    const checkoutContainer = document.getElementById("checkout-container");
+    if (!checkoutContainer) throw new Error("Checkout container #checkout-container not found");
+
+    checkoutContainer.innerHTML =
+      "<div style='padding:12px;font-size:14px;'>Loading secure payment form…</div>";
+
+    // Unmount previous embedded checkout so a new one can be mounted
+    try {
+      if (embeddedCheckout && typeof embeddedCheckout.unmount === "function") {
+        embeddedCheckout.unmount();
+      }
+    } catch (_) {
+      // ignore
+    }
+    embeddedCheckout = null;
+
+    const tracking = window.BUZZBLOCK_TRACKING || {};
+    const customer = getCustomer();
+
+    isLoadingCheckout = true;
+
+    const res = await fetch(`${BACKEND_BASE}/create-session`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bundle: bundleKey, tracking, customer }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    // If user changed bundle again while we waited, ignore this response
+    if (mySeq !== loadSeq) {
+      isLoadingCheckout = false;
+      return;
     }
 
-    bundleListEl.addEventListener("change", (evt) => {
+    if (!res.ok) {
+      isLoadingCheckout = false;
+      throw new Error(data.error || data.message || "Server error creating session");
+    }
+
+    const clientSecret = data.clientSecret;
+    if (!clientSecret) {
+      isLoadingCheckout = false;
+      throw new Error("No clientSecret returned from backend");
+    }
+
+    embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret });
+
+    // Still ensure latest
+    if (mySeq !== loadSeq) {
+      isLoadingCheckout = false;
+      return;
+    }
+
+    checkoutContainer.innerHTML = "";
+    embeddedCheckout.mount("#checkout-container");
+
+    isLoadingCheckout = false;
+  }
+
+  // Bundle change: update UI + reload Stripe embedded checkout
+  if (bundleListEl) {
+    bundleListEl.addEventListener("change", async (evt) => {
       if (evt.target && evt.target.name === "bundle") {
         const selectedBundle = evt.target.value;
 
-        document
-          .querySelectorAll(".bundle-card")
-          .forEach((card) => card.classList.remove("selected"));
+        document.querySelectorAll(".bundle-card").forEach((card) => {
+          card.classList.remove("selected");
+        });
 
         const card = evt.target.closest(".bundle-card");
         if (card) card.classList.add("selected");
 
         updateSummaryForBundle(selectedBundle);
+
+        try {
+          await loadEmbeddedCheckoutForBundle(selectedBundle);
+        } catch (err) {
+          console.error("Error loading embedded checkout:", err);
+          showPaymentError(err && err.message ? err.message : "Could not load payment form.");
+        }
       }
     });
+  }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const current = document.querySelector(
-        'input[name="bundle"]:checked'
-      );
-      if (current) updateSummaryForBundle(current.value);
-    });
+  // Page load: set summary + auto-load checkout for default selected bundle (bundle 3 in your UI)
+  document.addEventListener("DOMContentLoaded", async () => {
+    const current = getSelectedBundle();
+    if (current) {
+      updateSummaryForBundle(current);
+      try {
+        await loadEmbeddedCheckoutForBundle(current);
+      } catch (err) {
+        console.error("Error loading embedded checkout on load:", err);
+        showPaymentError(err && err.message ? err.message : "Could not load payment form.");
+      }
+    }
+  });
 
-    let embeddedCheckout = null;
-
-    const payButton = document.getElementById("pay-button");
+  // Pay button: now becomes a “scroll to payment” button (optional but keeps your UI)
+  const payButton = document.getElementById("pay-button");
+  if (payButton) {
     payButton.addEventListener("click", async function () {
-      const btn = this;
-      btn.disabled = true;
-      btn.textContent = "Processing…";
-
-      const selectedInput = document.querySelector(
-        'input[name="bundle"]:checked'
-      );
-      if (!selectedInput) {
+      const bundle = getSelectedBundle();
+      if (!bundle) {
         alert("Please choose your BuzzBlock bundle first.");
-        btn.disabled = false;
-        btn.textContent = "Complete secure checkout";
         return;
       }
-      const bundle = selectedInput.value;
 
-      const customer = {
-        name:
-          document.getElementById("customer-name")?.value || "",
-        email:
-          document.getElementById("customer-email")?.value || "",
-      };
-
-      const tracking = window.BUZZBLOCK_TRACKING || {};
-
-      try {
-        const res = await fetch(`${BACKEND_BASE}/create-session`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bundle, tracking, customer }),
-        });
-
-        const data = await res.json();
-        console.log("create-session response:", data);
-
-        if (!res.ok) {
-          throw new Error(
-            data.error || data.message || "Server error creating session"
-          );
+      // If checkout isn't loaded yet for some reason, load it now.
+      if (!embeddedCheckout && !isLoadingCheckout) {
+        const btn = this;
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Loading…";
+        try {
+          await loadEmbeddedCheckoutForBundle(bundle);
+        } catch (err) {
+          console.error(err);
+          showPaymentError(err && err.message ? err.message : "Could not load payment form.");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = originalText || "Complete secure checkout";
         }
-
-        const clientSecret = data.clientSecret;
-        if (!clientSecret) {
-          throw new Error("No clientSecret returned from backend");
-        }
-
-        // BEFORE mounting, ensure container exists & has NO children.
-        const checkoutContainer =
-          document.getElementById("checkout-container");
-        if (!checkoutContainer) {
-          throw new Error(
-            "Checkout container #checkout-container not found"
-          );
-        }
-        while (checkoutContainer.firstChild) {
-          checkoutContainer.removeChild(
-            checkoutContainer.firstChild
-          );
-        }
-
-        // Initialise / mount embedded checkout once
-        if (!embeddedCheckout) {
-          embeddedCheckout = await stripe.initEmbeddedCheckout({
-            clientSecret,
-          });
-          embeddedCheckout.mount("#checkout-container");
-        }
-
-        btn.textContent = "Secure payment form below";
-      } catch (err) {
-        console.error("Error initialising checkout:", err);
-        const errBox = document.getElementById("payment-error");
-        const errText = document.getElementById("payment-error-text");
-        if (errBox && errText) {
-          errText.textContent =
-            err && err.message
-              ? err.message
-              : "Unknown error. Please try again.";
-          errBox.style.display = "block";
-        } else {
-          alert(
-            "Error initialising payment. Please refresh and try again."
-          );
-        }
-        btn.disabled = false;
-        btn.textContent = "Complete secure checkout";
       }
+
+      document.getElementById("checkout-container")?.scrollIntoView({ behavior: "smooth" });
     });
-  </script>
+  }
+</script>
 <script>
     (function () {
       const mainImg = document.getElementById("bb-hero-main-image");
