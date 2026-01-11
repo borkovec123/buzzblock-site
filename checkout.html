@@ -2098,44 +2098,16 @@ Delivery was fast and setup was very easy.
   (function storeTrackingFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const mgidClickId = params.get("mgid_clickid") || params.get("c") || "";
-
-    window.BUZZBLOCK_TRACKING = {
-      mgid_clickid: mgidClickId,
-    };
+    window.BUZZBLOCK_TRACKING = { mgid_clickid: mgidClickId };
   })();
 
   // Bundle <-> price mapping just for UI text.
   const BUNDLE_CONFIG = {
-    "1": {
-      subtotal: "RM 99.99",
-      total: "RM 109.98",
-      shipping: "RM 9.99",
-      qtyLabel: "1× BuzzBlock",
-    },
-    "2": {
-      subtotal: "RM 179",
-      total: "RM 179.99",
-      shipping: "FREE",
-      qtyLabel: "2× BuzzBlock",
-    },
-    "3": {
-      subtotal: "RM 239.99",
-      total: "RM 239.99",
-      shipping: "FREE",
-      qtyLabel: "3× BuzzBlock",
-    },
-    "4": {
-      subtotal: "RM 279.99",
-      total: "RM 279.99",
-      shipping: "FREE",
-      qtyLabel: "4× BuzzBlock",
-    },
-    "5": {
-      subtotal: "RM 299.99",
-      total: "RM 299.99",
-      shipping: "FREE",
-      qtyLabel: "5× BuzzBlock",
-    },
+    "1": { subtotal: "RM 99.99", total: "RM 109.98", shipping: "RM 9.99", qtyLabel: "1× BuzzBlock" },
+    "2": { subtotal: "RM 179", total: "RM 179.99", shipping: "FREE", qtyLabel: "2× BuzzBlock" },
+    "3": { subtotal: "RM 239.99", total: "RM 239.99", shipping: "FREE", qtyLabel: "3× BuzzBlock" },
+    "4": { subtotal: "RM 279.99", total: "RM 279.99", shipping: "FREE", qtyLabel: "4× BuzzBlock" },
+    "5": { subtotal: "RM 299.99", total: "RM 299.99", shipping: "FREE", qtyLabel: "5× BuzzBlock" },
   };
 
   const bundleListEl = document.getElementById("bundle-list");
@@ -2184,79 +2156,93 @@ Delivery was fast and setup was very easy.
   }
 
   let embeddedCheckout = null;
-  let loadSeq = 0; // ignore stale async responses
-  let isLoadingCheckout = false;
 
-  async function loadEmbeddedCheckoutForBundle(bundleKey) {
-    if (!bundleKey) return;
+  // “Latest request wins” guard
+  let seq = 0;
+  // Prevent overlapping create+destroy races
+  let switching = false;
 
-    // Prevent spam if user clicks very fast (still safe even without this)
-    if (isLoadingCheckout) {
-      // Let the latest request win
-      loadSeq++;
-    }
-    const mySeq = ++loadSeq;
-
-    clearPaymentError();
-
-    const checkoutContainer = document.getElementById("checkout-container");
-    if (!checkoutContainer) throw new Error("Checkout container #checkout-container not found");
-
-    checkoutContainer.innerHTML =
-      "<div style='padding:12px;font-size:14px;'>Loading secure payment form…</div>";
-
-    // Unmount previous embedded checkout so a new one can be mounted
+  async function destroyEmbeddedCheckout() {
+    if (!embeddedCheckout) return;
     try {
-      if (embeddedCheckout && typeof embeddedCheckout.unmount === "function") {
+      // IMPORTANT: destroy is what actually frees the singleton
+      if (typeof embeddedCheckout.destroy === "function") {
+        embeddedCheckout.destroy();
+      } else if (typeof embeddedCheckout.unmount === "function") {
+        // fallback (less reliable)
         embeddedCheckout.unmount();
       }
     } catch (_) {
       // ignore
+    } finally {
+      embeddedCheckout = null;
     }
-    embeddedCheckout = null;
+  }
 
-    const tracking = window.BUZZBLOCK_TRACKING || {};
-    const customer = getCustomer();
+  async function loadEmbeddedCheckoutForBundle(bundleKey) {
+    if (!bundleKey) return;
 
-    isLoadingCheckout = true;
+    const checkoutContainer = document.getElementById("checkout-container");
+    if (!checkoutContainer) throw new Error("Checkout container #checkout-container not found");
 
-    const res = await fetch(`${BACKEND_BASE}/create-session`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bundle: bundleKey, tracking, customer }),
-    });
+    clearPaymentError();
 
-    const data = await res.json().catch(() => ({}));
+    // bump sequence; anything older becomes stale
+    const mySeq = ++seq;
 
-    // If user changed bundle again while we waited, ignore this response
-    if (mySeq !== loadSeq) {
-      isLoadingCheckout = false;
-      return;
-    }
-
-    if (!res.ok) {
-      isLoadingCheckout = false;
-      throw new Error(data.error || data.message || "Server error creating session");
+    // If we’re already switching, let the new request replace the old one
+    while (switching) {
+      await new Promise((r) => setTimeout(r, 50));
+      // if another request came in while we waited, stop and let the newest run
+      if (mySeq !== seq) return;
     }
 
-    const clientSecret = data.clientSecret;
-    if (!clientSecret) {
-      isLoadingCheckout = false;
-      throw new Error("No clientSecret returned from backend");
+    switching = true;
+
+    try {
+      // 1) Destroy previous instance FIRST
+      await destroyEmbeddedCheckout();
+
+      // 2) Visual loading state
+      checkoutContainer.innerHTML =
+        "<div style='padding:12px;font-size:14px;'>Loading secure payment form…</div>";
+
+      const tracking = window.BUZZBLOCK_TRACKING || {};
+      const customer = getCustomer();
+
+      // 3) Create session for selected bundle
+      const res = await fetch(`${BACKEND_BASE}/create-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bundle: bundleKey, tracking, customer }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      // stale response? ignore
+      if (mySeq !== seq) return;
+
+      if (!res.ok) {
+        throw new Error(data.error || data.message || "Server error creating session");
+      }
+
+      const clientSecret = data.clientSecret;
+      if (!clientSecret) throw new Error("No clientSecret returned from backend");
+
+      // 4) init + mount (ONLY one instance at a time)
+      embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret });
+
+      // stale? destroy what we just created and stop
+      if (mySeq !== seq) {
+        await destroyEmbeddedCheckout();
+        return;
+      }
+
+      checkoutContainer.innerHTML = "";
+      embeddedCheckout.mount("#checkout-container");
+    } finally {
+      switching = false;
     }
-
-    embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret });
-
-    // Still ensure latest
-    if (mySeq !== loadSeq) {
-      isLoadingCheckout = false;
-      return;
-    }
-
-    checkoutContainer.innerHTML = "";
-    embeddedCheckout.mount("#checkout-container");
-
-    isLoadingCheckout = false;
   }
 
   // Bundle change: update UI + reload Stripe embedded checkout
@@ -2268,7 +2254,6 @@ Delivery was fast and setup was very easy.
         document.querySelectorAll(".bundle-card").forEach((card) => {
           card.classList.remove("selected");
         });
-
         const card = evt.target.closest(".bundle-card");
         if (card) card.classList.add("selected");
 
@@ -2284,7 +2269,7 @@ Delivery was fast and setup was very easy.
     });
   }
 
-  // Page load: set summary + auto-load checkout for default selected bundle (bundle 3 in your UI)
+  // Page load: set summary + auto-load checkout for default selected bundle
   document.addEventListener("DOMContentLoaded", async () => {
     const current = getSelectedBundle();
     if (current) {
@@ -2298,7 +2283,7 @@ Delivery was fast and setup was very easy.
     }
   });
 
-  // Pay button: now becomes a “scroll to payment” button (optional but keeps your UI)
+  // Pay button: scroll to the payment form (and load if missing)
   const payButton = document.getElementById("pay-button");
   if (payButton) {
     payButton.addEventListener("click", async function () {
@@ -2308,8 +2293,7 @@ Delivery was fast and setup was very easy.
         return;
       }
 
-      // If checkout isn't loaded yet for some reason, load it now.
-      if (!embeddedCheckout && !isLoadingCheckout) {
+      if (!embeddedCheckout) {
         const btn = this;
         const originalText = btn.textContent;
         btn.disabled = true;
