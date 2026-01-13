@@ -44,8 +44,7 @@ const MGID_REVENUE_SIGNAL_MAP = {
 /**
  * GA4 MP purchase event
  */
-async function sendGa4Purchase({ mgidClickId, bundle, payout, currency }) {
-  if (!gaMeasurementId || !gaApiSecret) {
+async function sendGa4Purchase({ mgidClickId, bundle, payout, currency, mgidSourceId, mgidSiteId, mgidTeaserId, mgidCampaignId }) {  if (!gaMeasurementId || !gaApiSecret) {
     console.log('GA4 env not configured, skipping GA4 MP event');
     return;
   }
@@ -64,8 +63,15 @@ async function sendGa4Purchase({ mgidClickId, bundle, payout, currency }) {
       {
         name: 'purchase',
         params: {
-          value: payout,
-          currency,
+  value: payout,
+  currency,
+
+  // MGID attribution fields (you must register as custom dimensions in GA4 to see them in reports)
+  mgid_clickid: mgidClickId || undefined,
+  mgid_source_id: mgidSourceId || undefined,
+  mgid_site_id: mgidSiteId || undefined,
+  mgid_teaser_id: mgidTeaserId || undefined,
+  mgid_campaign_id: mgidCampaignId || undefined,
           items: [
             {
               item_name: 'BuzzBlock',
@@ -167,8 +173,12 @@ app.post(
 
         console.log('✅ payment_intent.succeeded');
         console.log('  pi:', pi.id);
-        console.log('  mgidClickId:', mgidClickId);
-        console.log('  bundle:', bundle);
+        const mgidClickId = pi.metadata?.mgid_clickid || '';
+        const bundle = pi.metadata?.bundle || '';
+        const mgidSourceId = pi.metadata?.source_id || '';
+        const mgidSiteId = pi.metadata?.site_id || '';
+        const mgidTeaserId = pi.metadata?.teaser_id || '';
+        const mgidCampaignId = pi.metadata?.campaign_id || '';
         console.log('  payoutReal:', payoutReal, currency);
         console.log('  mgid_revenue_signal:', revenueSignal);
         console.log('  mgid_postback_sent (fresh):', alreadySent);
@@ -295,6 +305,10 @@ app.post('/create-session', async (req, res) => {
   }
 
   const mgidClickId = tracking.mgid_clickid || '';
+  const mgidSourceId = tracking.source_id || '';
+  const mgidSiteId = tracking.site_id || '';
+  const mgidTeaserId = tracking.teaser_id || '';
+  const mgidCampaignId = tracking.campaign_id || '';
 
   try {
     const shippingOptions =
@@ -349,20 +363,28 @@ app.post('/create-session', async (req, res) => {
 
       // Keep metadata on session for debugging
       metadata: {
-        mgid_clickid: mgidClickId,
-        bundle,
-        customer_name: customer.name || '',
-      },
+  mgid_clickid: mgidClickId,
+  source_id: mgidSourceId,
+  site_id: mgidSiteId,
+  teaser_id: mgidTeaserId,
+  campaign_id: mgidCampaignId,
+  bundle,
+  customer_name: customer.name || '',
+},
 
       // This is what matters for payment_intent.succeeded
       payment_intent_data: {
-        metadata: {
-          mgid_clickid: mgidClickId,
-          bundle,
-          customer_name: customer.name || '',
-          mgid_postback_sent: '0',
-        },
-      },
+  metadata: {
+    mgid_clickid: mgidClickId,
+    source_id: mgidSourceId,
+    site_id: mgidSiteId,
+    teaser_id: mgidTeaserId,
+    campaign_id: mgidCampaignId,
+    bundle,
+    customer_name: customer.name || '',
+    mgid_postback_sent: '0',
+  },
+},
 
       return_url:
         'https://buzzblock.shop/thankyou.html?session_id={CHECKOUT_SESSION_ID}',
