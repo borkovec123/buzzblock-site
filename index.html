@@ -1057,8 +1057,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <strong>Sale: Live For 24 Hrs.</strong> 🔥
                   <strong style="color:red;">Stock: <span class="unit-count">Only 3 Units Left</span>!</strong>
   </div>
-<a href="/checkout.html" class="cta-button js-to-checkout">
-  Order Now & Save 50%
+<a
+  href="/checkout.html"
+  class="cta-button js-to-checkout"
+  onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({event:'pp_to_checkout'});"
+>
+  Order Now &amp; Save 50%
 </a>
   </div>
   <div class="faq-section">
