@@ -2089,11 +2089,26 @@ Delivery was fast and setup was very easy.
   // Your Render backend base URL
   const BACKEND_BASE = "https://buzzblock-backend.onrender.com";
 
-  // Track MGID click id from URL, so we can send it to the backend
+  // Track MGID + placement ids from URL, so we can send them to the backend
   (function storeTrackingFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    const mgidClickId = params.get("mgid_clickid") || params.get("c") || "";
-    window.BUZZBLOCK_TRACKING = { mgid_clickid: mgidClickId };
+
+    const tracking = {
+      mgid_clickid: params.get("mgid_clickid") || params.get("c") || "",
+      source_id: params.get("source_id") || "",
+      site_id: params.get("site_id") || "",
+      teaser_id: params.get("teaser_id") || "",
+      campaign_id: params.get("campaign_id") || "",
+    };
+
+    // Optional: don't keep empty keys (cleaner logs/payloads)
+    Object.keys(tracking).forEach((k) => {
+      if (!tracking[k]) delete tracking[k];
+    });
+
+    window.BUZZBLOCK_TRACKING = tracking;
+
+    console.log("BUZZBLOCK_TRACKING:", tracking);
   })();
 
   // Bundle <-> price mapping just for UI text.
