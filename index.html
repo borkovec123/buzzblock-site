@@ -2507,25 +2507,37 @@ setTimeout(() => {
   });
   </script>
 <script>
-(function() {
+document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
 
-  const passKeys = ["mgid_clickid", "source_id", "site_id", "teaser_id", "campaign_id"
-                    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+  const keysToForward = [
+    "mgid_clickid",
+    "source_id",
+    "site_id",
+    "teaser_id",
+    "campaign_id",
+  ];
 
   function addParamsToUrl(url) {
     const u = new URL(url, window.location.origin);
-    passKeys.forEach((k) => {
+
+    keysToForward.forEach((k) => {
       const v = params.get(k);
       if (v) u.searchParams.set(k, v);
     });
+
     return u.toString();
   }
 
+  // Your checkout buttons have class "js-to-checkout"
   document.querySelectorAll("a.js-to-checkout").forEach((a) => {
-    a.href = addParamsToUrl(a.getAttribute("href"));
+    a.href = addParamsToUrl(a.getAttribute("href") || "");
   });
-})();
+
+  console.log("PP search:", window.location.search);
+  const first = document.querySelector("a.js-to-checkout");
+  if (first) console.log("Updated PP → Checkout link:", first.href);
+});
 </script>
 
 
