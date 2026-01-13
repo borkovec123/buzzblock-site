@@ -2508,21 +2508,22 @@ setTimeout(() => {
   </script>
 <script>
 (function() {
-  var params = new URLSearchParams(window.location.search);
-  var mgidClickId = params.get('mgid_clickid');
-  var bemobClickId = params.get('bemob_clickid');
+  const params = new URLSearchParams(window.location.search);
 
-  if (!mgidClickId && !bemobClickId) return;
+  const passKeys = ["mgid_clickid", "source_id", "site_id", "teaser_id", "campaign_id"
+                    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 
-  function addIdsToUrl(url) {
-    var u = new URL(url, window.location.origin);
-    if (mgidClickId) u.searchParams.set('mgid_clickid', mgidClickId);
-    if (bemobClickId) u.searchParams.set('bemob_clickid', bemobClickId);
+  function addParamsToUrl(url) {
+    const u = new URL(url, window.location.origin);
+    passKeys.forEach((k) => {
+      const v = params.get(k);
+      if (v) u.searchParams.set(k, v);
+    });
     return u.toString();
   }
 
-  document.querySelectorAll('a.js-to-checkout').forEach(function(a) {
-    a.href = addIdsToUrl(a.href);
+  document.querySelectorAll("a.js-to-checkout").forEach((a) => {
+    a.href = addParamsToUrl(a.getAttribute("href"));
   });
 })();
 </script>
