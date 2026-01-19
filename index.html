@@ -1057,11 +1057,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <strong>Sale: Live For 24 Hrs.</strong> 🔥
                   <strong style="color:red;">Stock: <span class="unit-count">Only 3 Units Left</span>!</strong>
   </div>
-<a
-  href="/checkout.html"
-  class="cta-button js-to-checkout"
-  onclick="window.dataLayer = window.dataLayer || []; window.dataLayer.push({event:'pp_to_checkout'});"
->
+<a href="/checkout.html" class="cta-button js-to-checkout">
   Order Now &amp; Save 50%
 </a>
   </div>
@@ -2521,37 +2517,44 @@ setTimeout(() => {
   });
   </script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const params = new URLSearchParams(window.location.search);
-
-  const keysToForward = [
-    "mgid_clickid",
-    "source_id",
-    "site_id",
-    "teaser_id",
-    "campaign_id",
-  ];
-
-  function addParamsToUrl(url) {
-    const u = new URL(url, window.location.origin);
-
-    keysToForward.forEach((k) => {
-      const v = params.get(k);
-      if (v) u.searchParams.set(k, v);
-    });
-
-    return u.toString();
+(function () {
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name) || "";
   }
 
-  // Your checkout buttons have class "js-to-checkout"
-  document.querySelectorAll("a.js-to-checkout").forEach((a) => {
-    a.href = addParamsToUrl(a.getAttribute("href") || "");
-  });
+  function isPlaceholder(v) {
+    // handles "{source_id}" and "%7Bsource_id%7D" once decoded
+    return v.includes("{") || v.includes("}");
+  }
 
-  console.log("PP search:", window.location.search);
-  const first = document.querySelector("a.js-to-checkout");
-  if (first) console.log("Updated PP → Checkout link:", first.href);
-});
+  function safeParam(name) {
+    const v = getParam(name);
+    return v && !isPlaceholder(v) ? v : "";
+  }
+
+  document.addEventListener("click", function (e) {
+    const a = e.target.closest("a.js-to-checkout");
+    if (!a) return;
+
+    e.preventDefault();
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "pp_to_checkout_click",
+      mgid_clickid: safeParam("mgid_clickid") || safeParam("c"),
+      source_id: safeParam("source_id"),
+      site_id: safeParam("site_id"),
+      teaser_id: safeParam("teaser_id"),
+      campaign_id: safeParam("campaign_id")
+    });
+
+    // give GTM/GA a moment to send
+    setTimeout(function () {
+      window.location.href = a.href;
+    }, 200);
+  }, true);
+})();
+</script>
 </script>
 
 
