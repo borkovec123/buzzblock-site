@@ -2518,12 +2518,14 @@ setTimeout(() => {
   </script>
 <script>
 (function () {
+  const KEYS = ["mgid_clickid", "c", "source_id", "site_id", "teaser_id", "campaign_id"];
+
   function getParam(name) {
     return new URLSearchParams(window.location.search).get(name) || "";
   }
 
   function isPlaceholder(v) {
-    // handles "{source_id}" and "%7Bsource_id%7D" once decoded
+    // URLSearchParams already decodes %7Bsource_id%7D -> {source_id}
     return v.includes("{") || v.includes("}");
   }
 
@@ -2532,30 +2534,65 @@ setTimeout(() => {
     return v && !isPlaceholder(v) ? v : "";
   }
 
+  function buildTracking() {
+    const mgidClick = safeParam("mgid_clickid") || safeParam("c");
+    return {
+      mgid_clickid: mgidClick,
+      source_id: safeParam("source_id"),
+      site_id: safeParam("site_id"),
+      teaser_id: safeParam("teaser_id"),
+      campaign_id: safeParam("campaign_id"),
+    };
+  }
+
+  function appendParams(urlStr, tracking) {
+    const u = new URL(urlStr, window.location.origin);
+
+    // Only set if value exists (keeps URLs clean)
+    Object.entries(tracking).forEach(([k, v]) => {
+      if (!v) return;
+      // avoid duplicating if already present
+      if (!u.searchParams.get(k)) u.searchParams.set(k, v);
+    });
+
+    return u.toString();
+  }
+
+  function rewriteCheckoutLinks() {
+    const tracking = buildTracking();
+    document.querySelectorAll("a.js-to-checkout").forEach((a) => {
+      a.href = appendParams(a.href, tracking);
+    });
+  }
+
+  // Rewrite ASAP
+  rewriteCheckoutLinks();
+
+  // Also re-run after DOM ready (some themes mutate links late)
+  document.addEventListener("DOMContentLoaded", rewriteCheckoutLinks);
+
+  // Fire event on click and navigate (now navigation keeps params)
   document.addEventListener("click", function (e) {
     const a = e.target.closest("a.js-to-checkout");
     if (!a) return;
 
-    e.preventDefault();
+    const tracking = buildTracking();
 
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "pp_to_checkout",
-      mgid_clickid: safeParam("mgid_clickid") || safeParam("c"),
-      source_id: safeParam("source_id"),
-      site_id: safeParam("site_id"),
-      teaser_id: safeParam("teaser_id"),
-      campaign_id: safeParam("campaign_id")
+      ...tracking,
     });
 
-    // give GTM/GA a moment to send
+    // let GTM send, then continue to already-rewritten URL
+    e.preventDefault();
+    const targetUrl = a.href;
     setTimeout(function () {
-      window.location.href = a.href;
+      window.location.href = targetUrl;
     }, 200);
   }, true);
 })();
 </script>
-
   </body>
   </html>
   <style>
