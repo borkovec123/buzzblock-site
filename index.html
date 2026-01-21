@@ -2399,7 +2399,67 @@ Order Now & Save 50%</a>
   <div class="floating-review" id="floating-review-1">Just now: Anna from <span id="bubbleCountry1">your country</span> ordered BuzzBlock 🦟</div>
   <div class="floating-review" id="floating-review-2">Just now: Emil from <span id="bubbleCountry2">your country</span> grabbed one too 🔥</div>
   <div id="last-unit-alert" style="display:none;">⚠️ Only 5 units left — selling fast!</div>
+<script>
+  const images = [
+    "product-02.webp",
+    "caro3.webp",
+    "nextgen1.webp"
+  ];
+  let current = 0;
 
+  function getParam(name) {
+    return new URLSearchParams(window.location.search).get(name) || "";
+  }
+
+  function isPlaceholder(v) {
+    // catches "{source_id}" and "%7Bsource_id%7D" (decoded later)
+    return v.includes("{") || v.includes("}");
+  }
+
+  function safeParam(name) {
+    const v = getParam(name);
+    return v && !isPlaceholder(v) ? v : "";
+  }
+
+  function pushGalleryEvent(direction) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "pp_gallery_interaction",
+      direction: direction,                 // "next" | "prev"
+      slide_index: current,                 // 0,1,2...
+      slide_name: images[current] || "",    // filename
+
+      // tracking ids (URL-based)
+      mgid_clickid: safeParam("mgid_clickid") || safeParam("c"),
+      source_id: safeParam("source_id"),
+      site_id: safeParam("site_id"),
+      teaser_id: safeParam("teaser_id"),
+      campaign_id: safeParam("campaign_id")
+    });
+  }
+
+  function showImage(index) {
+    const img = document.getElementById("carousel-img");
+    if (!img) return;
+    img.src = "images/" + images[index];
+  }
+
+  function nextSlide() {
+    current = (current + 1) % images.length;
+    showImage(current);
+    pushGalleryEvent("next");
+  }
+
+  function prevSlide() {
+    current = (current - 1 + images.length) % images.length;
+    showImage(current);
+    pushGalleryEvent("prev");
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    showImage(current);
+  });
+</script>
   <script>
     const countries = ["Italy", "Spain", "Germany", "Australia", "Hungary", "Greece", "Netherlands"];
   
