@@ -2407,12 +2407,16 @@ Order Now & Save 50%</a>
   ];
   let current = 0;
 
+  // Loop-tracking state (per page load)
+  let galleryStartIndex = null;     // set on first interaction
+  let galleryClicks = 0;            // counts arrow clicks
+  let loopEventFired = false;       // ensure event fires only once
+
   function getParam(name) {
     return new URLSearchParams(window.location.search).get(name) || "";
   }
 
   function isPlaceholder(v) {
-    // catches "{source_id}" and "%7Bsource_id%7D" (decoded later)
     return v.includes("{") || v.includes("}");
   }
 
@@ -2421,13 +2425,14 @@ Order Now & Save 50%</a>
     return v && !isPlaceholder(v) ? v : "";
   }
 
-  function pushGalleryEvent(direction) {
+  function pushGalleryLoopCompleted() {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
-      event: "pp_gallery_interaction",
-      direction: direction,                 // "next" | "prev"
-      slide_index: current,                 // 0,1,2...
-      slide_name: images[current] || "",    // filename
+      event: "pp_gallery_loop_completed",
+      total_clicks: galleryClicks,
+      start_index: galleryStartIndex,
+      end_index: current,
+      images_count: images.length,
 
       // tracking ids (URL-based)
       mgid_clickid: safeParam("mgid_clickid") || safeParam("c"),
@@ -2444,16 +2449,33 @@ Order Now & Save 50%</a>
     img.src = "images/" + images[index];
   }
 
+  function recordInteractionAndMaybeFire() {
+    if (loopEventFired) return;
+
+    if (galleryStartIndex === null) {
+      // "original one" is whatever image they were on at first interaction
+      galleryStartIndex = current;
+    }
+
+    galleryClicks += 1;
+
+    // Fire when: they've clicked through at least N steps AND returned to start
+    if (galleryClicks >= images.length && current === galleryStartIndex) {
+      loopEventFired = true;
+      pushGalleryLoopCompleted();
+    }
+  }
+
   function nextSlide() {
     current = (current + 1) % images.length;
     showImage(current);
-    pushGalleryEvent("next");
+    recordInteractionAndMaybeFire();
   }
 
   function prevSlide() {
     current = (current - 1 + images.length) % images.length;
     showImage(current);
-    pushGalleryEvent("prev");
+    recordInteractionAndMaybeFire();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
