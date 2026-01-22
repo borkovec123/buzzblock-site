@@ -2579,107 +2579,40 @@ setTimeout(() => {
   </script>
 <script>
 (function () {
-  // --- config ---
-  const EVENT_NAME = "pp_engaged_reader";
-  const FAQ_REQUIRED = 2;
-  const SCROLL_REQUIRED = 50; // percent
-  const ONCE_PER_SESSION = true; // set false if you want it once per page load
-
-  // --- helpers ---
-  function getParam(name) {
-    return new URLSearchParams(window.location.search).get(name) || "";
-  }
-
-  function isPlaceholder(v) {
-    const d = decodeURIComponent(v || "");
-    return d.includes("{") || d.includes("}");
-  }
-
-  function safeParam(name) {
-    const v = getParam(name);
-    return v && !isPlaceholder(v) ? v : "";
-  }
-
-  function getScrollPercent() {
-    const doc = document.documentElement;
-    const body = document.body;
-    const scrollTop = window.scrollY || doc.scrollTop || body.scrollTop || 0;
-    const scrollHeight = Math.max(body.scrollHeight, doc.scrollHeight);
-    const clientHeight = doc.clientHeight || window.innerHeight || 0;
-    const maxScroll = Math.max(scrollHeight - clientHeight, 1);
-    return Math.min(100, Math.round((scrollTop / maxScroll) * 100));
-  }
-
-  const storageKey = "bb_pp_engaged_reader_fired";
-  let fired = false;
   let openedFaqCount = 0;
-  let maxScroll = 0;
 
-  // prevent re-fire
-  if (ONCE_PER_SESSION) {
-    try {
-      fired = sessionStorage.getItem(storageKey) === "1";
-    } catch (_) {}
+  function pushFaqOpenEvent(buttonText) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "pp_faq_open",
+      faq_question: (buttonText || "").trim().slice(0, 120),
+      opened_faq_count: openedFaqCount
+    });
   }
 
-  function maybeFire() {
-    if (fired) return;
-    if (openedFaqCount >= FAQ_REQUIRED && maxScroll >= SCROLL_REQUIRED) {
-      fired = true;
-      if (ONCE_PER_SESSION) {
-        try { sessionStorage.setItem(storageKey, "1"); } catch (_) {}
-      }
-
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: EVENT_NAME,
-        opened_faq_count: openedFaqCount,
-        scroll_percent: maxScroll,
-        mgid_clickid: safeParam("mgid_clickid") || safeParam("c"),
-        source_id: safeParam("source_id"),
-        site_id: safeParam("site_id"),
-        teaser_id: safeParam("teaser_id"),
-        campaign_id: safeParam("campaign_id")
-      });
-    }
-  }
-
-  // count FAQ opens (OPEN only)
   document.querySelectorAll(".faq-section").forEach((section) => {
-    section.querySelectorAll(".faq-question").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const item = btn.closest(".faq-item");
+    const buttons = section.querySelectorAll(".faq-question");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = button.closest(".faq-item");
         if (!item) return;
 
         const wasActive = item.classList.contains("active");
 
-        // Your accordion code removes all actives then (maybe) adds one.
-        // "Open" happens when it was NOT active.
+        // Your existing accordion behavior (only one open)
+        section.querySelectorAll(".faq-item").forEach((i) => i.classList.remove("active"));
+
+        // If it was NOT active, this click OPENS it => count it
         if (!wasActive) {
+          item.classList.add("active");
           openedFaqCount += 1;
-          maybeFire();
+          pushFaqOpenEvent(button.textContent);
         }
+        // If it WAS active, user is effectively closing it; do nothing
       });
     });
   });
-
-  // track scroll depth
-  function onScroll() {
-    const p = getScrollPercent();
-    if (p > maxScroll) maxScroll = p;
-    if (maxScroll >= SCROLL_REQUIRED) {
-      // if they already hit threshold, we can stop listening after firing
-      maybeFire();
-      if (fired) window.removeEventListener("scroll", onScroll, { passive: true });
-    } else {
-      maybeFire();
-    }
-  }
-
-  window.addEventListener("scroll", onScroll, { passive: true });
-  // initial check (in case user reloads mid-page)
-  maxScroll = Math.max(maxScroll, getScrollPercent());
-  maybeFire();
 })();
 </script>
 <script>
