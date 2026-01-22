@@ -2568,91 +2568,110 @@ setTimeout(() => {
 <script>
 (function () {
   // ---- config ----
-  const SCROLL_THRESHOLD = 50;   // %
-  const FAQ_OPEN_THRESHOLD = 2;  // opens (only counts when opening, not closing)
-  const MIN_SCROLL_PX = 80;      // require real scroll (prevents "50% at top" bug)
+  const SCROLL_THRESHOLD = 50;     // %
+  const MIN_SCROLL_PX = 300;        // must actually move down at least this much
+  const FAQ_UNIQUE_OPEN_THRESHOLD = 2;
 
   // ---- state ----
-  let faqOpens = 0;
-  let scrollPercent = 0;
-  let maxScrollTopSeen = 0;
+  const openedFaqIds = new Set();
+  let userHasScrolled = false;
+  let scrollReached = false;
   let fired = false;
 
-  function pushEngagedOnce() {
-    if (fired) return;
-
-    // Require real scrolling, not just "computed percent"
-    const scrolledEnoughPx = maxScrollTopSeen >= MIN_SCROLL_PX;
-
-    if (faqOpens >= FAQ_OPEN_THRESHOLD && scrollPercent >= SCROLL_THRESHOLD && scrolledEnoughPx) {
-      fired = true;
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "pp_engaged_reader",
-        faq_opens: faqOpens,
-        scroll_percent: scrollPercent
-      });
-    }
-  }
-
-  function computeScrollPercent() {
+  function getScrollPercent() {
     const doc = document.documentElement;
     const body = document.body;
 
+    // current scroll top
     const scrollTop = window.pageYOffset || doc.scrollTop || body.scrollTop || 0;
 
-    // Track max scroll reached (so tiny bounce doesn't count)
-    if (scrollTop > maxScrollTopSeen) maxScrollTopSeen = scrollTop;
-
+    // total scrollable height
     const scrollHeight = Math.max(
       body.scrollHeight, doc.scrollHeight,
       body.offsetHeight, doc.offsetHeight,
       body.clientHeight, doc.clientHeight
     );
-    const clientHeight = doc.clientHeight || window.innerHeight || 0;
 
+    const clientHeight = doc.clientHeight || window.innerHeight || 0;
     const maxScroll = Math.max(scrollHeight - clientHeight, 1);
-    scrollPercent = Math.min(100, Math.round((scrollTop / maxScroll) * 100));
+
+    const pct = Math.min(100, Math.round((scrollTop / maxScroll) * 100));
+    return { scrollTop, pct };
   }
 
-  // Throttle scroll work
-  let scrollTicking = false;
-  window.addEventListener("scroll", function () {
-    if (scrollTicking) return;
-    scrollTicking = true;
+  function maybeFire() {
+    if (fired) return;
+
+    if (
+      openedFaqIds.size >= FAQ_UNIQUE_OPEN_THRESHOLD &&
+      userHasScrolled &&
+      scrollReached
+    ) {
+      fired = true;
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "pp_engaged_reader",
+        faq_unique_opens: openedFaqIds.size
+        // IMPORTANT: teaser_id/source_id/etc should remain URL-based in GTM,
+        // so we do NOT pass them here.
+      });
+    }
+  }
+
+  // --- scroll tracking (throttled) ---
+  let ticking = false;
+
+  function onScrollOrResize() {
+    if (ticking) return;
+    ticking = true;
+
     requestAnimationFrame(function () {
-      scrollTicking = false;
-      computeScrollPercent();
-      pushEngagedOnce();
+      ticking = false;
+
+      const { scrollTop, pct } = getScrollPercent();
+
+      // Only treat scroll as meaningful after the user actually moves
+      if (scrollTop >= MIN_SCROLL_PX) userHasScrolled = true;
+
+      // Only allow reaching the threshold if the user has actually scrolled
+      if (userHasScrolled && pct >= SCROLL_THRESHOLD) {
+        scrollReached = true;
+      }
+
+      maybeFire();
     });
-  }, { passive: true });
+  }
 
-  // Initialize numbers (but DO NOT allow firing from init)
-  computeScrollPercent();
+  window.addEventListener("scroll", onScrollOrResize, { passive: true });
+  window.addEventListener("resize", onScrollOrResize);
 
-  // ---- FAQ accordion + counting opens ----
+  // Also run once after full load (images can change page height)
+  window.addEventListener("load", onScrollOrResize);
+
+  // --- FAQ open tracking (unique opens only, no spam events) ---
   document.querySelectorAll(".faq-section").forEach(function (section) {
     const buttons = section.querySelectorAll(".faq-question");
 
-    buttons.forEach(function (button) {
+    buttons.forEach(function (button, idx) {
+      // build a stable id per question (text is ok too, but index is simplest)
+      const faqId = section.className + "::" + idx;
+
       button.addEventListener("click", function () {
         const item = button.closest(".faq-item");
         if (!item) return;
 
         const wasActive = item.classList.contains("active");
 
-        // accordion: only one open at a time
+        // your accordion behavior (one open at a time)
         section.querySelectorAll(".faq-item").forEach(function (i) {
           i.classList.remove("active");
         });
 
-        // Count ONLY when opening
+        // count ONLY when opening
         if (!wasActive) {
           item.classList.add("active");
-          faqOpens += 1;
-
-          // re-check (but it still requires real scroll)
-          pushEngagedOnce();
+          openedFaqIds.add(faqId);
+          maybeFire();
         }
       });
     });
