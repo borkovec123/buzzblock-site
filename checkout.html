@@ -2453,124 +2453,65 @@ Delivery was fast and setup was very easy.
   </script>
 <script>
 (function () {
-  // ✅ TEST MODE: set to 1000ms (1s). Later change to 60000 for 60s.
-  const TIME_MS = 1000;
+  // === CONFIG ===
+  const TIME_MS = 1000; // <-- 1s for testing. Later set to 60000 for 60s.
 
   let fired = false;
   let hasTime = false;
   let hasInteraction = false;
 
-  function getParam(name) {
-    return new URLSearchParams(window.location.search).get(name) || "";
-  }
-
-  function isPlaceholder(v) {
-    // URLSearchParams decodes %7Bsource_id%7D -> {source_id}
-    return v.includes("{") || v.includes("}");
-  }
-
-  function safeParam(name) {
-    const v = getParam(name);
-    return v && !isPlaceholder(v) ? v : "";
-  }
-
-  function buildTracking() {
-    const mgidClick = safeParam("mgid_clickid") || safeParam("c");
-    return {
-      mgid_clickid: mgidClick,
-      source_id: safeParam("source_id"),
-      site_id: safeParam("site_id"),
-      teaser_id: safeParam("teaser_id"),
-      campaign_id: safeParam("campaign_id"),
-    };
-  }
-
-  function maybeFire() {
+  function fire() {
     if (fired) return;
     if (!hasTime || !hasInteraction) return;
 
     fired = true;
     window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "checkout_engaged",
-      ...buildTracking(),
-      engaged_time_ms: TIME_MS
-    });
+    window.dataLayer.push({ event: "checkout_engaged" });
   }
 
-  // ---- time requirement ----
+  // 1) Time requirement
   setTimeout(function () {
     hasTime = true;
-    maybeFire();
+    fire();
   }, TIME_MS);
 
-  // ---- mark interaction (once) ----
+  // 2) Interaction requirement (works even with Stripe iframe)
   function markInteraction() {
     if (hasInteraction) return;
     hasInteraction = true;
-    maybeFire();
+    fire();
   }
 
-  // 1) On-page inputs (your own inputs, not Stripe iframe)
-  function isRelevantField(el) {
+  // A) Click/tap anywhere inside the checkout container (captures iframe clicks too)
+  function attachContainerListener() {
+    const el = document.getElementById("checkout-container") || document.getElementById("checkout");
     if (!el) return false;
-    const tag = (el.tagName || "").toLowerCase();
-    if (!["input", "textarea", "select"].includes(tag)) return false;
 
-    const type = (el.getAttribute("type") || "").toLowerCase();
-    if (["hidden", "submit", "button", "reset"].includes(type)) return false;
-
+    // capture phase helps catch clicks early
+    el.addEventListener("pointerdown", markInteraction, true);
+    el.addEventListener("click", markInteraction, true);
     return true;
   }
 
-  document.addEventListener("input", function (e) {
-    const el = e.target;
-    if (!isRelevantField(el)) return;
-    const v = (el.value || "").trim();
-    if (v.length > 0) markInteraction();
-  }, true);
+  // try now; if not present yet, retry a few times
+  let tries = 0;
+  const iv = setInterval(function () {
+    tries += 1;
+    if (attachContainerListener() || tries > 40) { // ~4s max
+      clearInterval(iv);
+    }
+  }, 100);
 
-  document.addEventListener("change", function (e) {
-    const el = e.target;
-    if (!isRelevantField(el)) return;
-    markInteraction();
-  }, true);
+  // B) Pay button click counts as intent
+  const payBtn = document.getElementById("pay-button");
+  if (payBtn) {
+    payBtn.addEventListener("click", markInteraction, true);
+  }
 
-  // 2) Clicks that clearly indicate engagement on checkout page
-  document.addEventListener("click", function (e) {
-    const t = e.target;
-
-    // bundle selection area
-    if (t.closest("#bundle-list")) return markInteraction();
-
-    // pay button
-    if (t.closest("#pay-button")) return markInteraction();
-
-    // checkout container (Stripe area)
-    if (t.closest("#checkout-container")) return markInteraction();
-  }, true);
-
-  // 3) Stripe Embedded Checkout is in iframes → we can’t read typing,
-  //    but we CAN detect clicking the iframe element itself.
-  const container = document.getElementById("checkout-container");
-  if (container) {
-    const hookIframes = function () {
-      const iframes = container.querySelectorAll("iframe");
-      iframes.forEach((f) => {
-        if (f.dataset.bbEngagedHooked === "1") return;
-        f.dataset.bbEngagedHooked = "1";
-
-        // clicking/focusing iframe counts as interaction intent
-        f.addEventListener("pointerdown", markInteraction, { capture: true, passive: true });
-        f.addEventListener("mousedown", markInteraction, true);
-        f.addEventListener("touchstart", markInteraction, { capture: true, passive: true });
-      });
-    };
-
-    // run now + whenever Stripe injects new iframe(s)
-    hookIframes();
-    const obs = new MutationObserver(hookIframes);
-    obs.observe(container, { childList: true, subtree: true });
+  // C) Bundle change counts as intent (you reload embedded checkout)
+  const bundleListEl = document.getElementById("bundle-list");
+  if (bundleListEl) {
+    bundleListEl.addEventListener("change", markInteraction, true);
   }
 })();
 </script>
