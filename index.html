@@ -2564,6 +2564,19 @@ setTimeout(() => {
 }, 180000);
   </script>
   <!-- END Enhanced Floating Review Bubbles + Countdown -->
+    <script>
+  document.querySelectorAll('.faq-section').forEach(section => {
+    const buttons = section.querySelectorAll('.faq-question');
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const item = button.closest('.faq-item');
+        const wasActive = item.classList.contains('active');
+        section.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+        if (!wasActive) item.classList.add('active');
+      });
+    });
+  });
+  </script>
 <script>
 (function () {
   // --- config ---
