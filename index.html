@@ -2567,37 +2567,82 @@ setTimeout(() => {
 
 <script>
 (function () {
-  let openedFaqCount = 0;
+  // ---- config ----
+  const SCROLL_THRESHOLD = 50;   // %
+  const FAQ_OPEN_THRESHOLD = 2;  // opens (only counts when opening, not closing)
 
-  function pushFaqOpenEvent(buttonText) {
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "pp_faq_open",
-      faq_question: (buttonText || "").trim().slice(0, 120),
-      opened_faq_count: openedFaqCount
-    });
+  // ---- state ----
+  let faqOpens = 0;
+  let scrollPercent = 0;
+  let fired = false;
+
+  function pushEngagedOnce() {
+    if (fired) return;
+    if (faqOpens >= FAQ_OPEN_THRESHOLD && scrollPercent >= SCROLL_THRESHOLD) {
+      fired = true;
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "pp_engaged_reader",
+        faq_opens: faqOpens,
+        scroll_percent: scrollPercent
+      });
+    }
   }
 
-  document.querySelectorAll(".faq-section").forEach((section) => {
+  function updateScrollPercent() {
+    const doc = document.documentElement;
+    const body = document.body;
+
+    const scrollTop = window.pageYOffset || doc.scrollTop || body.scrollTop || 0;
+    const scrollHeight = Math.max(
+      body.scrollHeight, doc.scrollHeight,
+      body.offsetHeight, doc.offsetHeight,
+      body.clientHeight, doc.clientHeight
+    );
+    const clientHeight = doc.clientHeight || window.innerHeight || 0;
+
+    const maxScroll = Math.max(scrollHeight - clientHeight, 1);
+    scrollPercent = Math.min(100, Math.round((scrollTop / maxScroll) * 100));
+
+    pushEngagedOnce();
+  }
+
+  // Throttle scroll work a bit
+  let scrollTicking = false;
+  window.addEventListener("scroll", function () {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    requestAnimationFrame(function () {
+      scrollTicking = false;
+      updateScrollPercent();
+    });
+  }, { passive: true });
+
+  // Initialize once on load
+  updateScrollPercent();
+
+  // ---- FAQ accordion + counting opens ----
+  document.querySelectorAll(".faq-section").forEach(function (section) {
     const buttons = section.querySelectorAll(".faq-question");
 
-    buttons.forEach((button) => {
-      button.addEventListener("click", () => {
+    buttons.forEach(function (button) {
+      button.addEventListener("click", function () {
         const item = button.closest(".faq-item");
         if (!item) return;
 
         const wasActive = item.classList.contains("active");
 
-        // Your existing accordion behavior (only one open)
-        section.querySelectorAll(".faq-item").forEach((i) => i.classList.remove("active"));
+        // Your existing accordion behavior (only one open at a time)
+        section.querySelectorAll(".faq-item").forEach(function (i) {
+          i.classList.remove("active");
+        });
 
-        // If it was NOT active, this click OPENS it => count it
+        // Count ONLY when this click OPENS a FAQ (not when it closes)
         if (!wasActive) {
           item.classList.add("active");
-          openedFaqCount += 1;
-          pushFaqOpenEvent(button.textContent);
+          faqOpens += 1;
+          pushEngagedOnce();
         }
-        // If it WAS active, user is effectively closing it; do nothing
       });
     });
   });
