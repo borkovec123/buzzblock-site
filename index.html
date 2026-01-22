@@ -2400,82 +2400,73 @@ Order Now & Save 50%</a>
   <div class="floating-review" id="floating-review-2">Just now: Emil from <span id="bubbleCountry2">your country</span> grabbed one too 🔥</div>
   <div id="last-unit-alert" style="display:none;">⚠️ Only 5 units left — selling fast!</div>
 <script>
-  const images = [
-    "product-02.webp",
-    "caro3.webp",
-    "nextgen1.webp"
-  ];
+  // --- Carousel config (yours) ---
+  const images = ["product-02.webp", "caro3.webp", "nextgen1.webp"];
   let current = 0;
 
-  // Loop-tracking state (per page load)
-  let galleryStartIndex = null;     // set on first interaction
-  let galleryClicks = 0;            // counts arrow clicks
-  let loopEventFired = false;       // ensure event fires only once
+  function showImage(index) {
+    const img = document.getElementById("carousel-img");
+    if (img) img.src = "images/" + images[index];
+  }
 
+  // --- Tracking helpers (minimal) ---
   function getParam(name) {
     return new URLSearchParams(window.location.search).get(name) || "";
   }
-
   function isPlaceholder(v) {
-    return v.includes("{") || v.includes("}");
+    const decoded = decodeURIComponent(v || "");
+    // catches "{source_id}" and "%7Bsource_id%7D"
+    return decoded.includes("{") || decoded.includes("}");
   }
-
   function safeParam(name) {
     const v = getParam(name);
     return v && !isPlaceholder(v) ? v : "";
   }
 
-  function pushGalleryLoopCompleted() {
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "pp_gallery_loop_completed",
-      total_clicks: galleryClicks,
-      start_index: galleryStartIndex,
-      end_index: current,
-      images_count: images.length,
+  // Fire once when user completes a full loop (images.length steps) back to where they started
+  let galleryStarted = false;
+  let startIndex = 0;
+  let steps = 0;
+  let galleryEngagedFired = false;
 
-      // tracking ids (URL-based)
-      mgid_clickid: safeParam("mgid_clickid") || safeParam("c"),
-      source_id: safeParam("source_id"),
-      site_id: safeParam("site_id"),
-      teaser_id: safeParam("teaser_id"),
-      campaign_id: safeParam("campaign_id")
-    });
-  }
+  function maybeFireGalleryEngaged() {
+    if (galleryEngagedFired) return;
 
-  function showImage(index) {
-    const img = document.getElementById("carousel-img");
-    if (!img) return;
-    img.src = "images/" + images[index];
-  }
-
-  function recordInteractionAndMaybeFire() {
-    if (loopEventFired) return;
-
-    if (galleryStartIndex === null) {
-      // "original one" is whatever image they were on at first interaction
-      galleryStartIndex = current;
+    if (!galleryStarted) {
+      galleryStarted = true;
+      startIndex = current;
+      steps = 0;
+      return;
     }
 
-    galleryClicks += 1;
+    steps += 1;
 
-    // Fire when: they've clicked through at least N steps AND returned to start
-    if (galleryClicks >= images.length && current === galleryStartIndex) {
-      loopEventFired = true;
-      pushGalleryLoopCompleted();
+    // Full loop completed: back to start after >= images.length moves
+    if (steps >= images.length && current === startIndex) {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "pp_gallery_engaged",
+        mgid_clickid: safeParam("mgid_clickid") || safeParam("c"),
+        source_id: safeParam("source_id"),
+        site_id: safeParam("site_id"),
+        teaser_id: safeParam("teaser_id"),
+        campaign_id: safeParam("campaign_id"),
+      });
+      galleryEngagedFired = true;
     }
   }
 
+  // --- Your controls (same names, so your onclick="prevSlide()" still works) ---
   function nextSlide() {
     current = (current + 1) % images.length;
     showImage(current);
-    recordInteractionAndMaybeFire();
+    maybeFireGalleryEngaged();
   }
 
   function prevSlide() {
     current = (current - 1 + images.length) % images.length;
     showImage(current);
-    recordInteractionAndMaybeFire();
+    maybeFireGalleryEngaged();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
