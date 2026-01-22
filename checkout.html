@@ -2451,5 +2451,66 @@ Delivery was fast and setup was very easy.
       });
     });
   </script>
+   <script>
+(function () {
+  let fired = false;
+
+  let hasFormInteraction = false;
+  let has60s = false;
+
+  function maybeFire() {
+    if (fired) return;
+    if (hasFormInteraction && has60s) {
+      fired = true;
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: "checkout_engaged" });
+    }
+  }
+
+  // ---- 60s timer (starts when page loads) ----
+  setTimeout(function () {
+    has60s = true;
+    maybeFire();
+  }, 60000);
+
+  // ---- Form interaction detection (works even if elements appear later) ----
+  function isRelevantField(el) {
+    if (!el) return false;
+    const tag = (el.tagName || "").toLowerCase();
+    if (!["input", "textarea", "select"].includes(tag)) return false;
+
+    const type = (el.getAttribute("type") || "").toLowerCase();
+    if (["hidden", "submit", "button", "reset"].includes(type)) return false;
+
+    return true;
+  }
+
+  function markInteraction() {
+    if (hasFormInteraction) return;
+    hasFormInteraction = true;
+    maybeFire();
+  }
+
+  document.addEventListener("input", function (e) {
+    const el = e.target;
+    if (!isRelevantField(el)) return;
+    const v = (el.value || "").trim();
+    // for selects, v can be "", so input isn't always useful — but change covers that
+    if (v.length > 0) markInteraction();
+  }, true);
+
+  document.addEventListener("change", function (e) {
+    const el = e.target;
+    if (!isRelevantField(el)) return;
+    markInteraction();
+  }, true);
+
+  document.addEventListener("focusin", function (e) {
+    const el = e.target;
+    if (!isRelevantField(el)) return;
+    markInteraction();
+  }, true);
+})();
+</script>
 </body>
 </html>
