@@ -1361,7 +1361,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div>
           <div class="badge-inline">
             <span class="dot"></span>
-            <span>Official store </span>
+            <span>Official store • MY warehouse</span>
           </div>
         </div>
       </div>
@@ -1371,57 +1371,66 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="lock-dot"></div>
           <span>Secure 256-bit SSL Checkout</span>
         </div>
+        <div class="timer-pill">
+          <div class="timer-dot"></div>
+          <span>Sale Ends Today — 50% OFF</span>
+        </div>
         
       </div>
     </header>
-<!-- BuzzBlock Product Gallery / Slideshow -->
+     <!-- BuzzBlock Product Gallery / Slideshow -->
 <section class="bb-hero">
-  <div class="bb-hero-inner">
-    <!-- LEFT: GALLERY -->
-    <div class="bb-hero-gallery">
-      <div class="bb-hero-main">
-        <button
-          class="bb-hero-arrow bb-hero-arrow--left"
-          type="button"
-          aria-label="Previous image"
-        >
-          ‹
-        </button>
-
-        <img
-          id="bb-hero-main-image"
-          src="images/cleanc1.png"
-          alt="BuzzBlock product image"
-        />
-
-        <button
-          class="bb-hero-arrow bb-hero-arrow--right"
-          type="button"
-          aria-label="Next image"
-        >
-          ›
-        </button>
+    <div class="bb-hero-inner">
+      <!-- LEFT: GALLERY -->
+      <div class="bb-hero-gallery">
+        <div class="bb-hero-main">
+          <button class="bb-hero-arrow bb-hero-arrow--left" type="button" aria-label="Previous image">
+            ‹
+          </button>
+  
+          <img
+            id="bb-hero-main-image"
+            src="images/slidec1.png"
+            alt="BuzzBlock product image"
+          />
+  
+          <button class="bb-hero-arrow bb-hero-arrow--right" type="button" aria-label="Next image">
+            ›
+          </button>
+        </div>
+  
+        <div class="bb-hero-thumbs" id="bb-hero-thumbs">
+          <button class="bb-hero-thumb is-active" data-index="0" type="button">
+            <img src="images/slidec1.png" alt="BuzzBlock lamp and box" />
+          </button>
+          <button class="bb-hero-thumb" data-index="1" type="button">
+            <img src="images/slidec2.png" alt="BuzzBlock close-up UV light" />
+          </button>
+          <button class="bb-hero-thumb" data-index="2" type="button">
+            <img src="images/slidec3.png" alt="Family using BuzzBlock at home" />
+          </button>
+          <button class="bb-hero-thumb" data-index="3" type="button">
+            <img src="images/slidec4.png" alt="BuzzBlock outdoor scene" />
+          </button>
+  
+          <!-- ADD 2 more thumbs (replace filenames with your real images) -->
+          <button class="bb-hero-thumb" data-index="4" type="button">
+            <img src="images/slidec5.png" alt="BuzzBlock lifestyle image" />
+          </button>
+          <button class="bb-hero-thumb" data-index="5" type="button">
+            <img src="images/slidec6.png" alt="BuzzBlock details image" />
+          </button>
+        </div>
       </div>
-
-      <div class="bb-hero-thumbs" id="bb-hero-thumbs">
-        <!-- Image 1 -->
-        <button class="bb-hero-thumb is-active" data-index="0" type="button">
-          <img src="images/cleanc1.png" alt="BuzzBlock lamp and box" />
-        </button>
-
-        <!-- Image 2 -->
-        <button class="bb-hero-thumb" data-index="1" type="button">
-          <img src="images/slidec2.png" alt="BuzzBlock close-up UV light" />
-        </button>
-
-        <!-- Image 3 (formerly slidec5) -->
-        <button class="bb-hero-thumb" data-index="2" type="button">
-          <img src="images/slidec5.png" alt="BuzzBlock lifestyle image" />
-        </button>
-      </div>
-    </div>
+  
       <!-- RIGHT: TEXT -->
       <div class="bb-hero-copy">
+        <div class="bb-hero-rating-row">
+          <div class="bb-hero-stars">★★★★★</div>
+          <div class="bb-hero-rating-text">
+            <strong>4.8/5</strong> · 3,700+ Malaysian customers
+          </div>
+        </div>
   
         <h1 class="bb-hero-headline">
           Anyone Can Sleep Mosquito-Free<br />Even During Rainy Season…
@@ -1437,7 +1446,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li>
             <span class="bb-hero-bullet-icon">➤</span>
             <div>
-              <strong>Tuned UV-light:</strong> Attracts and traps mosquitoes based on their
+              <strong>Scientifically tuned UV-light:</strong> Attracts and traps mosquitoes based on their
               natural behaviour.
             </div>
           </li>
@@ -1451,17 +1460,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
   </section>
-
-     
     <main class="layout">
 
       <!-- LEFT COLUMN -->
 
 
       <section class="card left-card">
-      
+        <div class="reserve-alert" id="reserve-alert">
+            <div class="reserve-alert-icon" aria-hidden="true">⚠️</div>
+            <div class="reserve-alert-text">
+              <div class="reserve-alert-title">
+                <span class="reserve-alert-title-strong">LIMITED STOCK!</span>
+                <span> BuzzBlock has been in high demand and inventory is limited.</span>
+              </div>
+              <div class="reserve-alert-sub">
+                Cart reserved for <span class="reserve-alert-timer" id="reserve-timer">10:00</span>
+              </div>
+            </div>
+          </div>
         <div class="section-title">Complete your order</div>
-   
+        <div class="section-subtitle">
+           3–7 day delivery from our MY warehouse
+        </div>
 
         <div class="trust-row">
           <span>Save more when you protect multiple rooms.</span>
@@ -1496,10 +1516,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <div class="bundle-price-column">
+      <div class="bundle-line-through">RM 599.99</div>
       <div class="bundle-price-main">
         RM <span id="price-bundle-3">79.99</span> <span>/ unit</span>
       </div>
-  
+      <div class="bundle-discount-row">
+        <span class="bundle-discount">60% OFF</span>
+        <span class="bundle-shipping positive">+ FREE shipping</span>
+      </div>
+      <div class="bundle-discount-row">
+      </div>
       <div class="bundle-recommended">Recommended deal</div>
 
     </div>
@@ -1524,10 +1550,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="bundle-price-column">
+    <div class="bundle-line-through">RM 199.99</div>
     <div class="bundle-price-main">
       RM <span id="price-bundle-1">99.99</span> <span>/ unit</span>
     </div>
-
+    <div class="bundle-discount-row">
+      <span class="bundle-discount">50% OFF</span>
+      <span class="bundle-shipping negative">+ Shipping</span>
+    </div>
     <div class="bundle-discount-row"></div>
   </div>
 </label>
@@ -1551,10 +1581,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="bundle-price-column">
+    <div class="bundle-line-through">RM 399.99</div>
     <div class="bundle-price-main">
       RM <span id="price-bundle-2">89.99</span> <span>/ unit</span>
     </div>
-
+    <div class="bundle-discount-row">
+      <span class="bundle-discount">55% OFF</span>
+      <span class="bundle-shipping positive">+ FREE shipping</span>
+    </div>
     <div class="bundle-discount-row"></div>
   </div>
 </label>
@@ -1578,10 +1612,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="bundle-price-column">
+    <div class="bundle-line-through">RM 799.99</div>
     <div class="bundle-price-main">
       RM <span id="price-bundle-4">69.99</span> <span>/ unit</span>
     </div>
-
+    <div class="bundle-discount-row">
+      <span class="bundle-discount">65% OFF</span>
+      <span class="bundle-shipping positive">+ FREE shipping</span>
+    </div>
     <div class="bundle-discount-row"></div>
   </div>
 </label>
@@ -1607,10 +1645,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="bundle-price-column">
+    <div class="bundle-line-through">RM 999.99</div>
     <div class="bundle-price-main">
       RM <span id="price-bundle-5">59.99</span> <span>/ unit</span>
     </div>
-
+    <div class="bundle-discount-row">
+      <span class="bundle-discount">70% OFF</span>
+      <span class="bundle-shipping positive">+ FREE shipping</span>
+    </div>
     <div class="bundle-discount-row"></div>
   </div>
 </label>
@@ -1677,7 +1719,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="pill">
           <span class="pill-icon green">✅</span>
-          <span>30-day returns</span>
+          <span>14-day returns</span>
         </div>
       </div>
 
@@ -1687,10 +1729,233 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </button>
 
 
-
+      <div class="notice-box">
+        <div class="notice-icon">⚠️</div>
+        <div>
+          High demand during rainy season. We’re shipping from our latest batch —
+          once it sells out, delivery may be delayed.
+        </div>
+            </div>
           </div>
         </div>
+<!-- Trusted Customer Reviews (under Order Summary) -->
+<section class="bb-reviews" aria-label="Trusted customer reviews">
+    <div class="bb-reviews__header">
+      <h2 class="bb-reviews__title">Trusted Reviews from Malaysian Homes</h2>
+      <div class="bb-reviews__sub">
+        <span class="bb-reviews__stars" aria-hidden="true">★★★★★</span>
+        <span class="bb-reviews__meta"><strong>4.8/5</strong> · 3,700+ customers</span>
+      </div>
+    </div>
+  
+    <div class="bb-reviews__list" id="bb-reviews-list">
+      <!-- Review 1 (visible) -->
+      <article class="bb-review" data-review>
+        <div class="bb-review__avatar">
+          <img src="images/amy.png" alt="Amy J." loading="lazy" />
+          <span class="bb-review__rail" aria-hidden="true"></span>
+        </div>
+  
+        <div class="bb-review__body">
+          <div class="bb-review__bubble">
+            <div class="bb-review__name">Aisyah J.</div>
+            <p class="bb-review__text">
+  We live in an apartment and during rainy season the mosquitoes were crazy, especially at night.
 
+We put one BuzzBlock in the bedroom and another in the living room — huge difference after the first night. No sprays, no smell, and the kids sleep better now.
+
+Delivery was fast and setup was very easy.
+            </p>
+          </div>
+  
+          <div class="bb-review__metaRow">
+            <span class="bb-review__time">4w</span>
+            <span class="bb-review__verified">✔ Verified buyer</span>
+  
+            <span class="bb-review__spacer"></span>
+  
+            <span class="bb-review__helpful" aria-label="Helpful reactions">
+              <span class="bb-review__react bb-review__react--like" aria-hidden="true">👍</span>
+              <span class="bb-review__count">54</span>
+            </span>
+          </div>
+  
+          <div class="bb-review__footerRow">
+            <span class="bb-review__brandReply">BuzzBlock replied</span>
+            <span class="bb-review__dot">·</span>
+            <span class="bb-review__replies">18 replies</span>
+          </div>
+        </div>
+      </article>
+  
+      <!-- Review 2 (visible) -->
+      <article class="bb-review" data-review>
+        <div class="bb-review__avatar">
+          <img src="images/azim.png" alt="Taylor H." loading="lazy" />
+          <span class="bb-review__rail" aria-hidden="true"></span>
+        </div>
+  
+        <div class="bb-review__body">
+          <div class="bb-review__bubble">
+            <div class="bb-review__name">Azim R.</div>
+            <p class="bb-review__text">
+                Honestly I was skeptical at first. I didn’t expect much.
+
+                But after leaving it on overnight, there were mosquitoes inside the trap in the morning. No buzzing noise and it doesn’t disturb sleep.
+                
+                Ended up ordering a second one for the living room.
+            </p>
+          </div>
+  
+          <div class="bb-review__metaRow">
+            <span class="bb-review__time">4w</span>
+            <span class="bb-review__verified">✔ Verified buyer</span>
+  
+            <span class="bb-review__spacer"></span>
+  
+            <span class="bb-review__helpful" aria-label="Helpful reactions">
+              <span class="bb-review__react bb-review__react--like" aria-hidden="true">👍</span>
+              <span class="bb-review__count">31</span>
+            </span>
+          </div>
+        </div>
+      </article>
+  
+      <!-- Review 3 (hidden until "show more") -->
+      <article class="bb-review is-hidden" data-review>
+        <div class="bb-review__avatar">
+          <img src="images/tania.png" alt="Azim R." loading="lazy" />
+          <span class="bb-review__rail" aria-hidden="true"></span>
+        </div>
+  
+        <div class="bb-review__body">
+          <div class="bb-review__bubble">
+            <div class="bb-review__name">Tania H.</div>
+            <p class="bb-review__text">
+                I’ve tried sprays, coils, even those cheap zappers — nothing really worked and the smell was annoying.
+
+                BuzzBlock is the first thing that actually helped without making the house smell. We’re using one in the bedroom and one near the kitchen area.
+                
+                Already planning to get another for my parents’ place.
+            </p>
+          </div>
+  
+          <div class="bb-review__metaRow">
+            <span class="bb-review__time">6w</span>
+            <span class="bb-review__verified">✔ Verified buyer</span>
+  
+            <span class="bb-review__spacer"></span>
+  
+            <span class="bb-review__helpful" aria-label="Helpful reactions">
+              <span class="bb-review__react bb-review__react--like" aria-hidden="true">👍</span>
+              <span class="bb-review__count">19</span>
+            </span>
+          </div>
+        </div>
+      </article>
+  
+      <!-- Review 4 (hidden until "show more") -->
+      <article class="bb-review is-hidden" data-review>
+        <div class="bb-review__avatar">
+          <img src="images/farah.png" alt="Farah L." loading="lazy" />
+          <span class="bb-review__rail" aria-hidden="true"></span>
+        </div>
+  
+        <div class="bb-review__body">
+          <div class="bb-review__bubble">
+            <div class="bb-review__name">Farah L.</div>
+            <p class="bb-review__text">
+                We use BuzzBlock in the living room because that’s where the kids play at night. Fewer bites and much calmer evenings now.
+
+                It’s easy to clean and doesn’t look ugly like the old zapper we had. Thinking of getting another one for the bedroom.
+            </p>
+          </div>
+  
+          <div class="bb-review__metaRow">
+            <span class="bb-review__time">5w</span>
+            <span class="bb-review__verified">✔ Verified buyer</span>
+  
+            <span class="bb-review__spacer"></span>
+  
+            <span class="bb-review__helpful" aria-label="Helpful reactions">
+              <span class="bb-review__react bb-review__react--like" aria-hidden="true">👍</span>
+              <span class="bb-review__count">18</span>
+            </span>
+          </div>
+        </div>
+      </article>
+  
+      <!-- Review 5 (hidden until "show more") -->
+      <article class="bb-review is-hidden" data-review>
+        <div class="bb-review__avatar">
+          <img src="images/daniel.png" alt="Daniel K." loading="lazy" />
+          <span class="bb-review__rail" aria-hidden="true"></span>
+        </div>
+  
+        <div class="bb-review__body">
+          <div class="bb-review__bubble">
+            <div class="bb-review__name">Daniel K.</div>
+            <p class="bb-review__text">
+                Our balcony gets a lot of mosquitoes because we keep the doors open for airflow.
+
+                One BuzzBlock on the balcony and one inside the house made a noticeable difference. Setup took less than a minute.
+                
+                Worth it if you’re dealing with mosquitoes daily.
+            </p>
+          </div>
+  
+          <div class="bb-review__metaRow">
+            <span class="bb-review__time">6w</span>
+            <span class="bb-review__verified">✔ Verified buyer</span>
+  
+            <span class="bb-review__spacer"></span>
+  
+            <span class="bb-review__helpful" aria-label="Helpful reactions">
+              <span class="bb-review__react bb-review__react--like" aria-hidden="true">👍</span>
+              <span class="bb-review__count">26</span>
+            </span>
+          </div>
+        </div>
+      </article>
+  
+      <!-- Review 6 (hidden until "show more") -->
+      <article class="bb-review is-hidden" data-review>
+        <div class="bb-review__avatar">
+          <img src="images/nur.png" alt="Nur A." loading="lazy" />
+          <span class="bb-review__rail" aria-hidden="true"></span>
+        </div>
+  
+        <div class="bb-review__body">
+          <div class="bb-review__bubble">
+            <div class="bb-review__name">Nur A.</div>
+            <p class="bb-review__text">
+                We use it in the bedroom at night because we don’t want noise or chemicals. It’s quiet and there’s no smell at all.
+
+                My mother also uses one in her room now. Delivery was fast and it looks nicer than the cheap zappers.
+            </p>
+          </div>
+  
+          <div class="bb-review__metaRow">
+            <span class="bb-review__time">7w</span>
+            <span class="bb-review__verified">✔ Verified buyer</span>
+  
+            <span class="bb-review__spacer"></span>
+  
+            <span class="bb-review__helpful" aria-label="Helpful reactions">
+              <span class="bb-review__react bb-review__react--like" aria-hidden="true">👍</span>
+              <span class="bb-review__count">22</span>
+            </span>
+          </div>
+        </div>
+      </article>
+    </div>
+  
+    <button class="bb-reviews__more" type="button" id="bb-reviews-more">
+      Show more reviews
+    </button>
+  </section>
+      </aside>
+    </section>
 </aside>
 
 <!-- FAQ (desktop: fills empty left space; mobile: appears after reviews) -->
@@ -1818,7 +2083,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script>
   // 1) Stripe client (publishable key)
   const stripe = Stripe(
-    "pk_live_51RNA2NFMVKWDjAuUtpWoPZAb0k0E5pB0guvzthkifKYe5ZALiffc2JGuITQYcyDXllzx5lcAuGJdhQL42SyQQn1E00fcrq3Fzh"
+    "pk_test_51RNA2WFPa06eKXlybOaIwB2wXQEt5nBUNDKR3rtEW0XXARlP7Q71nzQLAUAvfHQYoqgN3EQPctPOQpp860HONPXS00n1dHxhfB"
   );
 
   // Your Render backend base URL
