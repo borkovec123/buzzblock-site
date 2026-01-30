@@ -2701,7 +2701,7 @@ setTimeout(() => {
 </script>
 <script>
 (function () {
-  const KEYS = ["mgid_clickid", "c", "source_id", "site_id", "teaser_id", "campaign_id"];
+  const KEYS = ["mgid_clickid", "c", "source_id", "site_id", "teaser_id", "source" "campaign_id"];
 
   function getParam(name) {
     return new URLSearchParams(window.location.search).get(name) || "";
@@ -2724,6 +2724,7 @@ setTimeout(() => {
       source_id: safeParam("source_id"),
       site_id: safeParam("site_id"),
       teaser_id: safeParam("teaser_id"),
+      source: safeParam("source"),      
       campaign_id: safeParam("campaign_id"),
     };
   }
