@@ -2691,14 +2691,16 @@ setTimeout(() => {
 </script>
 <script>
 (function () {
-  const KEYS = ["mgid_clickid", "c", "source_id", "site_id", "teaser_id", "source","campaign_id"];
+  const KEYS = ["mgid_clickid", "c", "source_id", "site_id", "teaser_id", "source", "campaign_id"];
+
+  // ✅ Your Render service origin (CHANGE THIS)
+  const SERVER_ORIGIN = "https://buzzblock-backend.onrender.com";
 
   function getParam(name) {
     return new URLSearchParams(window.location.search).get(name) || "";
   }
 
   function isPlaceholder(v) {
-    // URLSearchParams already decodes %7Bsource_id%7D -> {source_id}
     return v.includes("{") || v.includes("}");
   }
 
@@ -2722,10 +2724,8 @@ setTimeout(() => {
   function appendParams(urlStr, tracking) {
     const u = new URL(urlStr, window.location.origin);
 
-    // Only set if value exists (keeps URLs clean)
     Object.entries(tracking).forEach(([k, v]) => {
       if (!v) return;
-      // avoid duplicating if already present
       if (!u.searchParams.get(k)) u.searchParams.set(k, v);
     });
 
@@ -2739,26 +2739,30 @@ setTimeout(() => {
     });
   }
 
-  // Rewrite ASAP
   rewriteCheckoutLinks();
-
-  // Also re-run after DOM ready (some themes mutate links late)
   document.addEventListener("DOMContentLoaded", rewriteCheckoutLinks);
 
-  // Fire event on click and navigate (now navigation keeps params)
   document.addEventListener("click", function (e) {
     const a = e.target.closest("a.js-to-checkout");
     if (!a) return;
 
     const tracking = buildTracking();
 
+    // GA4/GTM event (keep)
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "pp_to_checkout",
       ...tracking,
     });
 
-    // let GTM send, then continue to already-rewritten URL
+    // MGID additional goal via your server (S2S)
+    if (tracking.mgid_clickid) {
+      const payload = JSON.stringify({ mgid_clickid: tracking.mgid_clickid });
+      const blob = new Blob([payload], { type: "application/json" });
+      navigator.sendBeacon(`${SERVER_ORIGIN}/mgid-goal/pp_to_checkout`, blob);
+    }
+
+    // let GTM send + beacon enqueue, then navigate
     e.preventDefault();
     const targetUrl = a.href;
     setTimeout(function () {
