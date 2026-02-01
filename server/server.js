@@ -288,15 +288,36 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 // ──────────────────────────────────────────────
 // 2) Normal middleware (AFTER webhook)
 // ──────────────────────────────────────────────
+// =============================
+// JSON body parsing (keep this)
+// =============================
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: true,
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type'],
-  })
-);
+// =============================
+// CORS for MGID S2S beacons
+// =============================
+app.use("/mgid-goal", (req, res, next) => {
+  const origin = req.headers.origin;
+
+  const allowedOrigins = new Set([
+    "https://modernworldnews.info",
+    "https://buzzblock.shop",
+  ]);
+
+  if (origin && allowedOrigins.has(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  }
+
+  // Handle preflight
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 // Health-check
 app.get('/health', (_req, res) => {
