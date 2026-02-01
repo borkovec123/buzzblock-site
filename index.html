@@ -2755,6 +2755,7 @@ setTimeout(() => {
       ...tracking,
     });
 
+console.log("PP click -> tracking:", tracking);
     // MGID additional goal via your server (S2S)
 if (tracking.mgid_clickid) {
   const payload = JSON.stringify({ mgid_clickid: tracking.mgid_clickid });
