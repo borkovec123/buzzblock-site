@@ -2756,11 +2756,12 @@ setTimeout(() => {
     });
 
     // MGID additional goal via your server (S2S)
-    if (tracking.mgid_clickid) {
-      const payload = JSON.stringify({ mgid_clickid: tracking.mgid_clickid });
-      const blob = new Blob([payload], { type: "application/json" });
-      navigator.sendBeacon(`${SERVER_ORIGIN}/mgid-goal/pp_to_checkout`, blob);
-    }
+if (tracking.mgid_clickid) {
+  const payload = JSON.stringify({ mgid_clickid: tracking.mgid_clickid });
+  const blob = new Blob([payload], { type: "application/json" });
+  const ok = navigator.sendBeacon(`${SERVER_ORIGIN}/mgid-goal/pp_to_checkout`, blob);
+  console.log("PP beacon queued:", ok);
+}
 
     // let GTM send + beacon enqueue, then navigate
     e.preventDefault();
