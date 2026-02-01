@@ -475,19 +475,48 @@ function extractMgidClickId(req) {
 
 async function handleGoal(req, res, eventName) {
   const mgidClickId = extractMgidClickId(req);
-  if (!mgidClickId) return res.status(400).json({ error: 'Missing mgid_clickid' });
+
+  // ✅ TRUTH TEST LOG #1: did we get hit + what clickid did we extract?
+  console.log(
+    "[MGID GOAL HIT]",
+    "event=", eventName,
+    "clickid=", mgidClickId || "(missing)",
+    "origin=", req.headers.origin || "(none)"
+  );
+
+  if (!mgidClickId) {
+    console.log("[MGID GOAL REJECTED] Missing mgid_clickid");
+    return res.status(400).json({ error: "Missing mgid_clickid" });
+  }
 
   const key = `${mgidClickId}:${eventName}`;
-  if (dedupeHit(key)) return res.json({ ok: true, deduped: true });
+
+  if (dedupeHit(key)) {
+    console.log("[MGID GOAL DEDUPED]", key);
+    return res.json({ ok: true, deduped: true });
+  }
 
   // 7 days TTL is safe
   dedupeMark(key, 7 * 24 * 60 * 60 * 1000);
 
-  await sendMgidPostbackEvent({
-    mgidClickId,
-    eventName,
-    revenueSignal: 0,
-  });
+  // ✅ TRUTH TEST LOG #2: we are about to send MGID postback
+  console.log("[MGID POSTBACK SENDING]", eventName, mgidClickId);
+
+  try {
+    await sendMgidPostbackEvent({
+      mgidClickId,
+      eventName,
+      revenueSignal: 0,
+    });
+
+    // ✅ TRUTH TEST LOG #3: postback call finished without throwing
+    console.log("[MGID POSTBACK SENT]", eventName, mgidClickId);
+  } catch (err) {
+    // ✅ TRUTH TEST LOG #4: MGID postback failed
+    console.error("[MGID POSTBACK FAILED]", eventName, mgidClickId, err);
+    // optional: you can return 500 here if you want MGID failures visible
+    // return res.status(500).json({ error: "MGID postback failed" });
+  }
 
   return res.json({ ok: true });
 }
