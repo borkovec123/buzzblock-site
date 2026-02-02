@@ -1314,7 +1314,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
      overflow: hidden;
      white-space: nowrap;
    "
-   onclick="_mgq.push(['MgSensorInvoke','order_click'])"
   class="cta-button js-to-checkout">
 Order Now & Save 50%</a>
     </div>
@@ -1458,7 +1457,6 @@ Order Now & Save 50%</a>
      overflow: hidden;
      white-space: nowrap;
    "
-   onclick="_mgq.push(['MgSensorInvoke','order_click'])"
   class="cta-button js-to-checkout">
   Order Now &amp; Save 50%
 </a>
@@ -1555,7 +1553,6 @@ Order Now & Save 50%</a>
      text-decoration: none;
      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
    "
-   onclick="_mgq.push(['MgSensorInvoke','order_click'])"
   class="cta-button js-to-checkout">
   Order Now &amp; Save 50%
 </a>
@@ -1617,7 +1614,6 @@ Order Now & Save 50%</a>
      display: inline-block;
      text-decoration: none;
    "
-   onclick="_mgq.push(['MgSensorInvoke','order_click'])"
     class="cta-button js-to-checkout">
   Order Now &amp; Save 50%
 </a>
@@ -1829,7 +1825,6 @@ Order Now & Save 50%</a>
      text-decoration: none;
      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
    "
-   onclick="_mgq.push(['MgSensorInvoke','order_click'])"
     class="cta-button js-to-checkout">
   Order Now &amp; Save 50%
 </a>
@@ -2691,9 +2686,6 @@ setTimeout(() => {
 </script>
 <script>
 (function () {
-  const KEYS = ["mgid_clickid", "c", "source_id", "site_id", "teaser_id", "source", "campaign_id"];
-
-  // ✅ Your Render service origin (CHANGE THIS)
   const SERVER_ORIGIN = "https://buzzblock-backend.onrender.com";
 
   function getParam(name) {
@@ -2742,35 +2734,55 @@ setTimeout(() => {
   rewriteCheckoutLinks();
   document.addEventListener("DOMContentLoaded", rewriteCheckoutLinks);
 
-  document.addEventListener("click", function (e) {
-    const a = e.target.closest("a.js-to-checkout");
-    if (!a) return;
+  document.addEventListener(
+    "click",
+    function (e) {
+      const a = e.target.closest("a.js-to-checkout");
+      if (!a) return;
 
-    const tracking = buildTracking();
+      const tracking = buildTracking();
 
-    // GA4/GTM event (keep)
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "pp_to_checkout",
-      ...tracking,
-    });
+      console.log("PP click -> tracking:", tracking);
 
-console.log("PP click -> tracking:", tracking);
-    // MGID additional goal via your server (S2S)
-if (tracking.mgid_clickid) {
-  const payload = JSON.stringify({ mgid_clickid: tracking.mgid_clickid });
-  const blob = new Blob([payload], { type: "application/json" });
-  const ok = navigator.sendBeacon(`${SERVER_ORIGIN}/mgid-goal/pp_to_checkout`, blob);
-  console.log("PP beacon queued:", ok);
-}
+      // GA4/GTM event (keep)
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "pp_to_checkout",
+        ...tracking,
+      });
 
-    // let GTM send + beacon enqueue, then navigate
-    e.preventDefault();
-    const targetUrl = a.href;
-    setTimeout(function () {
-      window.location.href = targetUrl;
-    }, 200);
-  }, true);
+      // ✅ MGID additional goal via your server (S2S) — using fetch (reliable)
+      if (tracking.mgid_clickid) {
+        const payloadObj = { mgid_clickid: tracking.mgid_clickid };
+
+        console.log("PP sending fetch:", payloadObj);
+
+        fetch(`${SERVER_ORIGIN}/mgid-goal/pp_to_checkout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payloadObj),
+          keepalive: true,
+        })
+          .then(async (r) => {
+            const text = await r.text();
+            console.log("PP fetch response:", r.status, text);
+          })
+          .catch((err) => {
+            console.error("PP fetch failed:", err);
+          });
+      } else {
+        console.log("PP NOT sending fetch (missing mgid_clickid)");
+      }
+
+      // navigate after a short delay
+      e.preventDefault();
+      const targetUrl = a.href;
+      setTimeout(function () {
+        window.location.href = targetUrl;
+      }, 600);
+    },
+    true
+  );
 })();
 </script>
   </body>
