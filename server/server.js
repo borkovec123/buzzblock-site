@@ -37,31 +37,6 @@ const fetchFn =
     import('node-fetch').then(({ default: fetch }) => fetch(...args)));
 
 // ──────────────────────────────────────────────
-// MGID in-memory dedupe (no Redis)
-// ──────────────────────────────────────────────
-/** @type {Map<string, number>} */
-const mgidDedupe = new Map();
-
-function dedupeHit(key) {
-  const now = Date.now();
-  const exp = mgidDedupe.get(key);
-  return exp !== undefined && exp > now;
-}
-
-function dedupeMark(key, ttlMs) {
-  mgidDedupe.set(key, Date.now() + ttlMs);
-}
-
-// cleanup
-setInterval(() => {
-  const now = Date.now();
-  for (const [k, exp] of mgidDedupe.entries()) {
-    if (exp <= now) mgidDedupe.delete(k);
-  }
-}, 60_000).unref();
-
-
-// ──────────────────────────────────────────────
 // OPTION 2: MGID revenue signal per bundle
 // (NOT real MYR; use to tell MGID which bundle is "better")
 // ──────────────────────────────────────────────
@@ -142,38 +117,25 @@ async function sendGa4Purchase({
 }
 
 // ──────────────────────────────────────────────
-// MGID S2S postback (generic)
+// MGID S2S postback
 // IMPORTANT: r= is our "revenueSignal" (Option 2), not real MYR.
 // ──────────────────────────────────────────────
-async function sendMgidPostbackEvent({
-  mgidClickId,
-  eventName,
-  revenueSignal,
-}) {
+async function sendMgidPostback({ mgidClickId, revenueSignal }) {
   if (!mgidClickId) {
     console.log('MGID: no click id, skipping postback');
     return;
   }
-  if (!eventName) {
-    console.log('MGID: no event name, skipping postback');
-    return;
-  }
 
-  const base =
+  const mgidUrl =
     `https://a.mgid.com/postback/${encodeURIComponent(mgidPostbackId)}` +
     `?c=${encodeURIComponent(mgidClickId)}` +
-    `&e=${encodeURIComponent(eventName)}`;
+    `&e=purchase` +
+    `&r=${encodeURIComponent(revenueSignal)}`;
 
-  // MGID postback UI includes r=, but for click-goals it's fine to send r=0 or omit.
-  const url =
-    revenueSignal === undefined || revenueSignal === null
-      ? `${base}&r=0`
-      : `${base}&r=${encodeURIComponent(String(revenueSignal))}`;
-
-  console.log('→ MGID postback:', url);
+  console.log('→ MGID postback:', mgidUrl);
 
   try {
-    const r = await fetchFn(url);
+    const r = await fetchFn(mgidUrl);
     const body = await r.text();
     console.log('MGID response status:', r.status);
     console.log('MGID response body:', body);
@@ -239,11 +201,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
       if (!alreadySent) {
         await Promise.all([
-          sendMgidPostbackEvent({
-            mgidClickId,
-            eventName: 'purchase',
-            revenueSignal,
-          }),
+          sendMgidPostback({ mgidClickId, revenueSignal }),
           // GA4 gets REAL payout (not the MGID signal)
           sendGa4Purchase({
             mgidClickId,
@@ -288,36 +246,15 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 // ──────────────────────────────────────────────
 // 2) Normal middleware (AFTER webhook)
 // ──────────────────────────────────────────────
-// =============================
-// JSON body parsing (keep this)
-// =============================
 app.use(express.json());
 
-// =============================
-// CORS for MGID S2S beacons
-// =============================
-app.use("/mgid-goal", (req, res, next) => {
-  const origin = req.headers.origin;
-
-  const allowedOrigins = new Set([
-    "https://modernworldnews.info",
-    "https://buzzblock.shop",
-  ]);
-
-  if (origin && allowedOrigins.has(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Vary", "Origin");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  }
-
-  // Handle preflight
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-
-  next();
-});
+app.use(
+  cors({
+    origin: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type'],
+  })
+);
 
 // Health-check
 app.get('/health', (_req, res) => {
@@ -454,88 +391,6 @@ app.post('/create-session', async (req, res) => {
       error: 'Stripe error',
       message: err && err.message ? err.message : 'Payment configuration error',
     });
-  }
-});
-
-
-// ──────────────────────────────────────────────
-// MGID additional goals (LP→PP and PP→Checkout)
-// ──────────────────────────────────────────────
-function extractMgidClickId(req) {
-  // Accept multiple shapes to make frontend changes painless
-  return (
-    req.body?.mgid_clickid ||
-    req.body?.tracking?.mgid_clickid ||
-    req.body?.c ||
-    req.query?.mgid_clickid ||
-    req.query?.c ||
-    ''
-  );
-}
-
-async function handleGoal(req, res, eventName) {
-  const mgidClickId = extractMgidClickId(req);
-
-  // ✅ TRUTH TEST LOG #1: did we get hit + what clickid did we extract?
-  console.log(
-    "[MGID GOAL HIT]",
-    "event=", eventName,
-    "clickid=", mgidClickId || "(missing)",
-    "origin=", req.headers.origin || "(none)"
-  );
-
-  if (!mgidClickId) {
-    console.log("[MGID GOAL REJECTED] Missing mgid_clickid");
-    return res.status(400).json({ error: "Missing mgid_clickid" });
-  }
-
-  const key = `${mgidClickId}:${eventName}`;
-
-  if (dedupeHit(key)) {
-    console.log("[MGID GOAL DEDUPED]", key);
-    return res.json({ ok: true, deduped: true });
-  }
-
-  // 7 days TTL is safe
-  dedupeMark(key, 7 * 24 * 60 * 60 * 1000);
-
-  // ✅ TRUTH TEST LOG #2: we are about to send MGID postback
-  console.log("[MGID POSTBACK SENDING]", eventName, mgidClickId);
-
-  try {
-    await sendMgidPostbackEvent({
-      mgidClickId,
-      eventName,
-      revenueSignal: 0,
-    });
-
-    // ✅ TRUTH TEST LOG #3: postback call finished without throwing
-    console.log("[MGID POSTBACK SENT]", eventName, mgidClickId);
-  } catch (err) {
-    // ✅ TRUTH TEST LOG #4: MGID postback failed
-    console.error("[MGID POSTBACK FAILED]", eventName, mgidClickId, err);
-    // optional: you can return 500 here if you want MGID failures visible
-    // return res.status(500).json({ error: "MGID postback failed" });
-  }
-
-  return res.json({ ok: true });
-}
-
-app.post('/mgid-goal/lp_to_pp', async (req, res) => {
-  try {
-    return await handleGoal(req, res, 'lp_to_pp');
-  } catch (e) {
-    console.error('lp_to_pp error:', e);
-    return res.status(500).json({ error: 'server error' });
-  }
-});
-
-app.post('/mgid-goal/pp_to_checkout', async (req, res) => {
-  try {
-    return await handleGoal(req, res, 'pp_to_checkout');
-  } catch (e) {
-    console.error('pp_to_checkout error:', e);
-    return res.status(500).json({ error: 'server error' });
   }
 });
 
