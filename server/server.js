@@ -116,7 +116,7 @@ async function sendGa4Purchase({
           mgid_source_id: mgidSourceId || undefined,
           mgid_site_id: mgidSiteId || undefined,
           mgid_teaser_id: mgidTeaserId || undefined,
-          mgid source: mgidSource || undefined,
+          mgid_source: mgidSource || undefined,
           mgid_campaign_id: mgidCampaignId || undefined,
 
           items: [
@@ -352,7 +352,7 @@ app.post('/create-session', async (req, res) => {
   const mgidSourceId = tracking.source_id || '';
   const mgidSiteId = tracking.site_id || '';
   const mgidTeaserId = tracking.teaser_id || '';
-  const mgidsource = tracking.source || '';
+  const mgidSource = tracking.source || '';
   const mgidCampaignId = tracking.campaign_id || '';
 
   try {
