@@ -2092,19 +2092,31 @@ Delivery was fast and setup was very easy.
   // Your Render backend base URL
   const BACKEND_BASE = "https://buzzblock-backend.onrender.com";
 
+     function getGa4ClientId() {
+    // GA4 client_id can be derived from _ga cookie: GA1.1.XXXX.YYYY -> XXXX.YYYY
+    const match = document.cookie.match(/(?:^|;\s*)_ga=([^;]+)/);
+    if (!match) return "";
+    const value = decodeURIComponent(match[1]); // e.g. "GA1.1.123.456"
+    const parts = value.split(".");
+    if (parts.length < 4) return "";
+    return `${parts[2]}.${parts[3]}`; // "123.456"
+  }
   // Track MGID + placement ids from URL, so we can send them to the backend
   (function storeTrackingFromUrl() {
     const params = new URLSearchParams(window.location.search);
 
     const tracking = {
-      mgid_clickid: params.get("mgid_clickid") || params.get("c") || "",
-      source_id: params.get("source_id") || "",
-      site_id: params.get("site_id") || "",
-      teaser_id: params.get("teaser_id") || "",
-      widget_id: params.get("widget_id") || "",
-      source: params.get("source") || "",
-      campaign_id: params.get("campaign_id") || "",
-    };
+  mgid_clickid: params.get("mgid_clickid") || params.get("c") || "",
+  source_id: params.get("source_id") || "",
+  site_id: params.get("site_id") || "",
+  teaser_id: params.get("teaser_id") || "",
+  widget_id: params.get("widget_id") || "",
+  source: params.get("source") || "",
+  campaign_id: params.get("campaign_id") || "",
+
+  // ✅ critical for server-side GA4 purchase attribution
+  ga_client_id: getGa4ClientId(),
+};
 
     // Optional: don't keep empty keys (cleaner logs/payloads)
     Object.keys(tracking).forEach((k) => {
