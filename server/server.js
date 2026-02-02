@@ -84,7 +84,6 @@ async function sendGa4Purchase({
   mgidSourceId,
   mgidSiteId,
   mgidTeaserId,
-  mgidSource,
   mgidCampaignId,
   transactionId,
 }) {
@@ -116,7 +115,6 @@ async function sendGa4Purchase({
           mgid_source_id: mgidSourceId || undefined,
           mgid_site_id: mgidSiteId || undefined,
           mgid_teaser_id: mgidTeaserId || undefined,
-          mgid_source: mgidSource || undefined,
           mgid_campaign_id: mgidCampaignId || undefined,
 
           items: [
@@ -221,7 +219,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       const mgidSourceId = pi.metadata?.source_id || '';
       const mgidSiteId = pi.metadata?.site_id || '';
       const mgidTeaserId = pi.metadata?.teaser_id || '';
-      const mgidSource = pi.metadata?.source || '';
       const mgidCampaignId = pi.metadata?.campaign_id || '';
 
       const currency = (pi.currency || 'myr').toLowerCase();
@@ -256,7 +253,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
             mgidSourceId,
             mgidSiteId,
             mgidTeaserId,
-            mgidSource,
             mgidCampaignId,
             transactionId: pi.id,
           }),
@@ -290,37 +286,38 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 });
 
 // ──────────────────────────────────────────────
-// ──────────────────────────────────────────────
-// ──────────────────────────────────────────────
-// ──────────────────────────────────────────────
 // 2) Normal middleware (AFTER webhook)
 // ──────────────────────────────────────────────
+// =============================
+// JSON body parsing (keep this)
+// =============================
 app.use(express.json());
 
-// CORS must be enabled for ALL browser->backend calls (Stripe embedded checkout relies on this)
-const ALLOWED_ORIGINS = new Set([
-  "https://buzzblock.shop",
-  "https://modernworldnews.info",
-]);
+// =============================
+// CORS for MGID S2S beacons
+// =============================
+app.use("/mgid-goal", (req, res, next) => {
+  const origin = req.headers.origin;
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no Origin (server-to-server, Stripe webhooks, curl, etc.)
-    if (!origin) return callback(null, true);
+  const allowedOrigins = new Set([
+    "https://modernworldnews.info",
+    "https://buzzblock.shop",
+  ]);
 
-    // Allow only your sites in the browser
-    if (ALLOWED_ORIGINS.has(origin)) return callback(null, true);
+  if (origin && allowedOrigins.has(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  }
 
-    return callback(new Error("Not allowed by CORS"));
-  },
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"],
-};
+  // Handle preflight
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
 
-app.use(cors(corsOptions));
-
-// Explicitly handle preflight for all routes (including /create-session and /mgid-goal/*)
-app.options("*", cors(corsOptions));
+  next();
+});
 
 // Health-check
 app.get('/health', (_req, res) => {
@@ -370,7 +367,6 @@ app.post('/create-session', async (req, res) => {
   const mgidSourceId = tracking.source_id || '';
   const mgidSiteId = tracking.site_id || '';
   const mgidTeaserId = tracking.teaser_id || '';
-  const mgidSource = tracking.source || '';
   const mgidCampaignId = tracking.campaign_id || '';
 
   try {
@@ -423,7 +419,6 @@ app.post('/create-session', async (req, res) => {
         source_id: mgidSourceId,
         site_id: mgidSiteId,
         teaser_id: mgidTeaserId,
-        source: mgidSource,
         campaign_id: mgidCampaignId,
         bundle,
         customer_name: customer.name || '',
@@ -436,7 +431,6 @@ app.post('/create-session', async (req, res) => {
           source_id: mgidSourceId,
           site_id: mgidSiteId,
           teaser_id: mgidTeaserId,
-          source: mgidSource,
           campaign_id: mgidCampaignId,
           bundle,
           customer_name: customer.name || '',
