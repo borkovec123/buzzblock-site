@@ -292,6 +292,13 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 // JSON body parsing (keep this)
 // =============================
 app.use(express.json());
+app.use(
+  cors({
+    origin: ["https://buzzblock.shop", "https://modernworldnews.info"],
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
 
 // =============================
 // CORS for MGID S2S beacons
