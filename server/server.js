@@ -84,6 +84,7 @@ async function sendGa4Purchase({
   mgidSourceId,
   mgidSiteId,
   mgidTeaserId,
+  mgidSource,
   mgidCampaignId,
   transactionId,
 }) {
@@ -115,6 +116,7 @@ async function sendGa4Purchase({
           mgid_source_id: mgidSourceId || undefined,
           mgid_site_id: mgidSiteId || undefined,
           mgid_teaser_id: mgidTeaserId || undefined,
+          mgid source: mgidSource || undefined,
           mgid_campaign_id: mgidCampaignId || undefined,
 
           items: [
@@ -219,6 +221,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       const mgidSourceId = pi.metadata?.source_id || '';
       const mgidSiteId = pi.metadata?.site_id || '';
       const mgidTeaserId = pi.metadata?.teaser_id || '';
+      const mgidSource = pi.metadata?.source || '';
       const mgidCampaignId = pi.metadata?.campaign_id || '';
 
       const currency = (pi.currency || 'myr').toLowerCase();
@@ -253,6 +256,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
             mgidSourceId,
             mgidSiteId,
             mgidTeaserId,
+            mgidSource,
             mgidCampaignId,
             transactionId: pi.id,
           }),
@@ -288,10 +292,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 // ──────────────────────────────────────────────
 // 2) Normal middleware (AFTER webhook)
 // ──────────────────────────────────────────────
-// =============================
-// JSON body parsing (keep this)
-// =============================
 app.use(express.json());
+
 app.use(
   cors({
     origin: ["https://buzzblock.shop", "https://modernworldnews.info"],
@@ -300,31 +302,7 @@ app.use(
   })
 );
 
-// =============================
-// CORS for MGID S2S beacons
-// =============================
-app.use("/mgid-goal", (req, res, next) => {
-  const origin = req.headers.origin;
-
-  const allowedOrigins = new Set([
-    "https://modernworldnews.info",
-    "https://buzzblock.shop",
-  ]);
-
-  if (origin && allowedOrigins.has(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Vary", "Origin");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  }
-
-  // Handle preflight
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-
-  next();
-});
+// (No extra /mgid-goal CORS needed)
 
 // Health-check
 app.get('/health', (_req, res) => {
@@ -374,6 +352,7 @@ app.post('/create-session', async (req, res) => {
   const mgidSourceId = tracking.source_id || '';
   const mgidSiteId = tracking.site_id || '';
   const mgidTeaserId = tracking.teaser_id || '';
+  const mgidsource = tracking.source || '';
   const mgidCampaignId = tracking.campaign_id || '';
 
   try {
@@ -426,6 +405,7 @@ app.post('/create-session', async (req, res) => {
         source_id: mgidSourceId,
         site_id: mgidSiteId,
         teaser_id: mgidTeaserId,
+        source: mgidSource,
         campaign_id: mgidCampaignId,
         bundle,
         customer_name: customer.name || '',
@@ -438,6 +418,7 @@ app.post('/create-session', async (req, res) => {
           source_id: mgidSourceId,
           site_id: mgidSiteId,
           teaser_id: mgidTeaserId,
+          source: mgidSource,
           campaign_id: mgidCampaignId,
           bundle,
           customer_name: customer.name || '',
