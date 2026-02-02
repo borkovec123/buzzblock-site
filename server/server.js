@@ -292,34 +292,35 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 // ──────────────────────────────────────────────
 // ──────────────────────────────────────────────
 // ──────────────────────────────────────────────
-// Normal middleware (AFTER Stripe webhook route)
+// ──────────────────────────────────────────────
+// 2) Normal middleware (AFTER webhook)
 // ──────────────────────────────────────────────
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      const allowed = new Set([
-        "https://buzzblock.shop",
-        "https://modernworldnews.info",
-      ]);
+// CORS must be enabled for ALL browser->backend calls (Stripe embedded checkout relies on this)
+const ALLOWED_ORIGINS = new Set([
+  "https://buzzblock.shop",
+  "https://modernworldnews.info",
+]);
 
-      // allow requests with no Origin (curl, server-to-server)
-      if (!origin) return cb(null, true);
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no Origin (server-to-server, Stripe webhooks, curl, etc.)
+    if (!origin) return callback(null, true);
 
-      if (allowed.has(origin)) return cb(null, true);
-      return cb(new Error(`CORS blocked origin: ${origin}`));
-    },
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
-    optionsSuccessStatus: 204,
-  })
-);
+    // Allow only your sites in the browser
+    if (ALLOWED_ORIGINS.has(origin)) return callback(null, true);
 
-// (Optional but helpful)
-app.options("*", cors());
+    return callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+};
 
-// (No extra /mgid-goal CORS needed)
+app.use(cors(corsOptions));
+
+// Explicitly handle preflight for all routes (including /create-session and /mgid-goal/*)
+app.options("*", cors(corsOptions));
 
 // Health-check
 app.get('/health', (_req, res) => {
