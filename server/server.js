@@ -84,6 +84,7 @@ async function sendGa4Purchase({
   mgidSourceId,
   mgidSiteId,
   mgidTeaserId,
+  mgidWidgetId,
   mgidSource,
   mgidCampaignId,
   transactionId,
@@ -116,6 +117,7 @@ async function sendGa4Purchase({
           mgid_source_id: mgidSourceId || undefined,
           mgid_site_id: mgidSiteId || undefined,
           mgid_teaser_id: mgidTeaserId || undefined,
+          mgid_widget_id: mgidWidgetId || undefined,
           mgid_source: mgidsource || undefined,
           mgid_campaign_id: mgidCampaignId || undefined,
 
@@ -221,6 +223,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       const mgidSourceId = pi.metadata?.source_id || '';
       const mgidSiteId = pi.metadata?.site_id || '';
       const mgidTeaserId = pi.metadata?.teaser_id || '';
+      const mgidWidgetId = pi.metadata?.widget_id || '';
       const mgidSource = pi.metadata?.source || '';
       const mgidCampaignId = pi.metadata?.campaign_id || '';
 
@@ -351,6 +354,7 @@ app.post('/create-session', async (req, res) => {
   const mgidSourceId = tracking.source_id || '';
   const mgidSiteId = tracking.site_id || '';
   const mgidTeaserId = tracking.teaser_id || '';
+  const mgidWidgetId = tracking.widget_id || '';
   const mgidSource = tracking.source || '';
   const mgidCampaignId = tracking.campaign_id || '';
 
@@ -404,6 +408,7 @@ app.post('/create-session', async (req, res) => {
         source_id: mgidSourceId,
         site_id: mgidSiteId,
         teaser_id: mgidTeaserId,
+        widget_id: mgidWidgetId,
         source: mgidSource,
         campaign_id: mgidCampaignId,
         bundle,
@@ -417,6 +422,7 @@ app.post('/create-session', async (req, res) => {
           source_id: mgidSourceId,
           site_id: mgidSiteId,
           teaser_id: mgidTeaserId,
+          widget_id: mgidWidgetId,
           source: mgidSource,
           campaign_id: mgidCampaignId,
           bundle,
