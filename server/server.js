@@ -118,7 +118,7 @@ async function sendGa4Purchase({
           mgid_site_id: mgidSiteId || undefined,
           mgid_teaser_id: mgidTeaserId || undefined,
           mgid_widget_id: mgidWidgetId || undefined,
-          mgid_source: mgidsource || undefined,
+          mgid_source: mgidSource || undefined,
           mgid_campaign_id: mgidCampaignId || undefined,
 
           items: [
