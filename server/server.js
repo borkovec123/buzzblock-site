@@ -290,17 +290,34 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 });
 
 // ──────────────────────────────────────────────
-// 2) Normal middleware (AFTER webhook)
+// ──────────────────────────────────────────────
+// ──────────────────────────────────────────────
+// Normal middleware (AFTER Stripe webhook route)
 // ──────────────────────────────────────────────
 app.use(express.json());
 
 app.use(
   cors({
-    origin: ["https://buzzblock.shop", "https://modernworldnews.info"],
+    origin: (origin, cb) => {
+      const allowed = new Set([
+        "https://buzzblock.shop",
+        "https://modernworldnews.info",
+      ]);
+
+      // allow requests with no Origin (curl, server-to-server)
+      if (!origin) return cb(null, true);
+
+      if (allowed.has(origin)) return cb(null, true);
+      return cb(new Error(`CORS blocked origin: ${origin}`));
+    },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
+    optionsSuccessStatus: 204,
   })
 );
+
+// (Optional but helpful)
+app.options("*", cors());
 
 // (No extra /mgid-goal CORS needed)
 
