@@ -96,10 +96,15 @@ async function sendGa4Purchase({
     return;
   }
 
-  const url =
-    `https://www.google-analytics.com/mp/collect` +
-    `?measurement_id=${encodeURIComponent(gaMeasurementId)}` +
-    `&api_secret=${encodeURIComponent(gaApiSecret)}`;
+  const GA4_DEBUG = true; // <-- set to false after test
+
+const base = GA4_DEBUG
+  ? "https://www.google-analytics.com/debug/mp/collect"
+  : "https://www.google-analytics.com/mp/collect";
+
+const url =
+  `${base}?measurement_id=${encodeURIComponent(gaMeasurementId)}` +
+  `&api_secret=${encodeURIComponent(gaApiSecret)}`;
 
   // ✅ This is the key to being able to break down purchase by teaser_id, etc.
   // Use the real GA4 client_id from the browser (_ga cookie), passed via checkout -> server -> PI metadata
@@ -146,7 +151,8 @@ async function sendGa4Purchase({
       body: JSON.stringify(body),
     });
     const text = await resp.text();
-    console.log("GA4 MP status:", resp.status, "body:", text);
+console.log("GA4 MP status:", resp.status);
+console.log("GA4 MP body:", text);
   } catch (err) {
     console.error("GA4 MP error:", err?.message || err);
   }
