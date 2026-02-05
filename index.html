@@ -2401,121 +2401,163 @@ Order Now & Save 50%</a>
     display: none;
   }
   </style>
-  <div class="floating-review" id="floating-review-1">Just now: Anna from <span id="bubbleCountry1">your country</span> ordered BuzzBlock 🦟</div>
-  <div class="floating-review" id="floating-review-2">Just now: Emil from <span id="bubbleCountry2">your country</span> grabbed one too 🔥</div>
-  <div id="last-unit-alert" style="display:none;">⚠️ Only 5 units left — selling fast!</div>
+<div class="floating-review" id="floating-review-1" style="display:none;">
+  Just now: <span id="bubbleName1">Anna</span> from <span id="bubbleCountry1">your country</span> ordered BuzzBlock 🦟
+</div>
+
+<div class="floating-review" id="floating-review-2" style="display:none;">
+  Just now: <span id="bubbleName2">Emil</span> from <span id="bubbleCountry2">your country</span> grabbed one too 🔥
+</div>
+
+<div id="last-unit-alert" style="display:none;">⚠️ 5 Units left or less — selling fast!</div>
+
 <script>
-  const images = ["product-02.webp", "caro3.webp", "nextgen1.webp"];
-  let current = 0;
+/* =========================
+   Carousel (unchanged)
+========================= */
+const images = ["product-02.webp", "caro3.webp", "nextgen1.webp"];
+let current = 0;
 
-  function showImage(index) {
-    const img = document.getElementById("carousel-img");
-    if (img) img.src = "images/" + images[index];
+function showImage(index) {
+  const img = document.getElementById("carousel-img");
+  if (img) img.src = "images/" + images[index];
+}
+
+// --- tracking helpers ---
+function getParam(name) {
+  return new URLSearchParams(window.location.search).get(name) || "";
+}
+function isPlaceholder(v) {
+  const d = decodeURIComponent(v || "");
+  return d.includes("{") || d.includes("}");
+}
+function safeParam(name) {
+  const v = getParam(name);
+  return v && !isPlaceholder(v) ? v : "";
+}
+
+// --- gallery engagement tracking ---
+let galleryClicks = 0;
+let galleryEventFired = false;
+
+function trackGalleryClick() {
+  if (galleryEventFired) return;
+
+  galleryClicks += 1;
+
+  if (galleryClicks === 3) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "pp_gallery_engaged",
+      mgid_clickid: safeParam("mgid_clickid") || safeParam("c"),
+      source_id: safeParam("source_id"),
+      site_id: safeParam("site_id"),
+      teaser_id: safeParam("teaser_id"),
+      widget_id: safeParam("widget_id"),
+      source: safeParam("source"),
+      campaign_id: safeParam("campaign_id")
+    });
+
+    galleryEventFired = true;
   }
+}
 
-  // --- tracking helpers ---
-  function getParam(name) {
-    return new URLSearchParams(window.location.search).get(name) || "";
-  }
-  function isPlaceholder(v) {
-    const d = decodeURIComponent(v || "");
-    return d.includes("{") || d.includes("}");
-  }
-  function safeParam(name) {
-    const v = getParam(name);
-    return v && !isPlaceholder(v) ? v : "";
-  }
+function nextSlide() {
+  current = (current + 1) % images.length;
+  showImage(current);
+  trackGalleryClick();
+}
 
-  // --- gallery engagement tracking ---
-  let galleryClicks = 0;
-  let galleryEventFired = false;
+function prevSlide() {
+  current = (current - 1 + images.length) % images.length;
+  showImage(current);
+  trackGalleryClick();
+}
 
-  function trackGalleryClick() {
-    if (galleryEventFired) return;
-
-    galleryClicks += 1;
-
-    if (galleryClicks === 3) {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: "pp_gallery_engaged",
-        mgid_clickid: safeParam("mgid_clickid") || safeParam("c"),
-        source_id: safeParam("source_id"),
-        site_id: safeParam("site_id"),
-        teaser_id: safeParam("teaser_id"),
-        widget_id: safeParam("widget_id"),
-        source: safeParam("source"),
-        campaign_id: safeParam("campaign_id")
-      });
-
-      galleryEventFired = true;
-    }
-  }
-
-  function nextSlide() {
-    current = (current + 1) % images.length;
-    showImage(current);
-    trackGalleryClick();
-  }
-
-  function prevSlide() {
-    current = (current - 1 + images.length) % images.length;
-    showImage(current);
-    trackGalleryClick();
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    showImage(current);
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  showImage(current);
+});
 </script>
-  <script>
-    const countries = ["Italy", "Spain", "Germany", "Australia", "Hungary", "Greece", "Netherlands"];
-  
-    // ✅ Persist units across refresh
-    const UNIT_STORAGE_KEY = "bb_currentUnitCount_v1";
-    const UNIT_FLOOR = 5;   // stop at 5
-    const UNIT_START = 7;   // start at 7
-  
-    function getStoredUnitCount() {
-      const raw = localStorage.getItem(UNIT_STORAGE_KEY);
-      const n = raw ? parseInt(raw, 10) : NaN;
-      return Number.isFinite(n) ? n : UNIT_START;
+
+<script>
+/* =========================
+   Floating bubbles + units
+   Minimal fixes:
+   - Random Malaysian names (bubbleName1/2)
+   - Faster timers for testing
+   Everything else unchanged.
+========================= */
+
+const countries = [
+  "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan", "Pahang", "Perak", "Perlis",
+  "Pulau Pinang", "Sabah", "Sarawak", "Selangor", "Terengganu",
+  "Kuala Lumpur", "Putrajaya", "Labuan"
+];
+
+// Random Malaysian names (first names only)
+const MY_NAMES = [
+  // Malay
+  "Aiman","Afiq","Amir","Aqil","Arif","Ashraf","Azlan","Danish","Faris","Hakim","Haziq","Irfan","Iskandar","Khairul","Luqman","Nabil","Rizal","Syafiq","Zikri",
+  "Aina","Aisyah","Alya","Amira","Balqis","Farah","Hana","Izzah","Maisara","Mira","Nadia","Nurin","Qistina","Sarah","Sofea","Syafiqa","Tasya","Yasmin","Zara",
+
+  // Chinese Malaysian (romanised)
+  "Wei Jie","Jun Hao","Jian Ming","Zi Hao","Kah Wei","Yong Jie","Kai Wen","Chen Wei","Ming Xuan",
+  "Xuan Yi","Jia Yi","Ying Xuan","Mei Ling","Xin Yi","Hui Wen","Jia Min","Pei Ling","Yi Xuan",
+
+  // Indian Malaysian (common)
+  "Arjun","Kumar","Vijay","Suresh","Ganesh","Karthik","Prakash","Ravi","Naveen","Hari",
+  "Anjali","Priya","Divya","Kavya","Meera","Nisha","Sangeetha","Asha","Keerthi"
+];
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/* ✅ Persist units across refresh */
+const UNIT_STORAGE_KEY = "bb_currentUnitCount_v1";
+const UNIT_FLOOR = 5;   // stop at 5
+const UNIT_START = 7;   // start at 7
+
+function getStoredUnitCount() {
+  const raw = localStorage.getItem(UNIT_STORAGE_KEY);
+  const n = raw ? parseInt(raw, 10) : NaN;
+  return Number.isFinite(n) ? n : UNIT_START;
+}
+
+function setStoredUnitCount(n) {
+  localStorage.setItem(UNIT_STORAGE_KEY, String(n));
+}
+
+let currentUnitCount = getStoredUnitCount();
+
+function renderUnitCount() {
+  const unitElements = document.querySelectorAll(".unit-count");
+  unitElements.forEach(el => {
+    el.textContent = `Only ${currentUnitCount} Unit${currentUnitCount > 1 ? "s" : ""} Left`;
+  });
+
+  const alertEl = document.getElementById("last-unit-alert");
+  if (alertEl) {
+    if (currentUnitCount <= UNIT_FLOOR) {
+      alertEl.textContent = `⚠️ Only ${currentUnitCount} units left or less — selling fast!`;
+      alertEl.style.display = "block";
+    } else {
+      alertEl.style.display = "none";
     }
-  
-    function setStoredUnitCount(n) {
-      localStorage.setItem(UNIT_STORAGE_KEY, String(n));
-    }
-  
-    let currentUnitCount = getStoredUnitCount();
-  
-    function renderUnitCount() {
-      const unitElements = document.querySelectorAll(".unit-count");
-      unitElements.forEach(el => {
-        el.textContent = `Only ${currentUnitCount} Unit${currentUnitCount > 1 ? "s" : ""} Left`;
-      });
-  
-      const alertEl = document.getElementById("last-unit-alert");
-      if (alertEl) {
-        if (currentUnitCount <= UNIT_FLOOR) {
-          alertEl.textContent = `⚠️ Only ${currentUnitCount} units left — selling fast!`;
-          alertEl.style.display = "block";
-        } else {
-          alertEl.style.display = "none";
-        }
-      }
-    }
-  
-    function updateUnitCount() {
-      // ✅ Decrease but never below 5 (your target)
-      currentUnitCount = Math.max(currentUnitCount - 1, UNIT_FLOOR);
-      setStoredUnitCount(currentUnitCount);
-      renderUnitCount();
-    }
-  
-    // Render immediately on page load (uses stored value, so no refresh reset)
-    renderUnitCount();
-  
-   // --- GEO (try ipapi, then ipwho.is, else fallback to Malaysia) ---
+  }
+}
+
+function updateUnitCount() {
+  // ✅ Decrease but never below 5 (your target)
+  currentUnitCount = Math.max(currentUnitCount - 1, UNIT_FLOOR);
+  setStoredUnitCount(currentUnitCount);
+  renderUnitCount();
+}
+
+// Render immediately on page load (uses stored value, so no refresh reset)
+renderUnitCount();
+
+// --- GEO (try ipapi, then ipwho.is, else fallback to Malaysia) ---
 async function getCountryName() {
   try {
     const r1 = await fetch("https://ipapi.co/json/", { cache: "no-store" });
@@ -2547,29 +2589,43 @@ async function getCountryName() {
   if (spanUser) spanUser.textContent = country;
   if (bubble1) bubble1.textContent = country;
 
-  // Keep bubble2 as random "social proof" OR set to real geo.
-  // Option A (keep random):
+  // Keep bubble2 as random "social proof" (your MY states list)
   if (bubble2) bubble2.textContent = countries[Math.floor(Math.random() * countries.length)];
 
-  // Option B (real geo):
-  // if (bubble2) bubble2.textContent = country;
+  // ✅ Minimal fix: random Malaysian names for bubbleName1/2
+  const name1El = document.getElementById("bubbleName1");
+  const name2El = document.getElementById("bubbleName2");
+
+  let name1 = pickRandom(MY_NAMES);
+  let name2 = pickRandom(MY_NAMES);
+  while (name2 === name1) name2 = pickRandom(MY_NAMES);
+
+  if (name1El) name1El.textContent = name1;
+  if (name2El) name2El.textContent = name2;
 })();
 
-// --- Two events: 7 → 6 → 5, then alert shows ---
+/* =========================
+   Bubble timings
+   Reduced for testing:
+   - bubble1: 15s (was 60s)
+   - bubble2: 45s (was 180s)
+   Duration shown: 8s (was 10s)
+========================= */
+
 setTimeout(() => {
   const bubble1 = document.getElementById("floating-review-1");
   if (bubble1) bubble1.style.display = "block";
   updateUnitCount();
-  setTimeout(() => { if (bubble1) bubble1.style.display = "none"; }, 10000);
-}, 60000);
+  setTimeout(() => { if (bubble1) bubble1.style.display = "none"; }, 8000);
+}, 15000);
 
 setTimeout(() => {
   const bubble2 = document.getElementById("floating-review-2");
   if (bubble2) bubble2.style.display = "block";
   updateUnitCount();
-  setTimeout(() => { if (bubble2) bubble2.style.display = "none"; }, 10000);
-}, 180000);
-  </script>
+  setTimeout(() => { if (bubble2) bubble2.style.display = "none"; }, 8000);
+}, 45000);
+</script>
   <!-- END Enhanced Floating Review Bubbles + Countdown -->
 
 <script>
