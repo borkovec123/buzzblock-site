@@ -2586,11 +2586,11 @@ async function getCountryName() {
   const bubble1 = document.getElementById("bubbleCountry1");
   const bubble2 = document.getElementById("bubbleCountry2");
 
-  if (spanUser) spanUser.textContent = country;
-  if (bubble1) bubble1.textContent = country;
+if (spanUser) spanUser.textContent = country;
 
-  // Keep bubble2 as random "social proof" (your MY states list)
-  if (bubble2) bubble2.textContent = countries[Math.floor(Math.random() * countries.length)];
+// Both bubbles: random Malaysian state
+if (bubble1) bubble1.textContent = pickRandom(countries);
+if (bubble2) bubble2.textContent = pickRandom(countries);
 
   // ✅ Minimal fix: random Malaysian names for bubbleName1/2
   const name1El = document.getElementById("bubbleName1");
@@ -2617,14 +2617,14 @@ setTimeout(() => {
   if (bubble1) bubble1.style.display = "block";
   updateUnitCount();
   setTimeout(() => { if (bubble1) bubble1.style.display = "none"; }, 8000);
-}, 15000);
+}, 45000);
 
 setTimeout(() => {
   const bubble2 = document.getElementById("floating-review-2");
   if (bubble2) bubble2.style.display = "block";
   updateUnitCount();
   setTimeout(() => { if (bubble2) bubble2.style.display = "none"; }, 8000);
-}, 45000);
+}, 80000);
 </script>
   <!-- END Enhanced Floating Review Bubbles + Countdown -->
 
