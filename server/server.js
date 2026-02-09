@@ -516,20 +516,20 @@ async function handleGoal(req, res, eventName) {
   return res.json({ ok: true });
 }
 
-app.post("/mgid-goal/lp_to_pp", async (req, res) => {
+app.post("/mgid-goal/lppp", async (req, res) => {
   try {
-    return await handleGoal(req, res, "lp_to_pp");
+    return await handleGoal(req, res, "lpp");
   } catch (e) {
-    console.error("lp_to_pp error:", e);
+    console.error("lpp error:", e);
     return res.status(500).json({ error: "server error" });
   }
 });
 
-app.post("/mgid-goal/pp_to_checkout", async (req, res) => {
+app.post("/mgid-goal/ppc", async (req, res) => {
   try {
-    return await handleGoal(req, res, "pp_to_checkout");
+    return await handleGoal(req, res, "ppc");
   } catch (e) {
-    console.error("pp_to_checkout error:", e);
+    console.error("ppc error:", e);
     return res.status(500).json({ error: "server error" });
   }
 });
