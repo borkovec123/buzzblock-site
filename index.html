@@ -2805,7 +2805,7 @@ setTimeout(() => {
       // GA4/GTM event (keep)
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
-        event: "pp_to_checkout",
+        event: "ppc",
         ...tracking,
       });
 
@@ -2815,7 +2815,7 @@ setTimeout(() => {
 
         console.log("PP sending fetch:", payloadObj);
 
-        fetch(`${SERVER_ORIGIN}/mgid-goal/pp_to_checkout`, {
+        fetch(`${SERVER_ORIGIN}/mgid-goal/ppc`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payloadObj),
