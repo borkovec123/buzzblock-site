@@ -518,9 +518,9 @@ async function handleGoal(req, res, eventName) {
 
 app.post("/mgid-goal/lppp", async (req, res) => {
   try {
-    return await handleGoal(req, res, "lpp");
+    return await handleGoal(req, res, "lppp");
   } catch (e) {
-    console.error("lpp error:", e);
+    console.error("lppp error:", e);
     return res.status(500).json({ error: "server error" });
   }
 });
