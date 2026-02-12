@@ -397,9 +397,10 @@ app.post("/create-session", async (req, res) => {
             },
           ];
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      ui_mode: "embedded",
+   const session = await stripe.checkout.sessions.create({
+  mode: "payment",
+  ui_mode: "embedded",
+  locale: "ms", // 👈 force Malay language
 
       line_items: [{ price: priceId, quantity: 1 }],
 
